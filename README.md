@@ -33,19 +33,44 @@ Projeto de código aberto, sem conta e sem telemetria.
   - **"Enquanto você esteve fora"**: ao voltar, o Yata chega voando com os avisos que você perdeu (lembretes, água, bateria, foco pausado).
   - **Pausa automática do foco** após 5 min longe (devolvendo o tempo não acompanhado), exceto se houver mídia tocando.
   - **Demonstração** pelo menu da bandeja (ou `Yata.exe --demo`) para ver todos os estados em ~20 s.
+- **Configurações** (engrenagem no notch, menu ou clique duplo na bandeja): iniciar com o Windows, esconder em tela cheia, demora para abrir, cor da capa ou preto e branco, letras liga/desliga, cada tipo de aviso, tempos do Pomodoro, meta e lembretes de água, e o comportamento do Yata. Tudo aplica na hora.
 - Lembretes que chegam com o notch aberto ou em tela cheia esperam e aparecem depois, em vez de serem perdidos.
 - **Some em tela cheia** (vídeos, jogos, apresentações).
 - Não rouba o foco, não aparece no Alt+Tab nem na barra de tarefas. Sair pelo ícone na bandeja.
 
+## Instalar
+
+Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~6 MB). O instalador:
+
+- instala só para o seu usuário, sem pedir administrador;
+- se faltar o **.NET 10 Desktop Runtime**, baixa direto da Microsoft e instala (essa etapa pede permissão de administrador);
+- oferece iniciar com o Windows e atalho na área de trabalho;
+- na desinstalação, remove o app e a inicialização automática, mas **mantém seus dados** em `%LOCALAPPDATA%\Yata`.
+
+Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução.
+
 ## Requisitos
 
-- Windows 10 (2004+) ou 11
+- Windows 10 (2004+) ou 11, x64
 - [.NET 10 SDK](https://dotnet.microsoft.com/download) para compilar
 
 ## Compilar e rodar
 
 ```powershell
 dotnet run --project src/Yata
+```
+
+Gerar o instalador localmente (precisa do [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
+
+```powershell
+./tools/build-installer.ps1 -Version 0.1.0   # sai em dist/
+```
+
+Releases são gerados pelo GitHub Actions ao enviar uma tag de versão:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
 ```
 
 ## Estrutura
@@ -74,6 +99,10 @@ src/Yata/
   Helpers/                    mola das animações, cor da capa, ícones de arquivo, som, caminhos
   Interop/                    chamadas Win32 e COM (Core Audio)
   Assets/yata.ico             ícone (gerado por tools/make-icon.ps1)
+  SettingsWindow.xaml(.cs)    janela de configurações
+installer/yata.iss            instalador (Inno Setup)
+tools/                        gerar ícone e instalador
+.github/workflows/release.yml release automático por tag
 ```
 
 ## Roadmap
@@ -84,4 +113,6 @@ src/Yata/
 4. ~~Pomodoro, lembrete de água, to-do~~
 5. ~~Prateleira de arquivos (arrastar e soltar)~~
 6. ~~Identidade (Yata) e companheiro~~
-7. Configurações, iniciar com o Windows, instalador
+7. ~~Configurações, iniciar com o Windows, instalador~~
+
+Próximas ideias: projeção WinRT enxuta (instalador menor), assinatura digital, suporte a vários monitores.

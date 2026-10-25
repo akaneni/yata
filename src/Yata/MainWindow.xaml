@@ -170,6 +170,9 @@
                                          Content="&#xE9D5;" ToolTip="Tarefas" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabShelf" Style="{StaticResource TabButton}" GroupName="Pages"
                                          Content="&#xE7B8;" ToolTip="Prateleira" Checked="OnTabChecked"/>
+                            <Button Style="{StaticResource IconButton}" Width="28" Height="26" FontSize="13" Margin="6,0,0,0"
+                                    Foreground="{StaticResource TextSecondary}" Content="&#xE713;" ToolTip="Configurações"
+                                    Click="OnSettingsClick"/>
                         </StackPanel>
                     </Grid>
 

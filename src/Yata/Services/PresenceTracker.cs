@@ -19,17 +19,22 @@ public sealed record AwayReport(TimeSpan Duration, IReadOnlyList<AwayItem> Items
 /// </summary>
 public sealed class PresenceTracker
 {
-    public static readonly TimeSpan IdleAfter = TimeSpan.FromMinutes(2);
     public static readonly TimeSpan AwayAfter = TimeSpan.FromMinutes(5);
-    public static readonly TimeSpan SleepAfter = TimeSpan.FromMinutes(10);
     // Something that fires after this much inactivity probably went unseen.
     private static readonly TimeSpan UnseenAfter = TimeSpan.FromMinutes(1);
     private const int BatteryChangeWorthReporting = 5;
 
+    private readonly SettingsData _settings;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
     private readonly List<AwayItem> _items = new();
     private TimeSpan _lastIdle;
     private int? _batteryAtAway;
+
+    /// <summary>Inactivity before Yata shows up.</summary>
+    public TimeSpan IdleAfter => TimeSpan.FromMinutes(Math.Max(1, _settings.CompanionIdleMinutes));
+
+    /// <summary>Inactivity before Yata dozes off; always after <see cref="IdleAfter"/>.</summary>
+    public TimeSpan SleepAfter => TimeSpan.FromMinutes(Math.Max(_settings.CompanionSleepMinutes, _settings.CompanionIdleMinutes + 1));
 
     public Presence State { get; private set; } = Presence.Active;
     public bool IsAway { get; private set; }
@@ -52,7 +57,11 @@ public sealed class PresenceTracker
     public event Action<TimeSpan>? WentAway;
     public event Action<AwayReport>? Returned;
 
-    public PresenceTracker() => _timer.Tick += (_, _) => Check();
+    public PresenceTracker(SettingsData settings)
+    {
+        _settings = settings;
+        _timer.Tick += (_, _) => Check();
+    }
 
     public void Start() => _timer.Start();
 

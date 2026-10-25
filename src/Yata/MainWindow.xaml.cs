@@ -33,7 +33,7 @@ public partial class MainWindow : Window
     private static readonly Size CompactMedia = new(260, 32);
     private static readonly Size CompactLyrics = new(380, 32);
     // Expanded heights include the 42px header with the page tabs.
-    private static readonly Size ExpandedIdle = new(380, 170);
+    private static readonly Size ExpandedIdle = new(420, 170);
     private static readonly Size ExpandedMedia = new(520, 196);
     private static readonly Size ExpandedLyrics = new(880, 196);
     private static readonly Size ExpandedFocus = new(440, 196);
@@ -66,11 +66,11 @@ public partial class MainWindow : Window
     private readonly NetworkWatcher _network;
     private readonly KeyboardWatcher _keyboard = new();
     private readonly AppStore _store = AppStore.Load();
-    private readonly FocusTimer _focus = new();
+    private readonly FocusTimer _focus;
     private readonly WaterTracker _water;
     private readonly TaskList _tasks;
     private readonly Shelf _shelf;
-    private readonly PresenceTracker _presence = new();
+    private readonly PresenceTracker _presence;
     private readonly DispatcherTimer _newsTimer = new() { Interval = TimeSpan.FromSeconds(9) };
     private readonly RavenAnimator _ambientRaven;
     private readonly RavenAnimator _musicRaven;
@@ -113,6 +113,11 @@ public partial class MainWindow : Window
     // Files are being dragged over the notch.
     private bool _dropHinting;
 
+    private bool _fullscreenApp;
+    private SettingsWindow? _settingsWindow;
+    private BitmapImage? _artwork;
+    private static readonly Color MonochromeAccent = Color.FromRgb(0xE0, 0xE0, 0xE0);
+
     private bool _ambientShown;
     private bool _ambientLeaving;
     private bool _newsActive;
@@ -143,6 +148,9 @@ public partial class MainWindow : Window
         _network.Message += ShowHud;
         _keyboard.Message += ShowHud;
 
+        _focus = new FocusTimer(_store.Settings);
+        _presence = new PresenceTracker(_store.Settings);
+        _store.SettingsChanged += OnSettingsChanged;
         _water = new WaterTracker(_store);
         _tasks = new TaskList(_store);
         _shelf = new Shelf(_store);
@@ -254,20 +262,62 @@ public partial class MainWindow : Window
 
     private void OnFullscreenChanged(bool fullscreen)
     {
-        if (fullscreen)
+        _fullscreenApp = fullscreen;
+        if (fullscreen && Settings.HideInFullscreen)
         {
             _hoverTimer.Stop();
             SetExpanded(false);
             Hide();
             SetEqualizer(false);
         }
-        else
+        else if (!IsVisible)
         {
             Show();
             SetEqualizer(_state?.IsPlaying == true);
             ShowPendingHud();
         }
         UpdateLyricsTimer();
+    }
+
+    // ---- Settings -------------------------------------------------------------------
+
+    private SettingsData Settings => _store.Settings;
+
+    public void OpenSettings()
+    {
+        SetExpanded(false);
+        if (_settingsWindow == null)
+        {
+            _settingsWindow = new SettingsWindow(_store);
+            _settingsWindow.Closed += (_, _) => _settingsWindow = null;
+            _settingsWindow.Show();
+        }
+        if (_settingsWindow.WindowState == WindowState.Minimized)
+            _settingsWindow.WindowState = WindowState.Normal;
+        _settingsWindow.Activate();
+    }
+
+    private void OnSettingsClick(object sender, RoutedEventArgs e) => OpenSettings();
+
+    /// <summary>Everything the settings window can change, re-applied live.</summary>
+    private void OnSettingsChanged()
+    {
+        _focus.ApplySettings();
+        _water.ApplySettings();
+
+        if (!Settings.LyricsEnabled && _lyrics != null)
+        {
+            _lyricsCts?.Cancel();
+            SetLyrics(null);
+        }
+        else if (Settings.LyricsEnabled && _lyrics == null && _state != null)
+        {
+            LoadLyrics(_state);
+        }
+
+        ApplyAccent();
+        OnFullscreenChanged(_fullscreenApp);
+        UpdateCompanion();
     }
 
     // ---- Keyboard (task input) ------------------------------------------------------
@@ -310,7 +360,7 @@ public partial class MainWindow : Window
 
     // ---- Hover / expand -------------------------------------------------------------
 
-    private void OnNotchMouseEnter(object sender, MouseEventArgs e) => ScheduleExpanded(true, 140);
+    private void OnNotchMouseEnter(object sender, MouseEventArgs e) => ScheduleExpanded(true, Settings.HoverDelayMs);
 
     private void OnNotchMouseLeave(object sender, MouseEventArgs e)
     {
@@ -661,8 +711,16 @@ public partial class MainWindow : Window
         CompactArtBrush.ImageSource = image;
         ExpandedArtBrush.ImageSource = image;
         CompactArt.Visibility = image != null ? Visibility.Visible : Visibility.Collapsed;
+        _artwork = image;
+        ApplyAccent();
+    }
 
-        var accent = image != null ? ColorExtractor.FromImage(image) : ColorExtractor.Default;
+    /// <summary>The cover's color, or plain light gray when the user prefers black and white.</summary>
+    private void ApplyAccent()
+    {
+        var accent = !Settings.UseArtworkAccent ? MonochromeAccent
+                   : _artwork != null ? ColorExtractor.FromImage(_artwork)
+                   : ColorExtractor.Default;
         _accent.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(accent, TimeSpan.FromMilliseconds(500)));
     }
 
@@ -702,7 +760,7 @@ public partial class MainWindow : Window
 
     private void UpdateCompanion()
     {
-        bool idle = _presence.State != Presence.Active;
+        bool idle = Settings.CompanionEnabled && _presence.State != Presence.Active;
 
         // Music still playing while you're away: Yata takes the equalizer's slot and nods along.
         bool nodding = idle && _state?.IsPlaying == true && !_focus.IsActive;
@@ -784,13 +842,13 @@ public partial class MainWindow : Window
     private void OnWentAway(TimeSpan unattended)
     {
         // Pause focus so time away isn't counted — unless something is playing (likely a video).
-        if (_state?.IsPlaying != true && _focus.PauseAfterIdle(unattended))
+        if (Settings.PauseFocusWhenAway && _state?.IsPlaying != true && _focus.PauseAfterIdle(unattended))
             _presence.Add(Glyphs.Timer, "Foco pausado quando você saiu");
     }
 
     private void OnReturned(AwayReport report)
     {
-        if (report.Items.Count > 0 && IsVisible && !_expanded)
+        if (Settings.AwaySummaryEnabled && report.Items.Count > 0 && IsVisible && !_expanded)
             ShowNews(report);
     }
 
@@ -842,9 +900,9 @@ public partial class MainWindow : Window
     public async void RunCompanionDemo()
     {
         SetExpanded(false);
-        _presence.Simulate(PresenceTracker.IdleAfter);
+        _presence.Simulate(_presence.IdleAfter);
         await Task.Delay(7000);
-        _presence.Simulate(PresenceTracker.SleepAfter + TimeSpan.FromMinutes(37));
+        _presence.Simulate(_presence.SleepAfter + TimeSpan.FromMinutes(37));
         _presence.Add(Glyphs.Bell, "Reunião com o time · 15:30");
         _presence.Add(Glyphs.Water, "Hora de beber água · 750/2000 ml");
         await Task.Delay(7000);
@@ -860,6 +918,8 @@ public partial class MainWindow : Window
 
     private void ShowHud(HudMessage message)
     {
+        if (!Settings.Shows(message.Kind))
+            return;
         _presence.NoteIfUnseen(message);
 
         if (!IsVisible || _expanded)
@@ -911,7 +971,7 @@ public partial class MainWindow : Window
     {
         _lyricsCts?.Cancel();
         SetLyrics(null);
-        if (media == null)
+        if (media == null || !Settings.LyricsEnabled)
             return;
 
         var cts = _lyricsCts = new CancellationTokenSource();

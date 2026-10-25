@@ -7,31 +7,30 @@ namespace Yata.Services;
 public enum FocusPhase { Focus, ShortBreak, LongBreak }
 
 /// <summary>
-/// Pomodoro: 25 min focus, 5 min break, 15 min break after every 4th session.
-/// Breaks start on their own; the next focus session waits for the user.
+/// Pomodoro (by default 25 min focus, 5 min break, 15 min break after every 4th session;
+/// lengths come from the settings). Breaks start on their own; the next focus session waits.
 /// </summary>
 public sealed class FocusTimer
 {
-    public const int SessionsPerCycle = 4;
-    private static readonly TimeSpan FocusLength = TimeSpan.FromMinutes(25);
-    private static readonly TimeSpan ShortBreakLength = TimeSpan.FromMinutes(5);
-    private static readonly TimeSpan LongBreakLength = TimeSpan.FromMinutes(15);
-
+    private readonly SettingsData _settings;
     private readonly DispatcherTimer _tick = new() { Interval = TimeSpan.FromMilliseconds(250) };
-    private TimeSpan _pausedRemaining = FocusLength;
+    private TimeSpan _pausedRemaining;
     private DateTime _endsAt;
+    private bool _phaseStarted;
 
     public FocusPhase Phase { get; private set; } = FocusPhase.Focus;
     public bool IsRunning { get; private set; }
-    /// <summary>Focus sessions finished in the current cycle (0..4).</summary>
+    /// <summary>Focus sessions finished in the current cycle (0..SessionsPerCycle).</summary>
     public int CompletedSessions { get; private set; }
 
-    public TimeSpan PhaseLength => Phase switch
+    public int SessionsPerCycle => Math.Max(1, _settings.SessionsPerCycle);
+
+    public TimeSpan PhaseLength => TimeSpan.FromMinutes(Math.Max(1, Phase switch
     {
-        FocusPhase.ShortBreak => ShortBreakLength,
-        FocusPhase.LongBreak => LongBreakLength,
-        _ => FocusLength,
-    };
+        FocusPhase.ShortBreak => _settings.ShortBreakMinutes,
+        FocusPhase.LongBreak => _settings.LongBreakMinutes,
+        _ => _settings.FocusMinutes,
+    }));
 
     public TimeSpan Remaining
     {
@@ -52,7 +51,25 @@ public sealed class FocusTimer
     public event Action? Changed;
     public event Action<HudMessage>? Message;
 
-    public FocusTimer() => _tick.Tick += OnTick;
+    public FocusTimer(SettingsData settings)
+    {
+        _settings = settings;
+        _pausedRemaining = PhaseLength;
+        _tick.Tick += OnTick;
+    }
+
+    /// <summary>
+    /// New lengths apply at once to a phase that hasn't started; a started one keeps its
+    /// countdown, capped at the new length.
+    /// </summary>
+    public void ApplySettings()
+    {
+        if (!_phaseStarted || _pausedRemaining > PhaseLength)
+            _pausedRemaining = PhaseLength;
+        if (CompletedSessions > SessionsPerCycle)
+            CompletedSessions = SessionsPerCycle;
+        Changed?.Invoke();
+    }
 
     public void Toggle()
     {
@@ -66,6 +83,7 @@ public sealed class FocusTimer
     {
         _endsAt = DateTime.Now + _pausedRemaining;
         IsRunning = true;
+        _phaseStarted = true;
         _tick.Start();
         Changed?.Invoke();
     }
@@ -99,6 +117,7 @@ public sealed class FocusTimer
     public void Reset()
     {
         IsRunning = false;
+        _phaseStarted = false;
         _tick.Stop();
         _pausedRemaining = PhaseLength;
         Changed?.Invoke();
@@ -132,6 +151,7 @@ public sealed class FocusTimer
                 CompletedSessions = 0;
             Phase = FocusPhase.Focus;
             IsRunning = false;
+            _phaseStarted = false;
             _tick.Stop();
             _pausedRemaining = PhaseLength;
             if (notify)

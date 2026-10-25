@@ -37,6 +37,9 @@ public sealed class WaterTracker
 
     public void Stop() => _reminder.Stop();
 
+    /// <summary>Goal or cup size changed in the settings.</summary>
+    public void ApplySettings() => Changed?.Invoke();
+
     public void Drink() => Add(Data.CupMl);
 
     public void Undo() => Add(-Data.CupMl);
@@ -62,7 +65,7 @@ public sealed class WaterTracker
     private void CheckReminder()
     {
         var now = DateTime.Now;
-        if (now.Hour < FirstReminderHour || now.Hour >= LastReminderHour || TodayMl >= GoalMl)
+        if (!Data.RemindersEnabled || now.Hour < FirstReminderHour || now.Hour >= LastReminderHour || TodayMl >= GoalMl)
             return;
 
         var dayStart = DateTime.Today.AddHours(FirstReminderHour);

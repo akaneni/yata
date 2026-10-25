@@ -37,8 +37,8 @@ internal sealed class KeyboardWatcher : IDisposable
         {
             _capsLock = capsLock;
             Message?.Invoke(capsLock
-                ? new HudMessage(Glyphs.Lock, "Caps Lock ativado")
-                : new HudMessage(Glyphs.Keyboard, "Caps Lock desativado"));
+                ? new HudMessage(Glyphs.Lock, "Caps Lock ativado", Kind: HudKind.CapsLock)
+                : new HudMessage(Glyphs.Keyboard, "Caps Lock desativado", Kind: HudKind.CapsLock));
         }
 
         // Layouts are per window; only a change within the same window is a user switch.
@@ -47,7 +47,7 @@ internal sealed class KeyboardWatcher : IDisposable
         if (window == _window && layout != _layout && layout != IntPtr.Zero && _layout != IntPtr.Zero)
         {
             var (name, code) = DescribeLayout(layout);
-            Message?.Invoke(new HudMessage(Glyphs.Keyboard, name, code));
+            Message?.Invoke(new HudMessage(Glyphs.Keyboard, name, code, Kind: HudKind.KeyboardLayout));
         }
         _window = window;
         _layout = layout;

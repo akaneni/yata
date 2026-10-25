@@ -65,11 +65,11 @@ internal sealed class PowerWatcher : IDisposable
             if (_line == PowerLineStatus.Online)
             {
                 _lastWarning = int.MaxValue;
-                Message?.Invoke(new HudMessage(Glyphs.Charging, "Carregando", $"{percent}%", fraction));
+                Message?.Invoke(new HudMessage(Glyphs.Charging, "Carregando", $"{percent}%", fraction, Kind: HudKind.Power));
             }
             else
             {
-                Message?.Invoke(new HudMessage(Glyphs.Battery, "Na bateria", $"{percent}%", fraction));
+                Message?.Invoke(new HudMessage(Glyphs.Battery, "Na bateria", $"{percent}%", fraction, Kind: HudKind.Power));
             }
             return;
         }
@@ -83,7 +83,7 @@ internal sealed class PowerWatcher : IDisposable
             {
                 _lastWarning = threshold;
                 Message?.Invoke(new HudMessage(Glyphs.BatteryLow,
-                    threshold <= 10 ? "Bateria muito baixa" : "Bateria baixa", $"{percent}%", fraction, Warning: true));
+                    threshold <= 10 ? "Bateria muito baixa" : "Bateria baixa", $"{percent}%", fraction, Warning: true, Kind: HudKind.Power));
             }
         }
     }

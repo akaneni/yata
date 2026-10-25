@@ -48,8 +48,8 @@ internal sealed class NetworkWatcher : IDisposable
         _connected = connected;
         _name = name;
         Message?.Invoke(connected
-            ? new HudMessage(isWifi ? Glyphs.Wifi : Glyphs.Ethernet, string.IsNullOrEmpty(name) ? "Conectado" : name)
-            : new HudMessage(Glyphs.Offline, "Sem internet", Warning: true));
+            ? new HudMessage(isWifi ? Glyphs.Wifi : Glyphs.Ethernet, string.IsNullOrEmpty(name) ? "Conectado" : name, Kind: HudKind.Network)
+            : new HudMessage(Glyphs.Offline, "Sem internet", Warning: true, Kind: HudKind.Network));
     }
 
     private static (bool Connected, string? Name, bool IsWifi) Read()

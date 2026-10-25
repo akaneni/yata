@@ -39,8 +39,13 @@ public partial class FocusPage : UserControl
             _ => "Foco",
         };
         HintText.Text = _timer.Phase == FocusPhase.Focus
-            ? $"Sessão {_timer.CompletedSessions + 1} de {FocusTimer.SessionsPerCycle}"
+            ? $"Sessão {_timer.CompletedSessions + 1} de {_timer.SessionsPerCycle}"
             : "Levante, alongue, beba água";
+
+        while (Dots.Children.Count < _timer.SessionsPerCycle)
+            Dots.Children.Add(new Ellipse { Width = 8, Height = 8, Margin = new Thickness(0, 0, 6, 0) });
+        while (Dots.Children.Count > _timer.SessionsPerCycle)
+            Dots.Children.RemoveAt(Dots.Children.Count - 1);
 
         for (int i = 0; i < Dots.Children.Count; i++)
             ((Ellipse)Dots.Children[i]).Fill = i < _timer.CompletedSessions ? Brushes.White : DotOff;

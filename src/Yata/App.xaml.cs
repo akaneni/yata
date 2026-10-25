@@ -26,6 +26,8 @@ public partial class App : Application
         _window.Show();
         CreateTrayIcon();
 
+        if (e.Args.Contains("--settings"))
+            _window.OpenSettings();
         if (e.Args.Contains("--demo"))
             _window.Dispatcher.InvokeAsync(_window.RunCompanionDemo, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
     }
@@ -33,6 +35,7 @@ public partial class App : Application
     private void CreateTrayIcon()
     {
         var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add("Configurações…", null, (_, _) => _window?.OpenSettings());
         menu.Items.Add("Demonstração do Yata", null, (_, _) => _window?.RunCompanionDemo());
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add("Sair", null, (_, _) => Shutdown());
@@ -44,6 +47,7 @@ public partial class App : Application
             ContextMenuStrip = menu,
             Visible = true,
         };
+        _tray.DoubleClick += (_, _) => _window?.OpenSettings();
     }
 
     private static System.Drawing.Icon LoadTrayIcon()

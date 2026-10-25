@@ -55,6 +55,6 @@ internal sealed class BrightnessWatcher : IDisposable
             return;
 
         _dispatcher.InvokeAsync(() =>
-            Message?.Invoke(new HudMessage(Glyphs.Brightness, "Brilho", $"{level}", level / 100.0)));
+            Message?.Invoke(new HudMessage(Glyphs.Brightness, "Brilho", $"{level}", level / 100.0, Kind: HudKind.Brightness)));
     }
 }

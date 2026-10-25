@@ -81,7 +81,7 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
             if (announce && changed)
             {
                 var (name, isHeadphones) = Describe(device);
-                Message?.Invoke(new HudMessage(isHeadphones ? Glyphs.Headphones : Glyphs.Speakers, name));
+                Message?.Invoke(new HudMessage(isHeadphones ? Glyphs.Headphones : Glyphs.Speakers, name, Kind: HudKind.AudioDevice));
             }
         }
         catch (COMException)
@@ -166,7 +166,7 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
                      : percent < 67 ? Glyphs.Volume2
                      : Glyphs.Volume3;
         return muted
-            ? new HudMessage(glyph, "Mudo", null, 0)
-            : new HudMessage(glyph, "Volume", $"{percent}", level);
+            ? new HudMessage(glyph, "Mudo", null, 0, Kind: HudKind.Volume)
+            : new HudMessage(glyph, "Volume", $"{percent}", level, Kind: HudKind.Volume);
     }
 }
