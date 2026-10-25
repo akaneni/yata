@@ -24,7 +24,7 @@ public partial class MainWindow : Window
     // Width of the concave "ears" that blend the notch into the top edge of the screen.
     private const double Ear = 10;
 
-    private enum NotchPage { Media, Focus, Water, Tasks }
+    private enum NotchPage { Media, Focus, Water, Tasks, Shelf }
 
     private static readonly Size CompactIdle = new(170, 32);
     private static readonly Size CompactIdleTimer = new(250, 32);
@@ -37,6 +37,7 @@ public partial class MainWindow : Window
     private static readonly Size ExpandedFocus = new(440, 196);
     private static readonly Size ExpandedWater = new(440, 196);
     private static readonly Size ExpandedTasks = new(440, 270);
+    private static readonly Size ExpandedShelf = new(520, 250);
     private const double HudMinWidth = 340;
     private const double HudHeight = 36;
     private const double CompactRadius = 12;
@@ -63,6 +64,7 @@ public partial class MainWindow : Window
     private readonly FocusTimer _focus = new();
     private readonly WaterTracker _water;
     private readonly TaskList _tasks;
+    private readonly Shelf _shelf;
     private readonly SolidColorBrush _accent = new(ColorExtractor.Default);
     private readonly DispatcherTimer _hoverTimer = new();
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -96,6 +98,8 @@ public partial class MainWindow : Window
     // True while the task box is being typed in; the notch accepts focus only then.
     private bool _keyboardMode;
     private IntPtr _previousForeground;
+    // Files are being dragged over the notch.
+    private bool _dropHinting;
 
     public MainWindow()
     {
@@ -106,7 +110,7 @@ public partial class MainWindow : Window
         _media.Changed += OnMediaChanged;
 
         _hoverTimer.Tick += OnHoverTimer;
-        _clockTimer.Tick += (_, _) => { UpdateClock(); RefreshProgress(); };
+        _clockTimer.Tick += (_, _) => { UpdateClock(); RefreshProgress(); CollapseIfCursorLeft(); };
         _lyricsTimer.Tick += (_, _) => UpdateLyricLine();
         _hudTimer.Tick += (_, _) => HideHud();
 
@@ -122,6 +126,8 @@ public partial class MainWindow : Window
 
         _water = new WaterTracker(_store);
         _tasks = new TaskList(_store);
+        _shelf = new Shelf(_store);
+        ShelfPage.Attach(_shelf);
         _focus.Message += ShowHud;
         _water.Message += ShowHud;
         _tasks.Message += ShowHud;
@@ -280,6 +286,78 @@ public partial class MainWindow : Window
             ScheduleExpanded(false, 350);
     }
 
+    /// <summary>
+    /// Safety net for missed MouseLeave events: Windows doesn't send mouse events during
+    /// drag-and-drop, so after dropping on (or dragging out of) the notch it could stay open.
+    /// </summary>
+    private void CollapseIfCursorLeft()
+    {
+        if (!_expanded || _dropHinting || _seeking || _hoverTimer.IsEnabled ||
+            TasksPage.HasDraft || ShelfPage.IsDraggingOut || IsCursorOverNotch())
+            return;
+        ScheduleExpanded(false, 350);
+    }
+
+    private bool IsCursorOverNotch()
+    {
+        if (!IsVisible || !NativeMethods.GetCursorPos(out var cursor))
+            return false;
+        var local = NotchHost.PointFromScreen(new Point(cursor.X, cursor.Y));
+        return local.X >= 0 && local.Y >= 0 && local.X <= NotchHost.ActualWidth && local.Y <= NotchHost.ActualHeight;
+    }
+
+    // ---- Shelf drag & drop ----------------------------------------------------------
+
+    private void OnNotchDragOver(object sender, DragEventArgs e)
+    {
+        e.Handled = true;
+        if (ShelfPage.IsDraggingOut || !e.Data.GetDataPresent(DataFormats.FileDrop))
+        {
+            e.Effects = DragDropEffects.None;
+            return;
+        }
+
+        // The shelf only keeps a reference, so "link" is the honest cursor when the source allows it.
+        e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) ? DragDropEffects.Link : DragDropEffects.Copy;
+        _hoverTimer.Stop();
+        if (_dropHinting)
+            return;
+
+        _dropHinting = true;
+        TabShelf.IsChecked = true;
+        ShelfPage.ShowDropHint(true);
+        SetExpanded(true);
+    }
+
+    private void OnNotchDragLeave(object sender, DragEventArgs e)
+    {
+        // Also fires when moving between child elements; the next DragOver cancels this.
+        if (_dropHinting)
+            ScheduleExpanded(false, 400);
+    }
+
+    private void OnNotchDrop(object sender, DragEventArgs e)
+    {
+        e.Handled = true;
+        if (!ShelfPage.IsDraggingOut && e.Data.GetData(DataFormats.FileDrop) is string[] paths)
+        {
+            _shelf.Add(paths);
+            // Tell the source nothing was moved: the shelf only references the files.
+            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) ? DragDropEffects.Link : DragDropEffects.Copy;
+        }
+        else
+        {
+            e.Effects = DragDropEffects.None;
+        }
+        EndDropHint();
+    }
+
+    private void EndDropHint()
+    {
+        _dropHinting = false;
+        ShelfPage.ShowDropHint(false);
+    }
+
     private void OnTabChecked(object sender, RoutedEventArgs e)
     {
         if (TasksPage == null)
@@ -288,6 +366,7 @@ public partial class MainWindow : Window
         _page = sender == TabFocus ? NotchPage.Focus
               : sender == TabWater ? NotchPage.Water
               : sender == TabTasks ? NotchPage.Tasks
+              : sender == TabShelf ? NotchPage.Shelf
               : NotchPage.Media;
         TasksPage.EndTyping();
         UpdateTargets();
@@ -330,6 +409,7 @@ public partial class MainWindow : Window
         else
         {
             TasksPage.EndTyping();
+            EndDropHint();
         }
         _clockTimer.Interval = TimeSpan.FromMilliseconds(expanded ? 250 : 1000);
         UpdateTargets();
@@ -353,6 +433,7 @@ public partial class MainWindow : Window
             NotchPage.Focus => ExpandedFocus,
             NotchPage.Water => ExpandedWater,
             NotchPage.Tasks => ExpandedTasks,
+            NotchPage.Shelf => ExpandedShelf,
             _ => hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : ExpandedIdle,
         };
         bool showHud = _hudActive && !_expanded;
@@ -377,6 +458,7 @@ public partial class MainWindow : Window
         FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Collapsed;
         WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Collapsed;
         TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
+        ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Collapsed;
 
         StartAnimation();
     }

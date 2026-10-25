@@ -13,7 +13,9 @@
              The window must stay wider than the widest notch (lyrics) plus ears, spring overshoot and shadow. -->
         <Grid x:Name="NotchHost" HorizontalAlignment="Center" VerticalAlignment="Top"
               MouseEnter="OnNotchMouseEnter" MouseLeave="OnNotchMouseLeave"
-              MouseLeftButtonUp="OnNotchClick">
+              MouseLeftButtonUp="OnNotchClick"
+              AllowDrop="True" DragEnter="OnNotchDragOver" DragOver="OnNotchDragOver"
+              DragLeave="OnNotchDragLeave" Drop="OnNotchDrop">
 
             <Path x:Name="NotchShape" Fill="Black">
                 <Path.Effect>
@@ -109,6 +111,8 @@
                                          Content="&#xEB42;" ToolTip="Água" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabTasks" Style="{StaticResource TabButton}" GroupName="Pages"
                                          Content="&#xE9D5;" ToolTip="Tarefas" Checked="OnTabChecked"/>
+                            <RadioButton x:Name="TabShelf" Style="{StaticResource TabButton}" GroupName="Pages"
+                                         Content="&#xE7B8;" ToolTip="Prateleira" Checked="OnTabChecked"/>
                         </StackPanel>
                     </Grid>
 
@@ -214,6 +218,7 @@
 
                     <views:FocusPage x:Name="FocusPage" Grid.Row="1" Visibility="Collapsed"/>
                     <views:WaterPage x:Name="WaterPage" Grid.Row="1" Visibility="Collapsed"/>
+                    <views:ShelfPage x:Name="ShelfPage" Grid.Row="1" Visibility="Collapsed"/>
                     <views:TasksPage x:Name="TasksPage" Grid.Row="1" Visibility="Collapsed"/>
                 </Grid>
             </Grid>

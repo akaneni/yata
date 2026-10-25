@@ -4,7 +4,7 @@ Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que e
 
 Projeto de código aberto, sem conta e sem telemetria.
 
-**Dados locais:** tarefas e registro de água ficam em `%LOCALAPPDATA%\Notch\data.json`.
+**Dados locais:** tarefas, registro de água e caminhos da prateleira ficam em `%LOCALAPPDATA%\Notch\data.json`.
 
 **Acesso à rede:** o único acesso é a busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Notch\lyrics`.
 
@@ -19,6 +19,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto.
 - **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
 - **Tarefas**: lista com marcar/remover; um horário no fim do texto ("Reunião 15:30") vira lembrete. O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
+- **Prateleira de arquivos**: arraste arquivos ou pastas até o notch para guardar e arraste de volta para qualquer app; clique duplo abre. Guarda só o caminho (nada é copiado) e itens apagados/movidos somem sozinhos. Imagens ganham miniatura.
 - Lembretes que chegam com o notch aberto ou em tela cheia esperam e aparecem depois, em vez de serem perdidos.
 - **Cor de destaque** extraída automaticamente da capa.
 - **Some em tela cheia** (vídeos, jogos, apresentações).
@@ -53,7 +54,9 @@ src/Notch/
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    água e lembretes
   Services/TaskList.cs        tarefas e lembretes
-  Views/                      páginas Foco, Água e Tarefas
+  Services/Shelf.cs           prateleira de arquivos
+  Views/                      páginas Foco, Água, Tarefas e Prateleira
+  Helpers/FileIcons.cs        miniaturas e ícones de arquivo
   Helpers/Chime.cs            som de aviso gerado em memória
   Services/FullscreenWatcher.cs  detecta app em tela cheia e mantém o notch no topo
   Helpers/Spring.cs           física de mola das animações
@@ -67,6 +70,6 @@ src/Notch/
 2. ~~Letras sincronizadas (LRCLIB)~~
 3. ~~Avisos do sistema: volume, brilho, bateria, fone, Caps Lock~~
 4. ~~Pomodoro, lembrete de água, to-do~~
-5. Prateleira de arquivos (arrastar e soltar)
+5. ~~Prateleira de arquivos (arrastar e soltar)~~
 6. Companheiro ocioso (olhinhos)
 7. Configurações, iniciar com o Windows, instalador

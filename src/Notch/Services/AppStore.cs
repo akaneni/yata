@@ -10,6 +10,8 @@ public sealed class StoreData
 {
     public WaterData Water { get; set; } = new();
     public List<TaskData> Tasks { get; set; } = new();
+    /// <summary>Paths parked on the shelf (references only, files are never copied).</summary>
+    public List<string> Shelf { get; set; } = new();
 }
 
 public sealed class WaterData
