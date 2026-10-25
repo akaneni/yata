@@ -24,12 +24,19 @@ public partial class MainWindow : Window
     // Width of the concave "ears" that blend the notch into the top edge of the screen.
     private const double Ear = 10;
 
+    private enum NotchPage { Media, Focus, Water, Tasks }
+
     private static readonly Size CompactIdle = new(170, 32);
+    private static readonly Size CompactIdleTimer = new(250, 32);
     private static readonly Size CompactMedia = new(260, 32);
     private static readonly Size CompactLyrics = new(380, 32);
-    private static readonly Size ExpandedIdle = new(330, 108);
-    private static readonly Size ExpandedMedia = new(520, 156);
-    private static readonly Size ExpandedLyrics = new(880, 156);
+    // Expanded heights include the 42px header with the page tabs.
+    private static readonly Size ExpandedIdle = new(380, 170);
+    private static readonly Size ExpandedMedia = new(520, 196);
+    private static readonly Size ExpandedLyrics = new(880, 196);
+    private static readonly Size ExpandedFocus = new(440, 196);
+    private static readonly Size ExpandedWater = new(440, 196);
+    private static readonly Size ExpandedTasks = new(440, 270);
     private const double HudMinWidth = 340;
     private const double HudHeight = 36;
     private const double CompactRadius = 12;
@@ -52,6 +59,10 @@ public partial class MainWindow : Window
     private readonly PowerWatcher _power;
     private readonly NetworkWatcher _network;
     private readonly KeyboardWatcher _keyboard = new();
+    private readonly AppStore _store = AppStore.Load();
+    private readonly FocusTimer _focus = new();
+    private readonly WaterTracker _water;
+    private readonly TaskList _tasks;
     private readonly SolidColorBrush _accent = new(ColorExtractor.Default);
     private readonly DispatcherTimer _hoverTimer = new();
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -78,6 +89,13 @@ public partial class MainWindow : Window
     private int _lyricIndex = -1;
 
     private bool _hudActive;
+    private HudMessage? _pendingHud;
+
+    private NotchPage _page = NotchPage.Media;
+    private bool _focusWasActive;
+    // True while the task box is being typed in; the notch accepts focus only then.
+    private bool _keyboardMode;
+    private IntPtr _previousForeground;
 
     public MainWindow()
     {
@@ -101,6 +119,19 @@ public partial class MainWindow : Window
         _power.Message += ShowHud;
         _network.Message += ShowHud;
         _keyboard.Message += ShowHud;
+
+        _water = new WaterTracker(_store);
+        _tasks = new TaskList(_store);
+        _focus.Message += ShowHud;
+        _water.Message += ShowHud;
+        _tasks.Message += ShowHud;
+        _focus.Changed += UpdateCompactTimer;
+        FocusPage.Attach(_focus);
+        WaterPage.Attach(_water);
+        TasksPage.Attach(_tasks);
+        TasksPage.KeyboardRequested += EnterKeyboardMode;
+        TasksPage.KeyboardReleased += ExitKeyboardMode;
+        Deactivated += OnDeactivated;
 
         SourceInitialized += OnSourceInitialized;
         Loaded += OnLoaded;
@@ -134,6 +165,8 @@ public partial class MainWindow : Window
         _power.Start();
         _network.Start();
         _keyboard.Start();
+        _water.Start();
+        _tasks.Start();
         try
         {
             await _media.InitializeAsync();
@@ -158,11 +191,14 @@ public partial class MainWindow : Window
         _power.Dispose();
         _network.Dispose();
         _keyboard.Dispose();
+        _water.Stop();
+        _tasks.Stop();
+        _store.SaveNow();
     }
 
-    private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
-        if (msg == NativeMethods.WM_MOUSEACTIVATE)
+        if (msg == NativeMethods.WM_MOUSEACTIVATE && !_keyboardMode)
         {
             handled = true;
             return new IntPtr(NativeMethods.MA_NOACTIVATE);
@@ -191,8 +227,47 @@ public partial class MainWindow : Window
         {
             Show();
             SetEqualizer(_state?.IsPlaying == true);
+            ShowPendingHud();
         }
         UpdateLyricsTimer();
+    }
+
+    // ---- Keyboard (task input) ------------------------------------------------------
+
+    private void EnterKeyboardMode()
+    {
+        if (_keyboardMode)
+            return;
+
+        _keyboardMode = true;
+        _previousForeground = NativeMethods.GetForegroundWindow();
+        var hwnd = new WindowInteropHelper(this).Handle;
+        NativeMethods.RemoveExtendedStyle(hwnd, NativeMethods.WS_EX_NOACTIVATE);
+        Activate();
+    }
+
+    private void ExitKeyboardMode()
+    {
+        if (!_keyboardMode)
+            return;
+
+        _keyboardMode = false;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        NativeMethods.AddExtendedStyle(hwnd, NativeMethods.WS_EX_NOACTIVATE);
+
+        // Done typing but still the active window: hand the keyboard back to where the user was.
+        if (IsActive && _previousForeground != IntPtr.Zero)
+            NativeMethods.SetForegroundWindow(_previousForeground);
+        _previousForeground = IntPtr.Zero;
+    }
+
+    private void OnDeactivated(object? sender, EventArgs e)
+    {
+        // Clicked elsewhere while typing: give focus back and close like a normal mouse-out.
+        TasksPage.EndTyping();
+        ExitKeyboardMode();
+        if (!NotchHost.IsMouseOver)
+            ScheduleExpanded(false, 350);
     }
 
     // ---- Hover / expand -------------------------------------------------------------
@@ -201,8 +276,21 @@ public partial class MainWindow : Window
 
     private void OnNotchMouseLeave(object sender, MouseEventArgs e)
     {
-        if (!_seeking)
+        if (!_seeking && !TasksPage.HasDraft)
             ScheduleExpanded(false, 350);
+    }
+
+    private void OnTabChecked(object sender, RoutedEventArgs e)
+    {
+        if (TasksPage == null)
+            return; // Fired by the default tab while the XAML is still loading.
+
+        _page = sender == TabFocus ? NotchPage.Focus
+              : sender == TabWater ? NotchPage.Water
+              : sender == TabTasks ? NotchPage.Tasks
+              : NotchPage.Media;
+        TasksPage.EndTyping();
+        UpdateTargets();
     }
 
     private void OnNotchClick(object sender, MouseButtonEventArgs e)
@@ -239,9 +327,15 @@ public partial class MainWindow : Window
             _hudActive = false;
             _hudTimer.Stop();
         }
+        else
+        {
+            TasksPage.EndTyping();
+        }
         _clockTimer.Interval = TimeSpan.FromMilliseconds(expanded ? 250 : 1000);
         UpdateTargets();
         RefreshProgress();
+        if (!expanded)
+            ShowPendingHud();
     }
 
     // ---- Animation ------------------------------------------------------------------
@@ -250,8 +344,17 @@ public partial class MainWindow : Window
     {
         bool hasMedia = _state != null;
         bool hasLyrics = hasMedia && _lyrics != null;
-        Size compact = hasLyrics ? CompactLyrics : hasMedia ? CompactMedia : CompactIdle;
-        Size expanded = hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : ExpandedIdle;
+        Size compact = hasLyrics ? CompactLyrics
+                     : hasMedia ? CompactMedia
+                     : _focus.IsActive ? CompactIdleTimer
+                     : CompactIdle;
+        Size expanded = _page switch
+        {
+            NotchPage.Focus => ExpandedFocus,
+            NotchPage.Water => ExpandedWater,
+            NotchPage.Tasks => ExpandedTasks,
+            _ => hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : ExpandedIdle,
+        };
         bool showHud = _hudActive && !_expanded;
         Size target = _expanded ? expanded
                     : showHud ? new Size(Math.Max(compact.Width, HudMinWidth), HudHeight)
@@ -269,6 +372,11 @@ public partial class MainWindow : Window
         IdlePanel.Visibility = hasMedia ? Visibility.Collapsed : Visibility.Visible;
         LyricsPanel.Visibility = hasLyrics ? Visibility.Visible : Visibility.Collapsed;
         LyricsDivider.Visibility = LyricsPanel.Visibility;
+
+        MediaPage.Visibility = _page == NotchPage.Media ? Visibility.Visible : Visibility.Collapsed;
+        FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Collapsed;
+        WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Collapsed;
+        TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
 
         StartAnimation();
     }
@@ -374,8 +482,7 @@ public partial class MainWindow : Window
             SetArtwork(null);
         }
 
-        bool hasMedia = _state != null;
-        Equalizer.Visibility = hasMedia ? Visibility.Visible : Visibility.Collapsed;
+        UpdateCompactTimer();
         SetEqualizer(_state?.IsPlaying == true && IsVisible);
 
         string? track = _state == null ? null : $"{_state.SourceApp}\n{_state.Artist}\n{_state.Title}";
@@ -400,6 +507,23 @@ public partial class MainWindow : Window
 
         string? line = _lyrics != null && _lyricIndex >= 0 ? _lyrics.Lines[_lyricIndex].Text : null;
         CompactText.Text = string.IsNullOrWhiteSpace(line) ? _state.Title : line;
+    }
+
+    /// <summary>While a focus session is active its countdown takes the equalizer's slot.</summary>
+    private void UpdateCompactTimer()
+    {
+        bool active = _focus.IsActive;
+        CompactTimer.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+        Equalizer.Visibility = _state != null && !active ? Visibility.Visible : Visibility.Collapsed;
+
+        var remaining = _focus.Remaining;
+        CompactTimerText.Text = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
+
+        if (active != _focusWasActive)
+        {
+            _focusWasActive = active;
+            UpdateTargets(); // The idle notch widens to fit the countdown.
+        }
     }
 
     private void SetArtwork(BitmapImage? image)
@@ -449,7 +573,14 @@ public partial class MainWindow : Window
     private void ShowHud(HudMessage message)
     {
         if (!IsVisible || _expanded)
+        {
+            // Reminders wait until the notch closes or a full-screen app exits; status blips are dropped.
+            if (message.Important)
+                _pendingHud = message;
             return;
+        }
+
+        _hudTimer.Interval = TimeSpan.FromMilliseconds(message.DurationMs);
 
         HudIcon.Text = message.Glyph;
         HudIcon.Foreground = message.Warning ? WarningBrush : Brushes.White;
@@ -467,6 +598,14 @@ public partial class MainWindow : Window
         _hudTimer.Stop();
         _hudTimer.Start();
         UpdateTargets();
+    }
+
+    private void ShowPendingHud()
+    {
+        if (_pendingHud is not HudMessage message)
+            return;
+        _pendingHud = null;
+        ShowHud(message);
     }
 
     private void HideHud()
@@ -699,6 +838,6 @@ public partial class MainWindow : Window
 
         IdleClock.Text = time;
         string date = now.ToString("dddd, d 'de' MMMM", PtBr);
-        IdleDate.Text = char.ToUpper(date[0], PtBr) + date[1..];
+        HeaderDate.Text = char.ToUpper(date[0], PtBr) + date[1..];
     }
 }

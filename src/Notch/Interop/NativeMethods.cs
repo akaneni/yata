@@ -56,6 +56,10 @@ internal static class NativeMethods
     public static extern IntPtr GetForegroundWindow();
 
     [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
     public static extern IntPtr GetShellWindow();
 
     [DllImport("user32.dll")]
@@ -95,6 +99,12 @@ internal static class NativeMethods
     {
         long current = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
         SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(current | style));
+    }
+
+    public static void RemoveExtendedStyle(IntPtr hwnd, long style)
+    {
+        long current = GetWindowLongPtr(hwnd, GWL_EXSTYLE).ToInt64();
+        SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(current & ~style));
     }
 
     public static void KeepTopmost(IntPtr hwnd)

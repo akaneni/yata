@@ -6,7 +6,16 @@ namespace Notch.Services;
 /// <param name="Value">Optional value on the right, e.g. "62%".</param>
 /// <param name="Level">Optional 0..1 level drawn as a bar.</param>
 /// <param name="Warning">Highlights the icon, e.g. for low battery.</param>
-public sealed record HudMessage(string Glyph, string Text, string? Value = null, double? Level = null, bool Warning = false);
+/// <param name="DurationMs">How long the message stays up.</param>
+/// <param name="Important">Reminders: held back while the notch is open or hidden, instead of dropped.</param>
+public sealed record HudMessage(
+    string Glyph,
+    string Text,
+    string? Value = null,
+    double? Level = null,
+    bool Warning = false,
+    int DurationMs = 1800,
+    bool Important = false);
 
 internal static class Glyphs
 {
@@ -26,4 +35,7 @@ internal static class Glyphs
     public const string Ethernet = "";
     public const string Offline = "";
     public const string Lock = "";
+    public const string Timer = "";
+    public const string Water = "";
+    public const string Bell = "";
 }

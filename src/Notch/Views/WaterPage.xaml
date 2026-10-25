@@ -1,0 +1,31 @@
+<UserControl x:Class="Notch.Views.WaterPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="24,0,22,14">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel VerticalAlignment="Center">
+            <TextBlock>
+                <Run x:Name="TodayRun" FontFamily="{StaticResource DisplayFont}" FontSize="26" FontWeight="SemiBold"/>
+                <Run x:Name="GoalRun" FontSize="13" Foreground="{StaticResource TextSecondary}"/>
+            </TextBlock>
+            <Grid x:Name="Bar" Height="6" Margin="0,6,0,0">
+                <Border CornerRadius="3" Background="{StaticResource TrackBrush}"/>
+                <Border x:Name="BarFill" CornerRadius="3" HorizontalAlignment="Left" Width="0" Background="#FF5AB8FF"/>
+            </Grid>
+            <!-- Last 7 days -->
+            <Grid x:Name="Chart" Height="46" Margin="0,10,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1" Margin="22,0,0,0" VerticalAlignment="Center">
+            <Button Style="{StaticResource IconButton}" Width="58" Height="58" FontSize="24"
+                    Foreground="#FF5AB8FF" Background="#1A5AB8FF" Content="&#xEB42;" Click="OnDrink"/>
+            <TextBlock x:Name="CupText" Margin="0,4,0,0" FontSize="12" HorizontalAlignment="Center"/>
+            <Button Style="{StaticResource PillButton}" Content="Desfazer" Height="24" FontSize="11" Margin="0,8,0,0"
+                    Click="OnUndo"/>
+        </StackPanel>
+    </Grid>
+</UserControl>

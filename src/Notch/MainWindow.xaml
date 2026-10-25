@@ -1,8 +1,9 @@
 <Window x:Class="Notch.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:Notch.Views"
         Title="Notch"
-        Width="1040" Height="260"
+        Width="1040" Height="340"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="False"
         FontFamily="{StaticResource UiFont}" Foreground="{StaticResource TextPrimary}"
@@ -41,6 +42,14 @@
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
                                Typography.NumeralAlignment="Tabular"/>
+
+                    <StackPanel x:Name="CompactTimer" Grid.Column="2" Orientation="Horizontal"
+                                VerticalAlignment="Center" Visibility="Collapsed">
+                        <TextBlock Text="&#xE916;" FontFamily="{StaticResource IconFont}" FontSize="12"
+                                   VerticalAlignment="Center" Margin="0,0,5,0" Foreground="{DynamicResource AccentBrush}"/>
+                        <TextBlock x:Name="CompactTimerText" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                   Typography.NumeralAlignment="Tabular"/>
+                    </StackPanel>
 
                     <StackPanel x:Name="Equalizer" Grid.Column="2" Orientation="Horizontal"
                                 VerticalAlignment="Center" Visibility="Collapsed">
@@ -82,8 +91,29 @@
                 <!-- Expanded: sized to the expanded target so it is revealed by the clip while the notch grows -->
                 <Grid x:Name="ExpandedView" HorizontalAlignment="Center" VerticalAlignment="Top"
                       Opacity="0" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="42"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                    <Grid x:Name="MediaPanel" Width="476" HorizontalAlignment="Left" Margin="22,18,22,16">
+                    <!-- Header: date + page tabs -->
+                    <Grid Margin="24,10,16,0">
+                        <TextBlock x:Name="HeaderDate" FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextSecondary}"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <RadioButton x:Name="TabMedia" Style="{StaticResource TabButton}" GroupName="Pages"
+                                         Content="&#xE8D6;" ToolTip="Mídia" IsChecked="True" Checked="OnTabChecked"/>
+                            <RadioButton x:Name="TabFocus" Style="{StaticResource TabButton}" GroupName="Pages"
+                                         Content="&#xE916;" ToolTip="Foco" Checked="OnTabChecked"/>
+                            <RadioButton x:Name="TabWater" Style="{StaticResource TabButton}" GroupName="Pages"
+                                         Content="&#xEB42;" ToolTip="Água" Checked="OnTabChecked"/>
+                            <RadioButton x:Name="TabTasks" Style="{StaticResource TabButton}" GroupName="Pages"
+                                         Content="&#xE9D5;" ToolTip="Tarefas" Checked="OnTabChecked"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid x:Name="MediaPage" Grid.Row="1">
+                    <Grid x:Name="MediaPanel" Width="476" HorizontalAlignment="Left" Margin="22,0,22,18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -150,9 +180,9 @@
                     </Grid>
 
                     <!-- Lyrics: right half of the split notch, current line kept centered -->
-                    <Border x:Name="LyricsDivider" Width="1" HorizontalAlignment="Left" Margin="519,26,0,26"
+                    <Border x:Name="LyricsDivider" Width="1" HorizontalAlignment="Left" Margin="519,6,0,24"
                             Background="#1AFFFFFF" Visibility="Collapsed"/>
-                    <Grid x:Name="LyricsPanel" Margin="544,12,24,12" ClipToBounds="True" Visibility="Collapsed"
+                    <Grid x:Name="LyricsPanel" Margin="544,0,24,14" ClipToBounds="True" Visibility="Collapsed"
                           SizeChanged="OnLyricsLayoutChanged">
                         <Grid.OpacityMask>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -173,13 +203,18 @@
                         </Canvas>
                     </Grid>
 
-                    <StackPanel x:Name="IdlePanel" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <StackPanel x:Name="IdlePanel" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,14">
                         <TextBlock x:Name="IdleClock" FontFamily="{StaticResource DisplayFont}" FontSize="36"
                                    FontWeight="SemiBold" HorizontalAlignment="Center"
                                    Typography.NumeralAlignment="Tabular"/>
-                        <TextBlock x:Name="IdleDate" FontSize="13" HorizontalAlignment="Center"
+                        <TextBlock Text="Nada tocando" FontSize="13" HorizontalAlignment="Center"
                                    Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>
+                    </Grid>
+
+                    <views:FocusPage x:Name="FocusPage" Grid.Row="1" Visibility="Collapsed"/>
+                    <views:WaterPage x:Name="WaterPage" Grid.Row="1" Visibility="Collapsed"/>
+                    <views:TasksPage x:Name="TasksPage" Grid.Row="1" Visibility="Collapsed"/>
                 </Grid>
             </Grid>
         </Grid>
