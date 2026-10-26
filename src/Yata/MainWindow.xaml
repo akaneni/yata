@@ -43,12 +43,16 @@
                     <TextBlock x:Name="CompactText" Grid.Column="1" Margin="8,0"
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                               Typography.NumeralAlignment="Tabular"/>
+                               Typography.NumeralAlignment="Tabular">
+                        <TextBlock.RenderTransform>
+                            <TranslateTransform x:Name="CompactTextShift"/>
+                        </TextBlock.RenderTransform>
+                    </TextBlock>
 
                     <StackPanel x:Name="CompactTimer" Grid.Column="2" Orientation="Horizontal"
                                 VerticalAlignment="Center" Visibility="Collapsed">
                         <TextBlock x:Name="CompactTimerGlyph" Text="&#xE916;" FontFamily="{StaticResource IconFont}" FontSize="12"
-                                   VerticalAlignment="Center" Margin="0,0,5,0" Foreground="{DynamicResource AccentBrush}"/>
+                                   VerticalAlignment="Center" Margin="0,0,5,0"/>
                         <TextBlock x:Name="CompactTimerText" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
                                    Typography.NumeralAlignment="Tabular"/>
                     </StackPanel>
@@ -234,11 +238,12 @@
                             </Grid>
 
                             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
-                                <Button Style="{StaticResource IconButton}" Content="&#xE892;" Click="OnPrevious"/>
-                                <Button x:Name="PlayPauseButton" Style="{StaticResource IconButton}"
-                                        Width="42" Height="42" FontSize="20" Margin="12,0"
-                                        Content="&#xE768;" Click="OnPlayPause"/>
-                                <Button Style="{StaticResource IconButton}" Content="&#xE893;" Click="OnNext"/>
+                                <!-- Filled glyphs, same family as the focus timer's buttons -->
+                                <Button Style="{StaticResource IconButton}" Content="&#xF8AC;" ToolTip="Anterior" Click="OnPrevious"/>
+                                <Button x:Name="PlayPauseButton" Style="{StaticResource PrimaryIconButton}"
+                                        Width="38" Height="38" FontSize="15" Margin="12,0"
+                                        Content="&#xF5B0;" Click="OnPlayPause"/>
+                                <Button Style="{StaticResource IconButton}" Content="&#xF8AD;" ToolTip="Próxima" Click="OnNext"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -268,9 +273,12 @@
                     </Grid>
 
                     <StackPanel x:Name="IdlePanel" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,14">
-                        <TextBlock x:Name="IdleClock" FontFamily="{StaticResource DisplayFont}" FontSize="36"
-                                   FontWeight="SemiBold" HorizontalAlignment="Center"
-                                   Typography.NumeralAlignment="Tabular"/>
+                        <!-- Yata keeps the clock company while nothing plays -->
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBlock x:Name="IdleClock" FontFamily="{StaticResource DisplayFont}" FontSize="36"
+                                       FontWeight="SemiBold" Typography.NumeralAlignment="Tabular"/>
+                            <views:RavenSprite x:Name="IdleRaven" PixelSize="2" VerticalAlignment="Bottom" Margin="10,0,0,10"/>
+                        </StackPanel>
                         <TextBlock Text="Nada tocando" FontSize="13" HorizontalAlignment="Center"
                                    Foreground="{StaticResource TextSecondary}"/>
                     </StackPanel>

@@ -5,7 +5,7 @@
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,14">
         <Grid Width="112" Height="112">
             <Ellipse Stroke="{StaticResource TrackBrush}" StrokeThickness="6"/>
-            <Path x:Name="ProgressArc" Stroke="{DynamicResource AccentBrush}" StrokeThickness="6"
+            <Path x:Name="ProgressArc" Stroke="{StaticResource TextPrimary}" StrokeThickness="6"
                   StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
             <TextBlock x:Name="TimeText" FontFamily="{StaticResource DisplayFont}" FontSize="26" FontWeight="SemiBold"
                        HorizontalAlignment="Center" VerticalAlignment="Center" Typography.NumeralAlignment="Tabular"/>

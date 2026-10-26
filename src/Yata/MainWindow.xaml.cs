@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -47,6 +48,9 @@ public partial class MainWindow : Window
     private const double HudHeight = 36;
     private const double CompactRadius = 12;
     private const double ExpandedRadius = 30;
+    // How much the closed notch swells under the mouse, before the hover delay opens it.
+    private const double PeekWidth = 8;
+    private const double PeekHeight = 3;
 
     private static readonly int[] EqualizerPeriods = { 420, 560, 360, 500 };
     private static readonly CultureInfo PtBr = new("pt-BR");
@@ -75,6 +79,7 @@ public partial class MainWindow : Window
     private readonly RavenAnimator _ambientRaven;
     private readonly RavenAnimator _musicRaven;
     private readonly RavenAnimator _newsRaven;
+    private readonly RavenAnimator _idleRaven;
     private readonly SolidColorBrush _accent = new(ColorExtractor.Default);
     private readonly DispatcherTimer _hoverTimer = new();
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -91,6 +96,9 @@ public partial class MainWindow : Window
     private MediaState? _state;
     private bool _expanded;
     private bool _pendingExpand;
+    private bool _peeking;
+    // The compact line waiting for the outgoing one to slide away; null when no swap is running.
+    private string? _incomingCompactText;
     private bool _animating;
     private TimeSpan _lastFrame;
     private bool _equalizerRunning;
@@ -170,6 +178,7 @@ public partial class MainWindow : Window
         _ambientRaven = new RavenAnimator(AmbientRaven);
         _musicRaven = new RavenAnimator(MusicRaven);
         _newsRaven = new RavenAnimator(NewsRaven);
+        _idleRaven = new RavenAnimator(IdleRaven);
         // Hidden means a full-screen app is up: someone is watching it, not away.
         _presence.IsSurelyPresent = () => !IsVisible;
         _presence.StateChanged += UpdateCompanion;
@@ -364,7 +373,17 @@ public partial class MainWindow : Window
     private void OnNotchMouseEnter(object sender, MouseEventArgs e)
     {
         _pinnedUntil = DateTime.MinValue; // The real mouse takes over from a preview.
+        SetPeeking(true);
         ScheduleExpanded(true, Settings.HoverDelayMs);
+    }
+
+    /// <summary>Instant feedback that the notch noticed the mouse, while the hover delay runs.</summary>
+    private void SetPeeking(bool peeking)
+    {
+        if (_peeking == peeking)
+            return;
+        _peeking = peeking;
+        UpdateTargets();
     }
 
     /// <summary>
@@ -389,6 +408,7 @@ public partial class MainWindow : Window
 
     private void OnNotchMouseLeave(object sender, MouseEventArgs e)
     {
+        SetPeeking(false);
         if (!_seeking && !TasksPage.HasDraft)
             ScheduleExpanded(false, 350);
     }
@@ -508,6 +528,7 @@ public partial class MainWindow : Window
             return;
 
         _expanded = expanded;
+        _peeking = false;
         if (expanded)
         {
             _hudActive = false;
@@ -554,6 +575,7 @@ public partial class MainWindow : Window
         Size target = _expanded ? expanded
                     : showNews ? new Size(NewsWidth, 50 + 22 * _newsCount)
                     : showHud ? new Size(Math.Max(compact.Width, HudMinWidth), HudHeight)
+                    : _peeking ? new Size(compact.Width + PeekWidth, compact.Height + PeekHeight)
                     : compact;
 
         _width.Target = target.Width;
@@ -575,6 +597,12 @@ public partial class MainWindow : Window
         WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Collapsed;
         TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
         ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Collapsed;
+
+        // Yata only fidgets beside the idle clock while it can be seen.
+        if (_expanded && _page == NotchPage.Media && !hasMedia)
+            _idleRaven.Perch();
+        else
+            _idleRaven.Stop();
 
         FitWindow(allowShrink: false);
         StartAnimation();
@@ -707,7 +735,8 @@ public partial class MainWindow : Window
             TitleText.Text = _state.Title;
             ArtistText.Text = _state.Artist;
             ArtistText.Visibility = string.IsNullOrEmpty(_state.Artist) ? Visibility.Collapsed : Visibility.Visible;
-            PlayPauseButton.Content = _state.IsPlaying ? "" : "";
+            PlayPauseButton.Content = _state.IsPlaying ? "\uF8AE" : "\uF5B0";
+            AutomationProperties.SetName(PlayPauseButton, _state.IsPlaying ? "Pausar" : "Tocar");
 
             if (previous == null || !ReferenceEquals(previous.Thumbnail, _state.Thumbnail))
                 SetArtwork(_state.Thumbnail);
@@ -742,7 +771,44 @@ public partial class MainWindow : Window
             return; // The clock owns the compact text.
 
         string? line = _lyrics != null && _lyricIndex >= 0 ? _lyrics.Lines[_lyricIndex].Text : null;
-        CompactText.Text = string.IsNullOrWhiteSpace(line) ? _state.Title : line;
+        SetCompactText(string.IsNullOrWhiteSpace(line) ? _state.Title : line);
+    }
+
+    /// <summary>
+    /// Swaps the closed notch's line: the old text slides up and out, the new one rises in.
+    /// Changes that arrive mid-swap just replace the incoming text.
+    /// </summary>
+    private void SetCompactText(string text)
+    {
+        if (_incomingCompactText != null)
+        {
+            _incomingCompactText = text;
+            return;
+        }
+        if (text == CompactText.Text)
+            return;
+        if (CompactView.Visibility != Visibility.Visible || string.IsNullOrEmpty(CompactText.Text))
+        {
+            CompactText.Text = text;
+            return;
+        }
+
+        _incomingCompactText = text;
+        var ease = new CubicEase { EasingMode = EasingMode.EaseIn };
+        var outgoing = new DoubleAnimation(0, -10, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease };
+        outgoing.Completed += (_, _) =>
+        {
+            CompactText.Text = _incomingCompactText;
+            _incomingCompactText = null;
+            var rise = new CubicEase { EasingMode = EasingMode.EaseOut };
+            CompactTextShift.BeginAnimation(TranslateTransform.YProperty,
+                new DoubleAnimation(10, 0, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
+            CompactText.BeginAnimation(OpacityProperty,
+                new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
+        };
+        CompactTextShift.BeginAnimation(TranslateTransform.YProperty, outgoing);
+        CompactText.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease });
     }
 
     /// <summary>While a focus session is active its countdown takes the equalizer's slot.</summary>
@@ -775,7 +841,10 @@ public partial class MainWindow : Window
         ApplyAccent();
     }
 
-    /// <summary>The cover's color, or plain light gray when the user prefers black and white.</summary>
+    /// <summary>
+    /// The cover's color, or plain light gray when the user prefers black and white.
+    /// Only media elements (equalizer, progress bar) wear it; everything else stays white.
+    /// </summary>
     private void ApplyAccent()
     {
         var accent = !Settings.UseArtworkAccent ? MonochromeAccent
@@ -1255,7 +1324,7 @@ public partial class MainWindow : Window
         string time = now.ToString("HH:mm", PtBr);
 
         if (_state == null)
-            CompactText.Text = time;
+            SetCompactText(time);
 
         IdleClock.Text = time;
         string date = now.ToString("dddd, d 'de' MMMM", PtBr);
