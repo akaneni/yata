@@ -1,8 +1,8 @@
-# Yata
+<h1><img src="docs/brand/yata-lockup.svg" alt="Yata" height="56"></h1>
 
 ![O Yata, corvo em pixel art, pousado diante de um sol pontilhado](docs/yata-hero.png)
 
-Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que está tocando, a hora, seus lembretes, e sai do caminho quando não é necessário.
+Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que está tocando, a hora, seus lembretes, e sai do caminho quando não é necessário. Site: **[getyata.app](https://getyata.app)**.
 
 O nome vem de **Yatagarasu** (八咫烏), o corvo mensageiro e guia da mitologia japonesa — parente dos corvos Huginn e Muninn, que voam pelo mundo e voltam contando o que viram. É isso que o Yata faz: fica lá em cima e te traz as notícias.
 
@@ -21,6 +21,8 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Minimalista e monocromático**: notch preto, texto branco; a cor da capa da música é o único acento.
 - **O Yata**: um corvo em pixel art 1-bit (16×14), branco sobre o preto do notch. Desenhado à mão em `Views/RavenSprite.cs`; o ícone do app é gerado a partir do mesmo sprite (`tools/make-icon.ps1`).
 - **Repertório**: pisca, olha para trás, se ajeita e, de vez em quando, olha para cima, estica a asa ou dá um pulinho; dorme respirando devagar; grasna quando traz um lembrete, se sacode quando a meta de água é batida e chega com uma carta quando traz as novidades.
+- **Logotipo**: "yata" em letras de pixel na mesma grade do corvo, traço de 2 px; o rabo do "y" desce no mesmo ângulo das costas do Yata, que pousa na linha de base do texto. Versões em branco, preto e uma que segue o tema claro/escuro em `docs/brand/`, geradas por `tools/make-brand.ps1` a partir do próprio sprite (junto com o favicon e a prévia de link do site).
+- **Tipografia do site**: DotGothic16 nos títulos (pixel, com o 八咫烏), Geist no texto e Geist Mono nos detalhes.
 - **Artes maiores** (README e instalador): o mesmo traço no dobro da resolução e com três pernas, como o Yatagarasu do mito, diante de um sol pontilhado em 1-bit. Geradas com o PhotoCraft da suíte ArtCraft (`tools/make-art.ps1`); o GIF abaixo sai do próprio sprite e é codificado no EffectCraft (`tools/make-gif.ps1`).
 
 ![O repertório do Yata no notch](docs/yata.gif)
@@ -107,6 +109,13 @@ Releases são gerados pelo GitHub Actions ao enviar uma tag de versão:
 ```powershell
 git tag v0.1.0
 git push origin v0.1.0
+```
+
+O site ([getyata.app](https://getyata.app)) fica em `site/`: a página em inglês é `site/index.html`, e a versão em português sai das traduções em `site/pt.json`. A política de privacidade do site espelha o `PRIVACY.md`. Montar e ver localmente (publicado no GitHub Pages a cada push na `main` que mexa no site):
+
+```powershell
+./tools/make-site.ps1                        # sai em _site/
+python -m http.server 8000 -d _site          # http://localhost:8000
 ```
 
 ## Estrutura

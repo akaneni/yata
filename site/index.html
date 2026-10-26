@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="meta.title">Yata · A notch for Windows</title>
+<meta name="description" content="Yata is a living notch for Windows: what's playing, your next meeting and your reminders, just below your camera. Open source, no account, no telemetry." data-i18n-content="meta.description">
+<link rel="canonical" href="{{CANONICAL}}">
+<link rel="alternate" hreflang="en" href="https://getyata.app/">
+<link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Yata">
+<meta property="og:description" content="Yata is a living notch for Windows: what's playing, your next meeting and your reminders, just below your camera. Open source, no account, no telemetry." data-i18n-content="meta.description">
+<meta property="og:url" content="{{CANONICAL}}">
+<meta property="og:image" content="https://getyata.app/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Main" data-i18n-label="aria.main">
+      <a class="hide-sm" href="#features" data-i18n="nav.features">Features</a>
+      <a class="hide-sm" href="#privacy" data-i18n="nav.privacy">Privacy</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="lang" role="group" aria-label="Language" data-i18n-label="aria.language">
+        <a href="/" hreflang="en" lang="en"{{CUR_EN}}>EN</a>
+        <a href="/pt/" hreflang="pt-BR" lang="pt-BR"{{CUR_PT}}>PT</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="wrap hero">
+    <div class="hero-copy">
+      <span class="label" data-i18n="hero.eyebrow">A notch for Windows</span>
+      <h1 data-i18n="hero.title">A quiet messenger at the top of your screen.</h1>
+      <p class="lede" data-i18n-html="hero.lede">Yata sits just below your camera. It shows <strong>what's playing</strong>, <strong>your next meeting</strong> and <strong>your reminders</strong>, then gets out of the way.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="https://github.com/akaneni/yata/releases/latest">
+          <svg viewBox="0 0 16 16" class="pix" aria-hidden="true"><path d="M7 1h2v8h2v-2h2v2h-1v1h-1v1h-1v1H8v-1H7v-1H6V9H5V8H3V7h2v2h2zM2 13h12v2H2z"/></svg>
+          <span data-i18n="cta.download">Download for Windows</span></a>
+        <a class="btn btn-ghost" href="https://github.com/akaneni/yata" data-i18n="cta.source">Read the source</a>
+      </div>
+      <div class="trust mono">
+        <span data-i18n="trust.oss">Open source, MIT</span>
+        <span data-i18n="trust.account">No account</span>
+        <span data-i18n="trust.telemetry">No telemetry</span>
+      </div>
+    </div>
+
+    <div>
+      <div class="screen" role="img" aria-label="Animated preview of the notch" data-i18n-label="aria.screen">
+        <div class="notch" id="notch"></div>
+        <div class="lyric" id="lyric"></div>
+      </div>
+      <div class="states" id="states" role="group" aria-label="Preview states" data-i18n-label="aria.states"></div>
+    </div>
+  </div>
+
+  <section id="features">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label" data-i18n="features.eyebrow">What it carries</span>
+        <h2 data-i18n="features.title">Small things, one glance away.</h2>
+        <p data-i18n="features.lede">Closed, it's a black pill with the time. Hover it and it opens into tabs. It hides when you go full screen.</p>
+      </div>
+      <div class="features">
+        <div class="feature"><span class="label" data-i18n="f1.k">Media</span><h3 data-i18n="f1.t">Now playing, from any app</h3><p data-i18n="f1.d">Spotify, YouTube in the browser, anything that uses Windows media controls. Cover, progress and controls, plus synced lyrics that scroll with the song.</p></div>
+        <div class="feature"><span class="label" data-i18n="f2.k">Agenda</span><h3 data-i18n="f2.t">Your next meeting</h3><p data-i18n="f2.d">Connect Google Calendar, read-only. "Standup in 8 min" appears in the closed notch, and Join opens Meet, Zoom or Teams.</p></div>
+        <div class="feature"><span class="label" data-i18n="f3.k">Focus</span><h3 data-i18n="f3.t">A Pomodoro you can see</h3><p data-i18n="f3.d">25 minutes of focus, 5 of rest, a long break every four. The countdown stays in the closed notch, and it pauses itself when you walk away.</p></div>
+        <div class="feature"><span class="label" data-i18n="f4.k">Water and tasks</span><h3 data-i18n="f4.t">Small habits, kept</h3><p data-i18n="f4.d">A daily water goal with gentle nudges. A task list where "Call Ana 15:30" becomes a reminder, with optional two-way sync to Google Tasks.</p></div>
+        <div class="feature"><span class="label" data-i18n="f5.k">Shelf</span><h3 data-i18n="f5.t">A shelf for files</h3><p data-i18n="f5.d">Drop files on the notch, drag them back out into any app later. Only the path is kept, nothing is copied.</p></div>
+        <div class="feature"><span class="label" data-i18n="f6.k">System</span><h3 data-i18n="f6.t">What Windows is doing</h3><p data-i18n="f6.d">Volume, brightness, battery, audio output, Caps Lock, keyboard layout and network. A dot lights up when an app is using your microphone.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="raven">
+    <div class="wrap">
+      <div class="raven">
+        <div class="copy">
+          <span class="kanji" lang="ja">八咫烏</span>
+          <h2 data-i18n="raven.title">Named after a messenger.</h2>
+          <p data-i18n="raven.p1">In Japanese myth, Yatagarasu is the three-legged crow sent to guide the way. It's a cousin of Huginn and Muninn, Odin's ravens, who fly over the world and come back with news.</p>
+          <p data-i18n="raven.p2">Yata does the same from the top of your screen. A 16 × 14 pixel raven, drawn by hand, lives in the notch and reacts to your day.</p>
+        </div>
+        <canvas class="sun pix" id="sun" width="112" height="70" role="img" aria-label="Yata, a three-legged pixel raven, in front of a dithered sun" data-i18n-label="aria.sun"></canvas>
+      </div>
+      <div class="repertoire" id="repertoire"></div>
+    </div>
+  </section>
+
+  <section id="privacy">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label" data-i18n="privacy.eyebrow">Privacy</span>
+        <h2 data-i18n="privacy.title">What leaves your PC</h2>
+        <p data-i18n="privacy.lede">Only what you turn on. Nothing about your computer is ever sent.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th data-i18n="t.feature">Feature</th><th data-i18n="t.sends">What is sent</th><th data-i18n="t.to">To</th><th data-i18n="t.default">Default</th></tr></thead>
+          <tbody>
+            <tr><td data-i18n="t.r1">Synced lyrics</td><td class="sends" data-i18n="t.r1s">Artist, title and length of the song</td><td>LRCLIB</td><td><span class="pill on" data-i18n="t.on">On</span></td></tr>
+            <tr><td data-i18n="t.r2">Weather</td><td class="sends" data-i18n="t.r2s">The city you chose, rounded to about 1 km. Never your IP location.</td><td>Open-Meteo</td><td><span class="pill" data-i18n="t.off">Off</span></td></tr>
+            <tr><td data-i18n="t.r3">Google Calendar and Tasks</td><td class="sends" data-i18n="t.r3s">Goes straight between your PC and Google. Access is encrypted on disk with Windows DPAPI.</td><td>Google</td><td><span class="pill" data-i18n="t.off">Off</span></td></tr>
+            <tr><td data-i18n="t.r4">New version notice</td><td class="sends" data-i18n="t.r4s">Nothing. Reads the public releases page once a day.</td><td>GitHub</td><td><span class="pill" data-i18n="t.off">Off</span></td></tr>
+            <tr><td data-i18n="t.r5">Everything else</td><td class="sends" data-i18n="t.r5s">Nothing</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="facts">
+        <div><h3 data-i18n="p1.t">It never sees what you type</h3><p data-i18n="p1.d">Caps Lock and keyboard layout are read by checking key state. There's no keyboard hook.</p></div>
+        <div><h3 data-i18n="p2.t">No account, no telemetry</h3><p data-i18n="p2.d">The diagnostic log stays on your PC for 7 days, and it leaves out songs, tasks, events, file paths and accounts.</p></div>
+        <div><h3 data-i18n="p3.t">You can check all of it</h3><p data-i18n-html="p3.d">Every line is on GitHub under the MIT license. This site has no trackers or cookies either. Full details in the <a href="/privacy">privacy policy</a>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="download">
+    <div class="wrap download">
+      <div class="go">
+        <span class="label" data-i18n="dl.eyebrow">Download</span>
+        <h2 data-i18n="dl.title">Get Yata</h2>
+        <a class="btn btn-primary" href="https://github.com/akaneni/yata/releases/latest">
+          <svg viewBox="0 0 16 16" class="pix" aria-hidden="true"><path d="M7 1h2v8h2v-2h2v2h-1v1h-1v1h-1v1H8v-1H7v-1H6V9H5V8H3V7h2v2h2zM2 13h12v2H2z"/></svg>
+          <span data-i18n="cta.download">Download for Windows</span></a>
+        <span class="mono" style="color: var(--dim)" data-i18n="dl.meta">Free · Windows 10 (2004+) and 11, x64 · about 6 MB</span>
+      </div>
+      <ul>
+        <li><span data-i18n="dl.l1">Installs for your user only, without admin rights.</span></li>
+        <li><span data-i18n="dl.l2">If the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft. That one step asks for admin.</span></li>
+        <li><span data-i18n-html="dl.l3">Each release ships a <code>SHA256SUMS.txt</code> so you can check the file you got.</span></li>
+        <li><span data-i18n-html="dl.l4">The installer isn't code-signed yet, so SmartScreen may warn on first run. Choose <strong>More info</strong>, then <strong>Run anyway</strong>.</span></li>
+        <li><span data-i18n="dl.l5">Uninstalling keeps your data, in case you come back.</span></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Footer" data-i18n-label="aria.footer">
+      <a href="/privacy" data-i18n="footer.privacy">Privacy policy</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="mono" data-i18n="footer.made">MIT license · made by akaneni</span>
+    </nav>
+  </div>
+</footer>
+<script src="/main.js"></script>
+</body>
+</html>

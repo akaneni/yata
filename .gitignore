@@ -9,3 +9,4 @@ dist/
 # Google OAuth client downloaded from Google Cloud (see docs/google-calendar.md)
 client_secret*.json
 google-client.json
+_site/
