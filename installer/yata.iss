@@ -32,6 +32,13 @@ LicenseFile=..\LICENSE
 Compression=lzma2/ultra64
 SolidCompression=yes
 WizardStyle=modern
+; Yata in 1-bit pixel art (tools/make-art.ps1). One file per display scale, each exactly the
+; size of the image area, so nothing is ever stretched and blurred; any spare room is black.
+WizardImageFile=wizard-image-100.png,wizard-image-125.png,wizard-image-150.png,wizard-image-175.png,wizard-image-200.png
+WizardSmallImageFile=wizard-small-100.png,wizard-small-125.png,wizard-small-150.png,wizard-small-175.png,wizard-small-200.png
+WizardImageStretch=no
+WizardImageBackColor=black
+WizardSmallImageBackColor=black
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.19041

@@ -1,5 +1,7 @@
 # Yata
 
+![O Yata, corvo em pixel art, pousado diante de um sol pontilhado](docs/yata-hero.png)
+
 Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que está tocando, a hora, seus lembretes, e sai do caminho quando não é necessário.
 
 O nome vem de **Yatagarasu** (八咫烏), o corvo mensageiro e guia da mitologia japonesa — parente dos corvos Huginn e Muninn, que voam pelo mundo e voltam contando o que viram. É isso que o Yata faz: fica lá em cima e te traz as notícias.
@@ -16,6 +18,10 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 - **Minimalista e monocromático**: notch preto, texto branco; a cor da capa da música é o único acento.
 - **O Yata**: um corvo em pixel art 1-bit (16×14), branco sobre o preto do notch. Desenhado à mão em `Views/RavenSprite.cs`; o ícone do app é gerado a partir do mesmo sprite (`tools/make-icon.ps1`).
+- **Repertório**: pisca, olha para trás, se ajeita e, de vez em quando, olha para cima, estica a asa ou dá um pulinho; dorme respirando devagar; grasna quando traz um lembrete, se sacode quando a meta de água é batida e chega com uma carta quando traz as novidades.
+- **Artes maiores** (README e instalador): o mesmo traço no dobro da resolução e com três pernas, como o Yatagarasu do mito, diante de um sol pontilhado em 1-bit. Geradas com o PhotoCraft da suíte ArtCraft (`tools/make-art.ps1`).
+
+![O repertório do Yata no notch](docs/yata.gif)
 
 ## Funcionalidades (v0.1)
 
@@ -35,9 +41,10 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **O Yata (companheiro)**, a partir do tempo desde o último uso de mouse/teclado (`GetLastInputInfo` — só o horário, nunca o conteúdo):
   - **Modo ambiente** (2 min parado, nada tocando): o relógio dá lugar ao Yata pousado, que pisca, olha em volta e se ajeita; aos 10 min ele cochila.
   - **Com música tocando** e você longe: ele toma o lugar do equalizador e balança a cabeça.
-  - **"Enquanto você esteve fora"**: ao voltar, o Yata chega voando com os avisos que você perdeu (lembretes, água, bateria, foco pausado).
+  - **"Enquanto você esteve fora"**: ao voltar, o Yata chega voando com uma carta e os avisos que você perdeu (lembretes, água, bateria, foco pausado).
+  - **Mensageiro**: lembretes (tarefas, água, foco, versão nova) chegam com o Yata grasnando no lugar do ícone; pequenas vitórias ganham comemoração (voo ao fim do foco, sacudida na meta de água).
   - **Pausa automática do foco** após 5 min longe (devolvendo o tempo não acompanhado), exceto se houver mídia tocando.
-  - **Demonstração** pelo menu da bandeja (ou `Yata.exe --demo`) para ver todos os estados em ~20 s.
+  - **Demonstração** pelo menu da bandeja (ou `Yata.exe --demo`) para ver todos os estados em ~30 s.
 - **Configurações** (engrenagem no notch, menu ou clique duplo na bandeja): iniciar com o Windows, esconder em tela cheia, demora para abrir, cor da capa ou preto e branco, letras liga/desliga, cada tipo de aviso, tempos do Pomodoro, meta e lembretes de água, e o comportamento do Yata. Tudo aplica na hora.
 - Lembretes que chegam com o notch aberto ou em tela cheia esperam e aparecem depois, em vez de serem perdidos.
 - **Some em tela cheia** (vídeos, jogos, apresentações).
@@ -120,8 +127,9 @@ src/Yata/
   Interop/                    chamadas Win32 e COM (Core Audio)
   Assets/yata.ico             ícone (gerado por tools/make-icon.ps1)
   SettingsWindow.xaml(.cs)    janela de configurações
-installer/yata.iss            instalador (Inno Setup)
-tools/                        gerar ícone e instalador
+installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
+docs/                         imagens do README
+tools/                        gerar ícone, artes (PhotoCraft) e instalador
 tests/Yata.Tests/             testes (xUnit)
 .github/workflows/ci.yml      build e testes a cada push
 .github/workflows/release.yml release automático por tag

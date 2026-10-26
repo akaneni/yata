@@ -54,14 +54,26 @@ public partial class MainWindow
         HudIcon.Foreground = message.Warning ? WarningBrush
                            : message.Kind == HudKind.Privacy ? (Brush)FindResource(message.Glyph == Glyphs.Camera ? "CameraBrush" : "MicrophoneBrush")
                            : Brushes.White;
-        HudIcon.Visibility = message.Celebrate ? Visibility.Collapsed : Visibility.Visible;
-        HudRaven.Visibility = message.Celebrate ? Visibility.Visible : Visibility.Collapsed;
-        if (message.Celebrate)
+        // Yata delivers reminders himself (he is a messenger, after all) and celebrates small wins;
+        // routine status blips keep their plain icon.
+        bool caw = message.Important && !message.Celebrate && message.Kind == HudKind.Reminder;
+        bool raven = message.Celebrate || caw;
+        HudIcon.Visibility = raven ? Visibility.Collapsed : Visibility.Visible;
+        HudRaven.Visibility = raven ? Visibility.Visible : Visibility.Collapsed;
+        _hudRavenLand.Stop();
+        if (message.Celebrate && message.Glyph == Glyphs.Water)
         {
-            // A quick flap, then Yata settles for the rest of the message.
+            _hudRaven.Shake();
+        }
+        else if (message.Celebrate)
+        {
+            // A quick flap, then Yata lands and settles for the rest of the message.
             _hudRaven.Fly();
-            _hudRavenLand.Stop();
             _hudRavenLand.Start();
+        }
+        else if (caw)
+        {
+            _hudRaven.Caw();
         }
         else
         {

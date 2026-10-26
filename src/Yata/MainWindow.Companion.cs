@@ -138,8 +138,10 @@ public partial class MainWindow
         _newsTimer.Start();
         UpdateTargets();
 
-        // Yata flies in with the news, then the text appears.
+        // Yata flies in with the news in a letter, lands, turns to face it, then the text appears.
+        NewsRaven.Letter = true;
         _newsRaven.Fly();
+        NewsRaven.FacingLeft = true;
         var flight = new DoubleAnimation(NewsWidth, 0, TimeSpan.FromMilliseconds(750))
         {
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
@@ -147,7 +149,7 @@ public partial class MainWindow
         flight.Completed += (_, _) =>
         {
             if (_newsActive)
-                _newsRaven.Perch();
+                _newsRaven.Land();
         };
         NewsRavenShift.BeginAnimation(TranslateTransform.XProperty, flight);
         NewsBody.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(400))
@@ -163,10 +165,11 @@ public partial class MainWindow
         _newsActive = false;
         _newsTimer.Stop();
         _newsRaven.Stop();
+        NewsRaven.Letter = false;
         UpdateTargets();
     }
 
-    /// <summary>Walks through Yata's states in ~20 s instead of waiting real minutes.</summary>
+    /// <summary>Walks through Yata's states in ~30 s instead of waiting real minutes.</summary>
     public async void RunCompanionDemo()
     {
         SetExpanded(false);
@@ -181,6 +184,10 @@ public partial class MainWindow
         _presence.Simulate(null);
         await Task.Delay(9000); // Let the news run out.
         ShowHud(new HudMessage(Glyphs.Timer, "Hora da pausa", "5 min", DurationMs: 4000, Celebrate: true));
+        await Task.Delay(4500);
+        ShowHud(new HudMessage(Glyphs.Water, "Meta de água batida", "2000/2000 ml", 1, DurationMs: 3500, Celebrate: true));
+        await Task.Delay(4000);
+        ShowHud(new HudMessage(Glyphs.Bell, "Reunião com o time", "15:30", DurationMs: 4000, Important: true));
     }
 
     private static string FormatAway(TimeSpan duration) =>

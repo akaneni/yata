@@ -6,7 +6,11 @@ using System.Windows.Media;
 
 namespace Yata.Views;
 
-public enum RavenFrame { Perch, Blink, Nod, Preen, Sleep, FlyUp, FlyMid, FlyDown }
+public enum RavenFrame
+{
+    Perch, Blink, Nod, Preen, Sleep, FlyUp, FlyMid, FlyDown,
+    Caw, LookUp, Crouch, Hop, Stretch, Fluff, FluffSplash, SleepIn,
+}
 
 /// <summary>
 /// Yata, the 1-bit pixel raven. Draws one frame, snapping each sprite pixel to whole
@@ -23,6 +27,11 @@ public sealed class RavenSprite : FrameworkElement
 
     public static readonly DependencyProperty FacingLeftProperty = DependencyProperty.Register(
         nameof(FacingLeft), typeof(bool), typeof(RavenSprite),
+        new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>Draws a small envelope at Yata's feet (or under him in flight): he brought news.</summary>
+    public static readonly DependencyProperty LetterProperty = DependencyProperty.Register(
+        nameof(Letter), typeof(bool), typeof(RavenSprite),
         new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>Approximate size of one sprite pixel in DIPs; rounded to whole device pixels.</summary>
@@ -44,6 +53,12 @@ public sealed class RavenSprite : FrameworkElement
     {
         get => (bool)GetValue(FacingLeftProperty);
         set => SetValue(FacingLeftProperty, value);
+    }
+
+    public bool Letter
+    {
+        get => (bool)GetValue(LetterProperty);
+        set => SetValue(LetterProperty, value);
     }
 
     public double PixelSize
@@ -79,12 +94,29 @@ public sealed class RavenSprite : FrameworkElement
     protected override void OnRender(DrawingContext dc)
     {
         double px = SnappedPixel();
-        foreach (var (row, start, length) in Runs[Frame])
+        Draw(dc, Runs[Frame], px);
+        if (Letter)
+            Draw(dc, Envelope, px);
+    }
+
+    private void Draw(DrawingContext dc, (int Row, int Start, int Length)[] runs, double px)
+    {
+        foreach (var (row, start, length) in runs)
         {
             int x = FacingLeft ? Columns - start - length : start;
             dc.DrawRectangle(Fill, null, new Rect(x * px, row * px, length * px, px));
         }
     }
+
+    // For tests: whether a pixel is lit, before mirroring.
+    internal static bool IsLit(RavenFrame frame, int column, int row) => IsLit(Runs[frame], column, row);
+
+    internal static bool IsLetterLit(int column, int row) => IsLit(Envelope, column, row);
+
+    internal static bool HasFrame(RavenFrame frame) => Runs.ContainsKey(frame);
+
+    private static bool IsLit((int Row, int Start, int Length)[] runs, int column, int row) =>
+        runs.Any(r => r.Row == row && column >= r.Start && column < r.Start + r.Length);
 
     // ---- Frames ---------------------------------------------------------------------
     // Hand-drawn 16x14 pixel art; '#' is a lit pixel. Stored as horizontal runs per row.
@@ -211,10 +243,155 @@ public sealed class RavenSprite : FrameworkElement
             ".....###........",
             ".....##.........",
             "....#..........."),
+        [RavenFrame.Caw] = Parse(
+            "................",
+            ".........####...",
+            "........######.#",
+            "........##.####.",
+            "........####....",
+            ".......########.",
+            "......######....",
+            ".....#######....",
+            "....########....",
+            "...########.....",
+            "..#######.......",
+            ".####.#.#.......",
+            "##....#.#.......",
+            ".....##.##......"),
+        [RavenFrame.LookUp] = Parse(
+            ".............##.",
+            ".........#####..",
+            "........#####...",
+            "........#.###...",
+            "........#####...",
+            ".......#####....",
+            "......######....",
+            ".....#######....",
+            "....########....",
+            "...########.....",
+            "..#######.......",
+            ".####.#.#.......",
+            "##....#.#.......",
+            ".....##.##......"),
+        // Knees bent: before a hop and on landing.
+        [RavenFrame.Crouch] = Parse(
+            "................",
+            "................",
+            ".........####...",
+            "........######..",
+            "........##.####.",
+            "........########",
+            ".......#####....",
+            "......######....",
+            ".....#######....",
+            "....########....",
+            "...########.....",
+            ".########.......",
+            "##....##........",
+            ".....##.##......"),
+        [RavenFrame.Hop] = Parse(
+            ".........####...",
+            "........######..",
+            "........##.####.",
+            "........########",
+            ".......#####....",
+            "......######....",
+            ".....#######....",
+            "....########....",
+            "...########.....",
+            "..#######.......",
+            ".####.#.#.......",
+            "##....#.#.......",
+            ".....#..#.......",
+            "................"),
+        [RavenFrame.Stretch] = Parse(
+            ".#.#............",
+            ".####....####...",
+            "..####..######..",
+            "...####.##.####.",
+            "....###.########",
+            ".....#######....",
+            "......######....",
+            ".....#######....",
+            "....########....",
+            "...########.....",
+            "..#######.......",
+            ".####.#.#.......",
+            "##....#.#.......",
+            ".....##.##......"),
+        // Feathers puffed out while shaking off water; the two differ only in the drops.
+        [RavenFrame.Fluff] = Parse(
+            "...#............",
+            ".........####...",
+            ".......#######..",
+            ".......##.####..",
+            "......##########",
+            "...#.#######....",
+            "....#########...",
+            "..###########...",
+            "...##########...",
+            ".###########....",
+            "..#########.....",
+            ".####.#.#.......",
+            "##....#.#.....#.",
+            ".....##.##......"),
+        [RavenFrame.FluffSplash] = Parse(
+            "............#...",
+            ".#.......####...",
+            ".......#######..",
+            ".......##.####..",
+            "......##########",
+            "...#.#######...#",
+            "....#########...",
+            "..###########...",
+            "...##########...",
+            ".###########....",
+            "..#########.....",
+            ".####.#.#.......",
+            "##....#.#.......",
+            "#....##.##......"),
+        // Asleep, breathing in: the back rises a pixel.
+        [RavenFrame.SleepIn] = Parse(
+            "................",
+            "................",
+            "................",
+            "................",
+            "........###.....",
+            "......######....",
+            ".....########...",
+            "....#########...",
+            "....#########...",
+            "...#########....",
+            "..#########.....",
+            ".####.#.#.......",
+            "##....#.#.......",
+            ".....##.##......"),
     };
+
+    // 5x4 envelope in the bottom-right corner: clear of the feet when perched and of the
+    // wings in flight, so one spot works for every frame.
+    private static readonly (int Row, int Start, int Length)[] Envelope = Parse(
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "................",
+        "...........#####",
+        "...........##.##",
+        "...........#.#.#",
+        "...........#####");
 
     private static (int, int, int)[] Parse(params string[] rows)
     {
+        // A mistyped row would silently shift pixels; fail loudly instead (the tests load every frame).
+        if (rows.Length != Rows || rows.Any(r => r.Length != Columns))
+            throw new ArgumentException($"Each frame must be {Columns}x{Rows} pixels.", nameof(rows));
+
         var runs = new List<(int, int, int)>();
         for (int y = 0; y < rows.Length; y++)
         {
