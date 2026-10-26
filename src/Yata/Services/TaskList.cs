@@ -51,15 +51,21 @@ public sealed class TaskList
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private readonly AppStore _store;
+    private readonly Func<DateTime> _clock;
+    private readonly Action _chime;
     private readonly DispatcherTimer _reminder = new() { Interval = TimeSpan.FromSeconds(15) };
 
     public ObservableCollection<TaskItem> Items { get; } = new();
 
     public event Action<HudMessage>? Message;
 
-    public TaskList(AppStore store)
+    /// <param name="clock">Current time; tests pass a fake one.</param>
+    /// <param name="chime">Reminder sound; tests pass a silent one.</param>
+    public TaskList(AppStore store, Func<DateTime>? clock = null, Action? chime = null)
     {
         _store = store;
+        _clock = clock ?? (() => DateTime.Now);
+        _chime = chime ?? Chime.Play;
         foreach (var data in store.Data.Tasks)
         {
             Items.Add(new TaskItem
@@ -94,8 +100,9 @@ public sealed class TaskList
             int.Parse(match.Groups[3].Value) is int minute and < 60)
         {
             text = match.Groups[1].Value.Trim();
-            var at = DateTime.Today.AddHours(hour).AddMinutes(minute);
-            due = at > DateTime.Now ? at : at.AddDays(1);
+            var now = _clock();
+            var at = now.Date.AddHours(hour).AddMinutes(minute);
+            due = at > now ? at : at.AddDays(1);
         }
 
         // Open tasks first, so new ones go right after the last open one.
@@ -119,14 +126,17 @@ public sealed class TaskList
         Save();
     }
 
+    /// <summary>One reminder check, as the timer does; for tests.</summary>
+    internal void Poll() => CheckReminders();
+
     private void CheckReminders()
     {
-        var now = DateTime.Now;
+        var now = _clock();
         var due = Items.Where(t => !t.Done && !t.Reminded && t.Due <= now).ToList();
         foreach (var item in due)
         {
             item.Reminded = true;
-            Chime.Play();
+            _chime();
             Message?.Invoke(new HudMessage(Glyphs.Bell, item.Text, item.Due!.Value.ToString("HH:mm"),
                 DurationMs: 6000, Important: true));
         }

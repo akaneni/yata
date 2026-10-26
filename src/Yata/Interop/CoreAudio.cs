@@ -81,6 +81,93 @@ internal interface IMMNotificationClient
     int OnPropertyValueChanged([MarshalAs(UnmanagedType.LPWStr)] string deviceId, PropertyKey key);
 }
 
+[ComImport, Guid("0BD7A1BE-7A1A-44DB-8397-CC5392387B5E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IMMDeviceCollection
+{
+    void GetCount(out uint count);
+    void Item(uint index, out IMMDevice device);
+}
+
+// ---- Audio sessions: which processes are capturing (microphone in use) ----
+
+[ComImport, Guid("77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionManager2
+{
+    void GetAudioSessionControl(IntPtr sessionGuid, int flags, out IntPtr control);
+    void GetSimpleAudioVolume(IntPtr sessionGuid, int flags, out IntPtr volume);
+    void GetSessionEnumerator(out IAudioSessionEnumerator sessions);
+    void RegisterSessionNotification(IAudioSessionNotification notification);
+    void UnregisterSessionNotification(IAudioSessionNotification notification);
+}
+
+[ComImport, Guid("E2F5BB11-0570-40CA-ACDD-3AA01277DEE8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionEnumerator
+{
+    void GetCount(out int count);
+    void GetSession(int index, out IAudioSessionControl session);
+}
+
+[ComImport, Guid("F4B1A599-7266-4319-A8CA-E70ACB11E8CD"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionControl
+{
+    void GetState(out AudioSessionState state);
+    void GetDisplayName(out IntPtr name);
+    void SetDisplayName(IntPtr name, IntPtr eventContext);
+    void GetIconPath(out IntPtr path);
+    void SetIconPath(IntPtr path, IntPtr eventContext);
+    void GetGroupingParam(out Guid grouping);
+    void SetGroupingParam(ref Guid grouping, IntPtr eventContext);
+    void RegisterAudioSessionNotification(IAudioSessionEvents events);
+    void UnregisterAudioSessionNotification(IAudioSessionEvents events);
+}
+
+[ComImport, Guid("BFB7FF88-7239-4FC9-8FA2-07C950BE9C6D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionControl2
+{
+    // IAudioSessionControl
+    void GetState(out AudioSessionState state);
+    void GetDisplayName(out IntPtr name);
+    void SetDisplayName(IntPtr name, IntPtr eventContext);
+    void GetIconPath(out IntPtr path);
+    void SetIconPath(IntPtr path, IntPtr eventContext);
+    void GetGroupingParam(out Guid grouping);
+    void SetGroupingParam(ref Guid grouping, IntPtr eventContext);
+    void RegisterAudioSessionNotification(IAudioSessionEvents events);
+    void UnregisterAudioSessionNotification(IAudioSessionEvents events);
+    // IAudioSessionControl2
+    void GetSessionIdentifier([MarshalAs(UnmanagedType.LPWStr)] out string id);
+    void GetSessionInstanceIdentifier([MarshalAs(UnmanagedType.LPWStr)] out string id);
+    void GetProcessId(out uint processId);
+}
+
+internal enum AudioSessionState { Inactive = 0, Active = 1, Expired = 2 }
+
+[ComImport, Guid("641DD20B-4D41-49CC-ABA3-174B9477BB08"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionNotification
+{
+    [PreserveSig]
+    int OnSessionCreated(IAudioSessionControl session);
+}
+
+[ComImport, Guid("24918ACC-64B3-37C1-8CA9-74A66E9957A8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionEvents
+{
+    [PreserveSig]
+    int OnDisplayNameChanged([MarshalAs(UnmanagedType.LPWStr)] string name, IntPtr eventContext);
+    [PreserveSig]
+    int OnIconPathChanged([MarshalAs(UnmanagedType.LPWStr)] string path, IntPtr eventContext);
+    [PreserveSig]
+    int OnSimpleVolumeChanged(float volume, int muted, IntPtr eventContext);
+    [PreserveSig]
+    int OnChannelVolumeChanged(uint channels, IntPtr volumes, uint changedChannel, IntPtr eventContext);
+    [PreserveSig]
+    int OnGroupingParamChanged(IntPtr grouping, IntPtr eventContext);
+    [PreserveSig]
+    int OnStateChanged(AudioSessionState state);
+    [PreserveSig]
+    int OnSessionDisconnected(int reason);
+}
+
 [StructLayout(LayoutKind.Sequential)]
 internal struct PropertyKey
 {

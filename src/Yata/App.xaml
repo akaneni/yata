@@ -11,6 +11,9 @@
         <SolidColorBrush x:Key="TextSecondary" Color="#99FFFFFF"/>
         <SolidColorBrush x:Key="TrackBrush" Color="#33FFFFFF"/>
         <SolidColorBrush x:Key="SurfaceBrush" Color="#1FFFFFFF"/>
+        <!-- Privacy indicators keep the colors people know from phones and laptops -->
+        <SolidColorBrush x:Key="CameraBrush" Color="#FF34C759"/>
+        <SolidColorBrush x:Key="MicrophoneBrush" Color="#FFFF9F0A"/>
 
         <Style x:Key="IconButton" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
@@ -86,14 +89,32 @@
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="Bg" Property="Background" Value="#14FFFFFF"/>
                             </Trigger>
+                            <!-- The selection background is a separate pill that slides between tabs -->
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bg" Property="Background" Value="#26FFFFFF"/>
+                                <Setter TargetName="Bg" Property="Background" Value="#00FFFFFF"/>
                                 <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- Track and fill of the media progress bar; reacts to the ProgressTrack element they sit in -->
+
+        <Style x:Key="ProgressBarPart" TargetType="Border">
+            <Setter Property="Height" Value="4"/>
+            <Setter Property="CornerRadius" Value="2"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, ElementName=ProgressTrack}" Value="True">
+                    <Setter Property="Height" Value="6"/>
+                    <Setter Property="CornerRadius" Value="3"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsMouseCaptured, ElementName=ProgressTrack}" Value="True">
+                    <Setter Property="Height" Value="6"/>
+                    <Setter Property="CornerRadius" Value="3"/>
+                </DataTrigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="PillButton" TargetType="Button">

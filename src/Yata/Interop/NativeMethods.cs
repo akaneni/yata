@@ -27,6 +27,26 @@ internal static class NativeMethods
     public const int QUNS_RUNNING_D3D_FULL_SCREEN = 3;
     public const int QUNS_PRESENTATION_MODE = 4;
 
+    public const int WM_HOTKEY = 0x0312;
+    public const uint MOD_ALT = 0x1;
+    public const uint MOD_CONTROL = 0x2;
+    public const uint MOD_NOREPEAT = 0x4000;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool RegisterHotKey(IntPtr hwnd, int id, uint modifiers, uint key);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool UnregisterHotKey(IntPtr hwnd, int id);
+
+    public const uint REG_NOTIFY_CHANGE_NAME = 0x1;
+    public const uint REG_NOTIFY_CHANGE_LAST_SET = 0x4;
+
+    [DllImport("advapi32.dll")]
+    public static extern int RegNotifyChangeKeyValue(Microsoft.Win32.SafeHandles.SafeRegistryHandle key, bool watchSubtree,
+        uint filter, Microsoft.Win32.SafeHandles.SafeWaitHandle evt, bool asynchronous);
+
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {
@@ -140,6 +160,27 @@ internal static class NativeMethods
     public static void KeepTopmost(IntPtr hwnd)
     {
         SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+    }
+
+    /// <summary>Moves a window to a position in physical pixels, keeping its size and z-order.</summary>
+    public static void MoveWindow(IntPtr hwnd, int x, int y)
+    {
+        SetWindowPos(hwnd, IntPtr.Zero, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
+    }
+
+    private const uint SWP_NOZORDER = 0x0004;
+
+    [DllImport("shcore.dll")]
+    private static extern int GetDpiForMonitor(IntPtr monitor, int dpiType, out uint dpiX, out uint dpiY);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr MonitorFromPoint(POINT point, uint flags);
+
+    /// <summary>Effective scale (1.0 = 96 DPI) of the monitor containing a physical-pixel point.</summary>
+    public static double ScaleAt(int x, int y)
+    {
+        IntPtr monitor = MonitorFromPoint(new POINT { X = x, Y = y }, MONITOR_DEFAULTTONEAREST);
+        return GetDpiForMonitor(monitor, 0, out uint dpi, out _) == 0 ? dpi / 96.0 : 1.0;
     }
 
     public static bool HasCaption(IntPtr hwnd)

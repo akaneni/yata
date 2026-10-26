@@ -14,6 +14,17 @@ public sealed class StoreData
     public List<TaskData> Tasks { get; set; } = new();
     /// <summary>Paths parked on the shelf (references only, files are never copied).</summary>
     public List<string> Shelf { get; set; } = new();
+    public UpdateData Updates { get; set; } = new();
+}
+
+/// <summary>What the (opt-in) update check last saw.</summary>
+public sealed class UpdateData
+{
+    public DateTime? LastCheck { get; set; }
+    /// <summary>Newest version published, e.g. "0.2.0".</summary>
+    public string? Latest { get; set; }
+    /// <summary>Version already announced in the notch, so it's shown once.</summary>
+    public string? Announced { get; set; }
 }
 
 /// <summary>User preferences. "Start with Windows" isn't here: the registry is its source of truth.</summary>
@@ -23,9 +34,16 @@ public sealed class SettingsData
     public bool HideInFullscreen { get; set; } = true;
     public int HoverDelayMs { get; set; } = 140;
     public bool UseArtworkAccent { get; set; } = true;
+    /// <summary>Display the notch sits on (Windows device name); null follows the primary display.</summary>
+    public string? Monitor { get; set; }
+    /// <summary>Ctrl+Alt+Y opens and closes the notch.</summary>
+    public bool HotkeyEnabled { get; set; } = true;
 
     // Media
     public bool LyricsEnabled { get; set; } = true;
+
+    // Updates: off unless the user opts in, since it's a network request.
+    public bool UpdateCheckEnabled { get; set; }
 
     // Calendar (Google)
     /// <summary>Notice this long before an event; 0 = only when it starts.</summary>
@@ -43,6 +61,7 @@ public sealed class SettingsData
     public bool HudCapsLock { get; set; } = true;
     public bool HudKeyboardLayout { get; set; } = true;
     public bool HudNetwork { get; set; } = true;
+    public bool HudPrivacy { get; set; } = true;
 
     // Focus
     public int FocusMinutes { get; set; } = 25;
@@ -66,6 +85,7 @@ public sealed class SettingsData
         HudKind.CapsLock => HudCapsLock,
         HudKind.KeyboardLayout => HudKeyboardLayout,
         HudKind.Network => HudNetwork,
+        HudKind.Privacy => HudPrivacy,
         _ => true,
     };
 }
@@ -90,7 +110,7 @@ public sealed class TaskData
     public bool Reminded { get; set; }
 }
 
-/// <summary>Local JSON storage in %LOCALAPPDATA%\Notch\data.json. Nothing leaves the PC.</summary>
+/// <summary>Local JSON storage in %LOCALAPPDATA%\Yata\data.json. Nothing leaves the PC.</summary>
 public sealed class AppStore
 {
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
@@ -134,6 +154,13 @@ public sealed class AppStore
         }
         return new AppStore(path, data ?? new StoreData());
     }
+
+    /// <summary>
+    /// A store that lives only in memory, for tests. Saves are scheduled on a dispatcher timer
+    /// that never ticks without a message loop, so nothing is written.
+    /// </summary>
+    internal static AppStore InMemory() =>
+        new(Path.Combine(Path.GetTempPath(), "yata-tests", "unused.json"), new StoreData());
 
     /// <summary>Coalesces bursts of changes (e.g. several clicks) into one write.</summary>
     public void SaveSoon()

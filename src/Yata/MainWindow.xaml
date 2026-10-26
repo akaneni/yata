@@ -40,14 +40,16 @@
                         </Border.Background>
                     </Border>
 
-                    <TextBlock x:Name="CompactText" Grid.Column="1" Margin="8,0"
-                               HorizontalAlignment="Center" VerticalAlignment="Center"
-                               FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
-                               Typography.NumeralAlignment="Tabular">
-                        <TextBlock.RenderTransform>
-                            <TranslateTransform x:Name="CompactTextShift"/>
-                        </TextBlock.RenderTransform>
-                    </TextBlock>
+                    <views:MarqueeText x:Name="CompactMarquee" Grid.Column="1" Margin="8,0"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <TextBlock x:Name="CompactText"
+                                   FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                   Typography.NumeralAlignment="Tabular">
+                            <TextBlock.RenderTransform>
+                                <TranslateTransform x:Name="CompactTextShift"/>
+                            </TextBlock.RenderTransform>
+                        </TextBlock>
+                    </views:MarqueeText>
 
                     <StackPanel x:Name="CompactTimer" Grid.Column="2" Orientation="Horizontal"
                                 VerticalAlignment="Center" Visibility="Collapsed">
@@ -61,26 +63,18 @@
                     <views:RavenSprite x:Name="MusicRaven" Grid.Column="2" PixelSize="1" VerticalAlignment="Center"
                                        Visibility="Collapsed"/>
 
-                    <StackPanel x:Name="Equalizer" Grid.Column="2" Orientation="Horizontal"
-                                VerticalAlignment="Center" Visibility="Collapsed">
-                        <Rectangle Width="3" Height="14" Margin="1,0" RadiusX="1.5" RadiusY="1.5"
-                                   Fill="{DynamicResource AccentBrush}" RenderTransformOrigin="0.5,0.5">
-                            <Rectangle.RenderTransform><ScaleTransform ScaleY="0.3"/></Rectangle.RenderTransform>
-                        </Rectangle>
-                        <Rectangle Width="3" Height="14" Margin="1,0" RadiusX="1.5" RadiusY="1.5"
-                                   Fill="{DynamicResource AccentBrush}" RenderTransformOrigin="0.5,0.5">
-                            <Rectangle.RenderTransform><ScaleTransform ScaleY="0.3"/></Rectangle.RenderTransform>
-                        </Rectangle>
-                        <Rectangle Width="3" Height="14" Margin="1,0" RadiusX="1.5" RadiusY="1.5"
-                                   Fill="{DynamicResource AccentBrush}" RenderTransformOrigin="0.5,0.5">
-                            <Rectangle.RenderTransform><ScaleTransform ScaleY="0.3"/></Rectangle.RenderTransform>
-                        </Rectangle>
-                        <Rectangle Width="3" Height="14" Margin="1,0" RadiusX="1.5" RadiusY="1.5"
-                                   Fill="{DynamicResource AccentBrush}" RenderTransformOrigin="0.5,0.5">
-                            <Rectangle.RenderTransform><ScaleTransform ScaleY="0.3"/></Rectangle.RenderTransform>
-                        </Rectangle>
-                    </StackPanel>
+                    <!-- Pixel-art equalizer, like Yata: square bars stepping in whole pixel rows, built in code -->
+                    <StackPanel x:Name="Equalizer" Grid.Column="2" Orientation="Horizontal" Height="14"
+                                VerticalAlignment="Center" Visibility="Collapsed"
+                                SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased"/>
                 </Grid>
+
+                <!-- Camera (green) / microphone (orange) in use; the expanded header names the apps -->
+                <StackPanel x:Name="PrivacyDots" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top"
+                            Margin="14,13,0,0" Visibility="Collapsed" IsHitTestVisible="False">
+                    <Ellipse x:Name="CameraDot" Width="6" Height="6" Fill="{StaticResource CameraBrush}"/>
+                    <Ellipse x:Name="MicrophoneDot" Width="6" Height="6" Fill="{StaticResource MicrophoneBrush}"/>
+                </StackPanel>
 
                 <!-- Ambient: Yata perched on the notch while the PC sits idle -->
                 <Grid x:Name="AmbientView" Opacity="0" Visibility="Collapsed">
@@ -140,6 +134,8 @@
                             Opacity="0" Visibility="Collapsed">
                     <TextBlock x:Name="HudIcon" FontFamily="{StaticResource IconFont}" FontSize="15"
                                VerticalAlignment="Center"/>
+                    <!-- Takes the icon's place for small wins -->
+                    <views:RavenSprite x:Name="HudRaven" PixelSize="1.5" VerticalAlignment="Center" Visibility="Collapsed"/>
                     <TextBlock x:Name="HudText" Margin="10,0,0,0" MaxWidth="240" FontSize="13" FontWeight="SemiBold"
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     <Grid x:Name="HudBar" Width="96" Height="4" Margin="14,0,0,0" VerticalAlignment="Center">
@@ -163,7 +159,18 @@
                     <Grid Margin="24,10,16,0">
                         <TextBlock x:Name="HeaderDate" FontSize="12" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextSecondary}"/>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <!-- Takes the date's place while the camera or microphone is in use -->
+                        <TextBlock x:Name="PrivacyText" FontSize="12" VerticalAlignment="Center" MaxWidth="260"
+                                   TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" Visibility="Collapsed"/>
+                        <Grid x:Name="TabStrip" HorizontalAlignment="Right">
+                        <!-- Selection pill that glides to the chosen tab -->
+                        <Border x:Name="TabIndicator" Width="32" Height="26" Margin="2,0,0,0" CornerRadius="8" Background="#26FFFFFF"
+                                HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False">
+                            <Border.RenderTransform>
+                                <TranslateTransform x:Name="TabIndicatorShift"/>
+                            </Border.RenderTransform>
+                        </Border>
+                        <StackPanel Orientation="Horizontal">
                             <RadioButton x:Name="TabMedia" Style="{StaticResource TabButton}" GroupName="Pages"
                                          Content="&#xE8D6;" ToolTip="Mídia" IsChecked="True" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabAgenda" Style="{StaticResource TabButton}" GroupName="Pages"
@@ -180,6 +187,7 @@
                                     Foreground="{StaticResource TextSecondary}" Content="&#xE713;" ToolTip="Configurações"
                                     Click="OnSettingsClick"/>
                         </StackPanel>
+                        </Grid>
                     </Grid>
 
                     <Grid x:Name="MediaPage" Grid.Row="1">
@@ -210,8 +218,10 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock x:Name="TitleText" FontSize="16" FontWeight="SemiBold"
-                                       TextTrimming="CharacterEllipsis"/>
+                            <views:MarqueeText x:Name="TitleMarquee" HorizontalAlignment="Left">
+                                <TextBlock x:Name="TitleText" FontSize="16" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis"/>
+                            </views:MarqueeText>
                             <TextBlock x:Name="ArtistText" Grid.Row="1" Margin="0,1,0,0" FontSize="13"
                                        Foreground="{StaticResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
 
@@ -229,9 +239,26 @@
                                       MouseLeftButtonDown="OnTrackMouseDown" MouseMove="OnTrackMouseMove"
                                       MouseLeftButtonUp="OnTrackMouseUp" LostMouseCapture="OnTrackLostCapture"
                                       SizeChanged="OnTrackSizeChanged">
-                                    <Border Height="4" CornerRadius="2" Background="{StaticResource TrackBrush}"/>
-                                    <Border x:Name="ProgressFill" Height="4" Width="0" CornerRadius="2"
+                                    <!-- Thickens and shows a handle under the mouse or while dragging -->
+                                    <Border Style="{StaticResource ProgressBarPart}" Background="{StaticResource TrackBrush}"/>
+                                    <Border x:Name="ProgressFill" Style="{StaticResource ProgressBarPart}" Width="0"
                                             HorizontalAlignment="Left" Background="{DynamicResource AccentBrush}"/>
+                                    <Ellipse x:Name="ProgressThumb" Width="12" Height="12" Fill="White"
+                                             HorizontalAlignment="Left" IsHitTestVisible="False">
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Setter Property="Opacity" Value="0"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsMouseOver, ElementName=ProgressTrack}" Value="True">
+                                                        <Setter Property="Opacity" Value="1"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding IsMouseCaptured, ElementName=ProgressTrack}" Value="True">
+                                                        <Setter Property="Opacity" Value="1"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
                                 </Grid>
 
                                 <TextBlock x:Name="DurationText" Grid.Column="2" FontSize="11" VerticalAlignment="Center"

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -18,6 +20,7 @@ using Yata.Helpers;
 using Yata.Interop;
 using Yata.Services;
 using Yata.Views;
+using Glyphs = Yata.Services.Glyphs;
 using MediaState = Yata.Services.MediaState;
 
 namespace Yata;
@@ -57,17 +60,10 @@ public partial class MainWindow : Window
     // How much the closed notch swells under the mouse, before the hover delay opens it.
     private const double PeekWidth = 8;
     private const double PeekHeight = 3;
-
-    private static readonly int[] EqualizerPeriods = { 420, 560, 360, 500 };
+    private const double PrivacyGap = 8;
     private static readonly CultureInfo PtBr = new("pt-BR");
 
-    // Highlight a line slightly early so it doesn't feel late against the audio.
-    private static readonly TimeSpan LyricLead = TimeSpan.FromMilliseconds(200);
-    private static readonly Brush LyricDim = Freeze(new SolidColorBrush(Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF)));
-    private static readonly Brush WarningBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B)));
-
     private readonly MediaService _media;
-    private readonly LyricsService _lyricsService = new();
     private readonly DispatcherTimer _lyricsTimer = new() { Interval = TimeSpan.FromMilliseconds(120) };
     private readonly DispatcherTimer _hudTimer = new() { Interval = TimeSpan.FromMilliseconds(1800) };
     private readonly AudioWatcher _audio;
@@ -75,6 +71,8 @@ public partial class MainWindow : Window
     private readonly PowerWatcher _power;
     private readonly NetworkWatcher _network;
     private readonly KeyboardWatcher _keyboard = new();
+    private readonly PrivacyWatcher _privacy;
+    private readonly UpdateChecker _updates;
     private readonly AppStore _store = AppStore.Load();
     private readonly FocusTimer _focus;
     private readonly WaterTracker _water;
@@ -87,6 +85,8 @@ public partial class MainWindow : Window
     private readonly RavenAnimator _musicRaven;
     private readonly RavenAnimator _newsRaven;
     private readonly RavenAnimator _idleRaven;
+    private readonly RavenAnimator _hudRaven;
+    private readonly DispatcherTimer _titleReveal = new() { Interval = TimeSpan.FromMilliseconds(450) };
     private readonly SolidColorBrush _accent = new(ColorExtractor.Default);
     private readonly DispatcherTimer _hoverTimer = new();
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -104,21 +104,11 @@ public partial class MainWindow : Window
     private bool _expanded;
     private bool _pendingExpand;
     private bool _peeking;
-    // The compact line waiting for the outgoing one to slide away; null when no swap is running.
-    private string? _incomingCompactText;
     private bool _animating;
     private TimeSpan _lastFrame;
-    private bool _equalizerRunning;
     private bool _seeking;
-    private double _seekFraction;
-
     private Lyrics? _lyrics;
-    private string? _lyricsTrack;
-    private CancellationTokenSource? _lyricsCts;
-    private int _lyricIndex = -1;
-
     private bool _hudActive;
-    private HudMessage? _pendingHud;
 
     private NotchPage _page = NotchPage.Media;
     private bool _focusWasActive;
@@ -133,8 +123,6 @@ public partial class MainWindow : Window
     private bool _fullscreenApp;
     private DateTime _pinnedUntil;
     private SettingsWindow? _settingsWindow;
-    private BitmapImage? _artwork;
-    private static readonly Color MonochromeAccent = Color.FromRgb(0xE0, 0xE0, 0xE0);
 
     private bool _ambientShown;
     private bool _ambientLeaving;
@@ -155,6 +143,7 @@ public partial class MainWindow : Window
         _clockTimer.Tick += (_, _) => { UpdateClock(); RefreshProgress(); CollapseIfCursorLeft(); };
         _lyricsTimer.Tick += (_, _) => UpdateLyricLine();
         _hudTimer.Tick += (_, _) => HideHud();
+        _titleReveal.Tick += (_, _) => { _titleReveal.Stop(); TitleMarquee.Run(); };
 
         _audio = new AudioWatcher(Dispatcher);
         _brightness = new BrightnessWatcher(Dispatcher);
@@ -165,6 +154,10 @@ public partial class MainWindow : Window
         _power.Message += ShowHud;
         _network.Message += ShowHud;
         _keyboard.Message += ShowHud;
+        _privacy = new PrivacyWatcher(Dispatcher);
+        _privacy.Changed += OnPrivacyChanged;
+        _updates = new UpdateChecker(_store);
+        _updates.Message += ShowHud;
 
         _focus = new FocusTimer(_store.Settings);
         _presence = new PresenceTracker(_store.Settings);
@@ -191,6 +184,9 @@ public partial class MainWindow : Window
         _ambientRaven = new RavenAnimator(AmbientRaven);
         _musicRaven = new RavenAnimator(MusicRaven);
         _newsRaven = new RavenAnimator(NewsRaven);
+        _hudRaven = new RavenAnimator(HudRaven);
+        _hudRavenLand.Tick += (_, _) => { _hudRavenLand.Stop(); _hudRaven.Perch(); };
+        BuildEqualizer();
         _idleRaven = new RavenAnimator(IdleRaven);
         // Hidden means a full-screen app is up: someone is watching it, not away.
         _presence.IsSurelyPresent = () => !IsVisible;
@@ -203,6 +199,7 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         Closed += OnClosed;
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+        DpiChanged += OnDpiChanged;
 
         UpdateClock();
         UpdateTargets();
@@ -217,6 +214,7 @@ public partial class MainWindow : Window
         HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
 
         PositionWindow();
+        UpdateHotkey();
 
         _fullscreen = new FullscreenWatcher(hwnd);
         _fullscreen.Changed += OnFullscreenChanged;
@@ -231,6 +229,8 @@ public partial class MainWindow : Window
         _power.Start();
         _network.Start();
         _keyboard.Start();
+        _privacy.Start();
+        _updates.Start();
         _water.Start();
         _tasks.Start();
         _calendar.Start();
@@ -254,11 +254,15 @@ public partial class MainWindow : Window
         _lyricsTimer.Stop();
         _lyricsCts?.Cancel();
         _hudTimer.Stop();
+        _hudRavenLand.Stop();
+        _titleReveal.Stop();
         _audio.Dispose();
         _brightness.Dispose();
         _power.Dispose();
         _network.Dispose();
         _keyboard.Dispose();
+        _privacy.Dispose();
+        _updates.Stop();
         _water.Stop();
         _tasks.Stop();
         _calendar.Stop();
@@ -274,16 +278,39 @@ public partial class MainWindow : Window
             handled = true;
             return new IntPtr(NativeMethods.MA_NOACTIVATE);
         }
+        if (msg == NativeMethods.WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+        {
+            handled = true;
+            OnHotkey();
+        }
         return IntPtr.Zero;
     }
 
     private void OnDisplaySettingsChanged(object? sender, EventArgs e) => Dispatcher.InvokeAsync(PositionWindow);
 
+    /// <summary>
+    /// Centers the window at the top of the chosen display. Positioned in physical pixels, since
+    /// WPF's Left/Top are in the primary display's units and displays can have different scales.
+    /// </summary>
     private void PositionWindow()
     {
-        Left = (SystemParameters.PrimaryScreenWidth - Width) / 2;
-        Top = 0;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            // Not created yet: a first guess; OnSourceInitialized places it properly.
+            Left = (SystemParameters.PrimaryScreenWidth - Width) / 2;
+            Top = 0;
+            return;
+        }
+
+        var display = Monitors.Resolve(Settings.Monitor);
+        double scale = NativeMethods.ScaleAt(display.X + display.Width / 2, display.Y);
+        int width = (int)Math.Round(Width * scale);
+        NativeMethods.MoveWindow(hwnd, display.X + (display.Width - width) / 2, display.Y);
     }
+
+    // Moving to a display with another scale makes WPF resize the window; center it again.
+    private void OnDpiChanged(object sender, DpiChangedEventArgs e) => Dispatcher.InvokeAsync(PositionWindow);
 
     private void OnFullscreenChanged(bool fullscreen)
     {
@@ -342,7 +369,11 @@ public partial class MainWindow : Window
 
         ApplyAccent();
         UpdateClock();
+        PositionWindow();
+        UpdateHotkey();
+        _ = _updates.CheckIfDueAsync(); // Just switched on: look now rather than within the hour.
         OnFullscreenChanged(_fullscreenApp);
+        UpdatePrivacy();
         UpdateCompanion();
     }
 
@@ -450,73 +481,6 @@ public partial class MainWindow : Window
         return local.X >= 0 && local.Y >= 0 && local.X <= NotchHost.ActualWidth && local.Y <= NotchHost.ActualHeight;
     }
 
-    // ---- Shelf drag & drop ----------------------------------------------------------
-
-    private void OnNotchDragOver(object sender, DragEventArgs e)
-    {
-        e.Handled = true;
-        if (ShelfPage.IsDraggingOut || !e.Data.GetDataPresent(DataFormats.FileDrop))
-        {
-            e.Effects = DragDropEffects.None;
-            return;
-        }
-
-        // The shelf only keeps a reference, so "link" is the honest cursor when the source allows it.
-        e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) ? DragDropEffects.Link : DragDropEffects.Copy;
-        _hoverTimer.Stop();
-        if (_dropHinting)
-            return;
-
-        _dropHinting = true;
-        TabShelf.IsChecked = true;
-        ShelfPage.ShowDropHint(true);
-        SetExpanded(true);
-    }
-
-    private void OnNotchDragLeave(object sender, DragEventArgs e)
-    {
-        // Also fires when moving between child elements; the next DragOver cancels this.
-        if (_dropHinting)
-            ScheduleExpanded(false, 400);
-    }
-
-    private void OnNotchDrop(object sender, DragEventArgs e)
-    {
-        e.Handled = true;
-        if (!ShelfPage.IsDraggingOut && e.Data.GetData(DataFormats.FileDrop) is string[] paths)
-        {
-            _shelf.Add(paths);
-            // Tell the source nothing was moved: the shelf only references the files.
-            e.Effects = e.AllowedEffects.HasFlag(DragDropEffects.Link) ? DragDropEffects.Link : DragDropEffects.Copy;
-        }
-        else
-        {
-            e.Effects = DragDropEffects.None;
-        }
-        EndDropHint();
-    }
-
-    private void EndDropHint()
-    {
-        _dropHinting = false;
-        ShelfPage.ShowDropHint(false);
-    }
-
-    private void OnTabChecked(object sender, RoutedEventArgs e)
-    {
-        if (TasksPage == null)
-            return; // Fired by the default tab while the XAML is still loading.
-
-        _page = sender == TabAgenda ? NotchPage.Agenda
-              : sender == TabFocus ? NotchPage.Focus
-              : sender == TabWater ? NotchPage.Water
-              : sender == TabTasks ? NotchPage.Tasks
-              : sender == TabShelf ? NotchPage.Shelf
-              : NotchPage.Media;
-        TasksPage.EndTyping();
-        UpdateTargets();
-    }
-
     private void OnNotchClick(object sender, MouseButtonEventArgs e)
     {
         if (!_expanded)
@@ -551,10 +515,16 @@ public partial class MainWindow : Window
         {
             _hudActive = false;
             _hudTimer.Stop();
+            StopHudRaven();
             HideNews();
+            // Wait for the page to fade in before scrolling a long title.
+            _titleReveal.Stop();
+            _titleReveal.Start();
         }
         else
         {
+            _titleReveal.Stop();
+            TitleMarquee.Stop();
             TasksPage.EndTyping();
             EndDropHint();
         }
@@ -578,6 +548,11 @@ public partial class MainWindow : Window
                      : _upcomingText != null ? (_focus.IsActive ? CompactEventTimer : CompactEvent)
                      : _focus.IsActive ? CompactIdleTimer
                      : CompactIdle;
+        // The privacy dots get their own space at the left edge of the closed notch.
+        int dots = !PrivacyShown ? 0 : (_privacy.Current.Camera.Count > 0 ? 1 : 0) + (_privacy.Current.Microphone.Count > 0 ? 1 : 0);
+        double privacyRoom = dots == 0 ? 0 : dots * 6 + (dots - 1) * 3 + PrivacyGap;
+        compact = new Size(compact.Width + privacyRoom, compact.Height);
+        CompactView.Margin = new Thickness(12 + privacyRoom, 0, 12, 0);
         Size expanded = _page switch
         {
             NotchPage.Agenda => ExpandedAgenda,
@@ -714,6 +689,8 @@ public partial class MainWindow : Window
 
         CompactView.Opacity = underOverlay * (1 - ambient);
         AmbientView.Opacity = underOverlay * ambient;
+        // Dots stay through HUDs; the open notch names the apps in its header instead.
+        PrivacyDots.Opacity = compactOpacity * (_overlayIsNews ? 1 - overlay : 1);
         HudView.Opacity = _overlayIsNews ? 0 : compactOpacity * overlay;
         NewsView.Opacity = _overlayIsNews ? compactOpacity * overlay : 0;
         foreach (var view in new UIElement[] { CompactView, AmbientView, HudView, NewsView })
@@ -743,599 +720,6 @@ public partial class MainWindow : Window
         geometry.Freeze();
         return geometry;
     }
-
-    // ---- Media ----------------------------------------------------------------------
-
-    private void OnMediaChanged()
-    {
-        var previous = _state;
-        _state = _media.Current;
-
-        if (_state != null)
-        {
-            TitleText.Text = _state.Title;
-            ArtistText.Text = _state.Artist;
-            ArtistText.Visibility = string.IsNullOrEmpty(_state.Artist) ? Visibility.Collapsed : Visibility.Visible;
-            PlayPauseButton.Content = _state.IsPlaying ? "\uF8AE" : "\uF5B0";
-            AutomationProperties.SetName(PlayPauseButton, _state.IsPlaying ? "Pausar" : "Tocar");
-
-            if (previous == null || !ReferenceEquals(previous.Thumbnail, _state.Thumbnail))
-                SetArtwork(_state.Thumbnail);
-        }
-        else
-        {
-            SetArtwork(null);
-        }
-
-        UpdateCompactTimer();
-        SetEqualizer(_state?.IsPlaying == true && IsVisible);
-
-        string? track = _state == null ? null : $"{_state.SourceApp}\n{_state.Artist}\n{_state.Title}";
-        if (track != _lyricsTrack)
-        {
-            _lyricsTrack = track;
-            LoadLyrics(_state);
-        }
-
-        UpdateClock();
-        UpdateTargets();
-        RefreshProgress();
-        UpdateLyricsTimer();
-        UpdateLyricLine();
-        UpdateCompactText();
-        UpdateCompanion();
-    }
-
-    private void UpdateCompactText()
-    {
-        if (_state == null)
-            return; // The clock owns the compact text.
-
-        string? line = _lyrics != null && _lyricIndex >= 0 ? _lyrics.Lines[_lyricIndex].Text : null;
-        SetCompactText(string.IsNullOrWhiteSpace(line) ? _state.Title : line);
-    }
-
-    /// <summary>
-    /// Swaps the closed notch's line: the old text slides up and out, the new one rises in.
-    /// Changes that arrive mid-swap just replace the incoming text.
-    /// </summary>
-    private void SetCompactText(string text)
-    {
-        if (_incomingCompactText != null)
-        {
-            _incomingCompactText = text;
-            return;
-        }
-        if (text == CompactText.Text)
-            return;
-        if (CompactView.Visibility != Visibility.Visible || string.IsNullOrEmpty(CompactText.Text))
-        {
-            CompactText.Text = text;
-            return;
-        }
-
-        _incomingCompactText = text;
-        var ease = new CubicEase { EasingMode = EasingMode.EaseIn };
-        var outgoing = new DoubleAnimation(0, -10, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease };
-        outgoing.Completed += (_, _) =>
-        {
-            CompactText.Text = _incomingCompactText;
-            _incomingCompactText = null;
-            var rise = new CubicEase { EasingMode = EasingMode.EaseOut };
-            CompactTextShift.BeginAnimation(TranslateTransform.YProperty,
-                new DoubleAnimation(10, 0, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
-            CompactText.BeginAnimation(OpacityProperty,
-                new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
-        };
-        CompactTextShift.BeginAnimation(TranslateTransform.YProperty, outgoing);
-        CompactText.BeginAnimation(OpacityProperty,
-            new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease });
-    }
-
-    /// <summary>While a focus session is active its countdown takes the equalizer's slot.</summary>
-    private void UpdateCompactTimer()
-    {
-        bool active = _focus.IsActive;
-        CompactTimer.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
-        bool nodding = MusicRaven.Visibility == Visibility.Visible;
-        Equalizer.Visibility = _state != null && !active && !nodding ? Visibility.Visible : Visibility.Collapsed;
-
-        var remaining = _focus.Remaining;
-        CompactTimerText.Text = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
-        // Paused reads differently from running at a glance: pause icon, dimmed time.
-        CompactTimerGlyph.Text = _focus.IsPaused ? "" : Glyphs.Timer;
-        CompactTimer.Opacity = _focus.IsPaused ? 0.55 : 1;
-
-        if (active != _focusWasActive)
-        {
-            _focusWasActive = active;
-            UpdateTargets(); // The idle notch widens to fit the countdown.
-        }
-    }
-
-    private void SetArtwork(BitmapImage? image)
-    {
-        CompactArtBrush.ImageSource = image;
-        ExpandedArtBrush.ImageSource = image;
-        CompactArt.Visibility = image != null ? Visibility.Visible : Visibility.Collapsed;
-        _artwork = image;
-        ApplyAccent();
-    }
-
-    /// <summary>
-    /// The cover's color, or plain light gray when the user prefers black and white.
-    /// Only media elements (equalizer, progress bar) wear it; everything else stays white.
-    /// </summary>
-    private void ApplyAccent()
-    {
-        var accent = !Settings.UseArtworkAccent ? MonochromeAccent
-                   : _artwork != null ? ColorExtractor.FromImage(_artwork)
-                   : ColorExtractor.Default;
-        _accent.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(accent, TimeSpan.FromMilliseconds(500)));
-    }
-
-    /// <summary>
-    /// Endless decorative animations run at 15 fps instead of 60. Each frame repaints the
-    /// whole transparent window; at 60 fps the equalizer alone cost ~25% of a CPU core.
-    /// </summary>
-    internal static T Ambient<T>(T animation) where T : Timeline
-    {
-        Timeline.SetDesiredFrameRate(animation, 15);
-        return animation;
-    }
-
-    private void SetEqualizer(bool running)
-    {
-        if (running == _equalizerRunning)
-            return;
-        _equalizerRunning = running;
-
-        for (int i = 0; i < Equalizer.Children.Count; i++)
-        {
-            var scale = (ScaleTransform)((Rectangle)Equalizer.Children[i]).RenderTransform;
-            if (running)
-            {
-                var bar = new DoubleAnimation(0.25, 1, TimeSpan.FromMilliseconds(EqualizerPeriods[i]))
-                {
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever,
-                    EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
-                };
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, Ambient(bar));
-            }
-            else
-            {
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                scale.ScaleY = 0.3;
-            }
-        }
-    }
-
-    private void OnPlayPause(object sender, RoutedEventArgs e) => _ = _media.TogglePlayPauseAsync();
-
-    private void OnNext(object sender, RoutedEventArgs e) => _ = _media.NextAsync();
-
-    private void OnPrevious(object sender, RoutedEventArgs e) => _ = _media.PreviousAsync();
-
-    // ---- Yata (companion) -----------------------------------------------------------
-
-    private void UpdateCompanion()
-    {
-        bool idle = Settings.CompanionEnabled && _presence.State != Presence.Active;
-
-        // Music still playing while you're away: Yata takes the equalizer's slot and nods along.
-        bool nodding = idle && _state?.IsPlaying == true && !_focus.IsActive;
-        MusicRaven.Visibility = nodding ? Visibility.Visible : Visibility.Collapsed;
-        if (nodding)
-            _musicRaven.Nod();
-        else
-            _musicRaven.Stop();
-
-        // Nothing playing (a paused player counts): the clock gives way to Yata, who eventually dozes off.
-        bool ambient = idle && _state?.IsPlaying != true && IsVisible;
-        if (ambient)
-        {
-            if (_ambientLeaving)
-                CancelLeave();
-            _ambientShown = true;
-            bool asleep = _presence.State == Presence.Asleep;
-            if (asleep)
-                _ambientRaven.Sleep();
-            else
-                _ambientRaven.Perch();
-            SetZzz(asleep);
-        }
-        else if (_ambientShown && !_ambientLeaving)
-        {
-            LeaveAmbient();
-        }
-
-        UpdateCompactTimer();
-        UpdateTargets();
-    }
-
-    /// <summary>You're back: Yata flaps off to the right and the clock returns.</summary>
-    private void LeaveAmbient()
-    {
-        _ambientLeaving = true;
-        SetZzz(false);
-        _ambientRaven.Fly();
-        var flight = new DoubleAnimation(0, 150, TimeSpan.FromMilliseconds(700))
-        {
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn },
-        };
-        flight.Completed += (_, _) =>
-        {
-            if (!_ambientLeaving)
-                return;
-            CancelLeave();
-            _ambientShown = false;
-            _ambientRaven.Stop();
-            UpdateTargets();
-        };
-        AmbientRavenShift.BeginAnimation(TranslateTransform.XProperty, flight);
-    }
-
-    private void CancelLeave()
-    {
-        _ambientLeaving = false;
-        AmbientRavenShift.BeginAnimation(TranslateTransform.XProperty, null);
-        AmbientRavenShift.X = 0;
-    }
-
-    private void SetZzz(bool on)
-    {
-        Zzz.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
-        if (!on)
-        {
-            ZzzShift.BeginAnimation(TranslateTransform.YProperty, null);
-            Zzz.BeginAnimation(OpacityProperty, null);
-            return;
-        }
-
-        var period = TimeSpan.FromSeconds(2.2);
-        ZzzShift.BeginAnimation(TranslateTransform.YProperty,
-            Ambient(new DoubleAnimation(3, -6, period) { RepeatBehavior = RepeatBehavior.Forever }));
-        Zzz.BeginAnimation(OpacityProperty,
-            Ambient(new DoubleAnimation(1, 0, period) { RepeatBehavior = RepeatBehavior.Forever }));
-    }
-
-    private void OnWentAway(TimeSpan unattended)
-    {
-        // Pause focus so time away isn't counted — unless something is playing (likely a video).
-        if (Settings.PauseFocusWhenAway && _state?.IsPlaying != true && _focus.PauseAfterIdle(unattended))
-            _presence.Add(Glyphs.Timer, "Foco pausado quando você saiu");
-    }
-
-    private void OnReturned(AwayReport report)
-    {
-        if (Settings.AwaySummaryEnabled && report.Items.Count > 0 && IsVisible && !_expanded)
-            ShowNews(report);
-    }
-
-    private void ShowNews(AwayReport report)
-    {
-        var items = report.Items.Skip(Math.Max(0, report.Items.Count - NewsMaxItems)).ToList();
-        _newsCount = items.Count;
-        NewsList.ItemsSource = items;
-        NewsTitle.Text = report.Items.Count > items.Count
-            ? $"Enquanto você esteve fora · {FormatAway(report.Duration)} · {report.Items.Count} avisos"
-            : $"Enquanto você esteve fora · {FormatAway(report.Duration)}";
-
-        _hudActive = false;
-        _hudTimer.Stop();
-        _newsActive = true;
-        _newsTimer.Stop();
-        _newsTimer.Start();
-        UpdateTargets();
-
-        // Yata flies in with the news, then the text appears.
-        _newsRaven.Fly();
-        var flight = new DoubleAnimation(NewsWidth, 0, TimeSpan.FromMilliseconds(750))
-        {
-            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
-        };
-        flight.Completed += (_, _) =>
-        {
-            if (_newsActive)
-                _newsRaven.Perch();
-        };
-        NewsRavenShift.BeginAnimation(TranslateTransform.XProperty, flight);
-        NewsBody.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(400))
-        {
-            BeginTime = TimeSpan.FromMilliseconds(450),
-        });
-    }
-
-    private void HideNews()
-    {
-        if (!_newsActive)
-            return;
-        _newsActive = false;
-        _newsTimer.Stop();
-        _newsRaven.Stop();
-        UpdateTargets();
-    }
-
-    /// <summary>Walks through Yata's states in ~20 s instead of waiting real minutes.</summary>
-    public async void RunCompanionDemo()
-    {
-        SetExpanded(false);
-        _presence.Simulate(_presence.IdleAfter);
-        await Task.Delay(7000);
-        _presence.Simulate(_presence.SleepAfter + TimeSpan.FromMinutes(37));
-        _presence.Add(Glyphs.Bell, "Reunião com o time · 15:30");
-        _presence.Add(Glyphs.Water, "Hora de beber água · 750/2000 ml");
-        await Task.Delay(7000);
-        _presence.Simulate(TimeSpan.Zero); // "You're back."
-        await Task.Delay(1500);
-        _presence.Simulate(null);
-    }
-
-    private static string FormatAway(TimeSpan duration) =>
-        duration.TotalHours >= 1 ? $"{(int)duration.TotalHours}h{duration.Minutes:00}" : $"{Math.Max(1, (int)duration.TotalMinutes)} min";
-
-    // ---- HUD ------------------------------------------------------------------------
-
-    private void ShowHud(HudMessage message)
-    {
-        if (!Settings.Shows(message.Kind))
-            return;
-        _presence.NoteIfUnseen(message);
-
-        if (!IsVisible || _expanded)
-        {
-            // Reminders wait until the notch closes or a full-screen app exits; status blips are dropped.
-            if (message.Important)
-                _pendingHud = message;
-            return;
-        }
-
-        _hudTimer.Interval = TimeSpan.FromMilliseconds(message.DurationMs);
-
-        HudIcon.Text = message.Glyph;
-        HudIcon.Foreground = message.Warning ? WarningBrush : Brushes.White;
-        HudText.Text = message.Text;
-        HudValue.Text = message.Value ?? "";
-        HudValue.Visibility = message.Value == null ? Visibility.Collapsed : Visibility.Visible;
-        HudBar.Visibility = message.Level.HasValue ? Visibility.Visible : Visibility.Collapsed;
-        if (message.Level is double level)
-        {
-            HudBarFill.BeginAnimation(WidthProperty,
-                new DoubleAnimation(Math.Clamp(level, 0, 1) * HudBar.Width, TimeSpan.FromMilliseconds(120)));
-        }
-
-        _hudActive = true;
-        _hudTimer.Stop();
-        _hudTimer.Start();
-        UpdateTargets();
-    }
-
-    private void ShowPendingHud()
-    {
-        if (_pendingHud is not HudMessage message)
-            return;
-        _pendingHud = null;
-        ShowHud(message);
-    }
-
-    private void HideHud()
-    {
-        _hudTimer.Stop();
-        _hudActive = false;
-        UpdateTargets();
-    }
-
-    // ---- Lyrics ---------------------------------------------------------------------
-
-    private async void LoadLyrics(MediaState? media)
-    {
-        _lyricsCts?.Cancel();
-        SetLyrics(null);
-        if (media == null || !Settings.LyricsEnabled)
-            return;
-
-        var cts = _lyricsCts = new CancellationTokenSource();
-        try
-        {
-            // Players send the new title before the new duration; wait for the timeline to settle
-            // so the duration match doesn't use the previous track's length.
-            await Task.Delay(700, cts.Token);
-            var lyrics = await _lyricsService.FindAsync(_state ?? media, cts.Token);
-            if (!cts.IsCancellationRequested)
-                SetLyrics(lyrics);
-        }
-        catch (Exception)
-        {
-            // Cancelled by a track change, or lyrics unavailable; the player works without them.
-        }
-    }
-
-    private void SetLyrics(Lyrics? lyrics)
-    {
-        _lyrics = lyrics;
-        _lyricIndex = -1;
-        LyricsLines.Children.Clear();
-        LyricsScroll.BeginAnimation(TranslateTransform.YProperty, null);
-        LyricsScroll.Y = 0;
-
-        if (lyrics != null)
-        {
-            for (int i = 0; i < lyrics.Lines.Count; i++)
-            {
-                var text = lyrics.Lines[i].Text;
-                var line = new TextBlock
-                {
-                    Text = string.IsNullOrWhiteSpace(text) ? "♪" : text,
-                    FontSize = 15,
-                    FontWeight = FontWeights.SemiBold,
-                    TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 4, 0, 4),
-                    Foreground = LyricDim,
-                    Cursor = Cursors.Hand,
-                    Tag = i,
-                };
-                line.MouseLeftButtonUp += OnLyricClick;
-                LyricsLines.Children.Add(line);
-            }
-        }
-
-        UpdateTargets();
-        UpdateLyricsTimer();
-        UpdateLyricLine();
-        UpdateCompactText();
-    }
-
-    private void UpdateLyricsTimer()
-    {
-        bool run = _lyrics != null && _state?.IsPlaying == true && IsVisible;
-        if (run)
-            _lyricsTimer.Start();
-        else
-            _lyricsTimer.Stop();
-    }
-
-    private void UpdateLyricLine()
-    {
-        if (_lyrics == null || _state == null)
-            return;
-
-        int index = _lyrics.IndexAt(_state.CurrentPosition + LyricLead);
-        if (index == _lyricIndex)
-            return;
-
-        if (_lyricIndex >= 0 && _lyricIndex < LyricsLines.Children.Count)
-            ((TextBlock)LyricsLines.Children[_lyricIndex]).Foreground = LyricDim;
-        if (index >= 0)
-            ((TextBlock)LyricsLines.Children[index]).Foreground = Brushes.White;
-
-        _lyricIndex = index;
-        ScrollLyrics(animate: true);
-        UpdateCompactText();
-    }
-
-    private void ScrollLyrics(bool animate)
-    {
-        if (LyricsLines.Children.Count == 0 || LyricsPanel.ActualHeight <= 0)
-            return;
-
-        var line = (FrameworkElement)LyricsLines.Children[Math.Max(_lyricIndex, 0)];
-        if (line.ActualHeight <= 0)
-            return;
-
-        double center = line.TranslatePoint(new Point(0, 0), LyricsLines).Y + line.ActualHeight / 2;
-        double target = LyricsPanel.ActualHeight / 2 - center;
-
-        if (animate)
-        {
-            LyricsScroll.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(target, TimeSpan.FromMilliseconds(450))
-            {
-                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
-            });
-        }
-        else
-        {
-            LyricsScroll.BeginAnimation(TranslateTransform.YProperty, null);
-            LyricsScroll.Y = target;
-        }
-    }
-
-    private void OnLyricsLayoutChanged(object sender, SizeChangedEventArgs e) => ScrollLyrics(animate: false);
-
-    private void OnLyricClick(object sender, MouseButtonEventArgs e)
-    {
-        if (_lyrics == null || sender is not TextBlock { Tag: int index })
-            return;
-
-        _ = _media.SeekAsync(_lyrics.Lines[index].Time);
-        e.Handled = true;
-    }
-
-    private static Brush Freeze(Brush brush)
-    {
-        brush.Freeze();
-        return brush;
-    }
-
-    // ---- Progress / seeking ---------------------------------------------------------
-
-    private void RefreshProgress()
-    {
-        if (_state == null || _seeking)
-            return;
-
-        if (_state.Duration <= TimeSpan.Zero)
-        {
-            ProgressRow.Visibility = Visibility.Hidden;
-            return;
-        }
-
-        ProgressRow.Visibility = Visibility.Visible;
-        var position = _state.CurrentPosition;
-        SetProgress(position.TotalSeconds / _state.Duration.TotalSeconds, position, _state.Duration);
-    }
-
-    private void SetProgress(double fraction, TimeSpan position, TimeSpan duration)
-    {
-        ProgressFill.Width = Math.Clamp(fraction, 0, 1) * ProgressTrack.ActualWidth;
-        ElapsedText.Text = FormatTime(position);
-        DurationText.Text = FormatTime(duration);
-    }
-
-    private void OnTrackMouseDown(object sender, MouseButtonEventArgs e)
-    {
-        if (_state == null || _state.Duration <= TimeSpan.Zero)
-            return;
-
-        _seeking = true;
-        ProgressTrack.CaptureMouse();
-        PreviewSeek(e.GetPosition(ProgressTrack).X);
-        e.Handled = true;
-    }
-
-    private void OnTrackMouseMove(object sender, MouseEventArgs e)
-    {
-        if (_seeking)
-            PreviewSeek(e.GetPosition(ProgressTrack).X);
-    }
-
-    private void OnTrackMouseUp(object sender, MouseButtonEventArgs e)
-    {
-        if (!_seeking || _state == null)
-            return;
-
-        var target = TimeSpan.FromTicks((long)(_state.Duration.Ticks * _seekFraction));
-        _seeking = false;
-        ProgressTrack.ReleaseMouseCapture();
-        _ = _media.SeekAsync(target);
-        e.Handled = true;
-
-        if (!NotchHost.IsMouseOver)
-            ScheduleExpanded(false, 350);
-    }
-
-    private void OnTrackLostCapture(object sender, MouseEventArgs e)
-    {
-        if (_seeking)
-        {
-            _seeking = false;
-            RefreshProgress();
-        }
-    }
-
-    private void OnTrackSizeChanged(object sender, SizeChangedEventArgs e) => RefreshProgress();
-
-    private void PreviewSeek(double x)
-    {
-        if (_state == null)
-            return;
-
-        _seekFraction = Math.Clamp(x / Math.Max(ProgressTrack.ActualWidth, 1), 0, 1);
-        SetProgress(_seekFraction, TimeSpan.FromTicks((long)(_state.Duration.Ticks * _seekFraction)), _state.Duration);
-    }
-
-    private static string FormatTime(TimeSpan time) =>
-        time.TotalHours >= 1 ? time.ToString(@"h\:mm\:ss") : time.ToString(@"m\:ss");
 
     // ---- Clock ----------------------------------------------------------------------
 
