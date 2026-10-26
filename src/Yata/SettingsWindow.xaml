@@ -510,6 +510,16 @@
                 <Button Style="{StaticResource PillButton}" Content="Abrir pasta de dados" HorizontalAlignment="Right"
                         Click="OnOpenDataFolder"/>
             </Grid>
+            <Grid Margin="4,10,0,0">
+                <TextBlock Text="Algum problema? O registro também fica só aqui." FontSize="12" Foreground="#8C8C8C"
+                           VerticalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Style="{StaticResource PillButton}" Content="Abrir registro" Margin="0,0,8,0"
+                            Click="OnOpenLogs"/>
+                    <Button x:Name="DiagnosticsButton" Style="{StaticResource PillButton}" Content="Copiar diagnóstico"
+                            Click="OnCopyDiagnostics"/>
+                </StackPanel>
+            </Grid>
         </StackPanel>
     </ScrollViewer>
 </Window>

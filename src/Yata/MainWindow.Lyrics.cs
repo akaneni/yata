@@ -55,9 +55,11 @@ public partial class MainWindow
             if (!cts.IsCancellationRequested)
                 SetLyrics(lyrics);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Cancelled by a track change, or lyrics unavailable; the player works without them.
+            if (ex is not OperationCanceledException)
+                Log.Warn("lyrics", "Falha ao carregar a letra", ex);
         }
     }
 

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using Windows.Devices.Geolocation;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -281,6 +282,7 @@ public sealed class WeatherService
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             // Offline: keep the last report (it says when it was fetched) and retry soon.
+            Log.Warn("weather", "Falha ao buscar o tempo", ex);
         }
         finally
         {

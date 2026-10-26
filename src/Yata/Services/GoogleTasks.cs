@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -150,16 +151,19 @@ public sealed class GoogleTasks
         }
         catch (GoogleAuthException ex)
         {
+            Log.Warn("google-tasks", "Acesso ao Google recusado", ex);
             Error = ex.Message;
             _account.Lost(ex);
         }
         catch (GoogleApiException ex) when (ex.ApiDisabled)
         {
+            Log.Warn("google-tasks", "API do Google Tasks desativada no projeto", ex);
             Error = "A API do Google Tasks não está ativada no projeto do Google Cloud.";
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             // Offline: changes stay marked and go out on a later round.
+            Log.Warn("google-tasks", "Falha ao sincronizar", ex);
             Error = "Sem conexão com o Google Tasks.";
         }
         finally

@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using Yata.Interop;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -35,9 +36,10 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
             _enumerator.RegisterEndpointNotificationCallback(this);
             BindDefaultDevice(announce: false);
         }
-        catch (COMException)
+        catch (COMException ex)
         {
             // No audio subsystem; volume HUD stays off.
+            Log.Warn("audio", "Core Audio indisponível; avisos de volume desligados", ex);
         }
     }
 

@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -107,6 +108,7 @@ public sealed class UpdateChecker
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
+            Log.Info("updates", $"Não foi possível consultar a versão nova ({ex.GetType().Name})");
             return null;
         }
     }

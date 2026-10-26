@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using Windows.Foundation;
 using Windows.Media.Control;
 using Windows.Storage.Streams;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -130,8 +131,9 @@ public sealed class MediaService
         {
             _watched = _manager?.GetSessions().ToList() ?? new List<GlobalSystemMediaTransportControlsSession>();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Warn("media", "Falha ao listar as sessões de mídia", ex);
             _watched = Array.Empty<GlobalSystemMediaTransportControlsSession>();
         }
         foreach (var session in _watched)

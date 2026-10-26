@@ -43,6 +43,7 @@ internal sealed record GoogleClient(string Id, string Secret)
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException or InvalidOperationException)
         {
+            Log.Warn("google", "google-client.json ilegível; usando o cliente embutido", ex);
             return null;
         }
     }

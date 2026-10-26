@@ -7,6 +7,7 @@ using System.Threading;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using Yata.Interop;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -114,8 +115,9 @@ internal sealed class PrivacyWatcher : IDisposable
             using var store = Registry.CurrentUser.OpenSubKey(StorePath, writable: false);
             return store == null ? Array.Empty<string>() : AppsUsing(store, "webcam");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Warn("privacy", "Falha ao ler o uso da câmera", ex);
             return Array.Empty<string>();
         }
     }

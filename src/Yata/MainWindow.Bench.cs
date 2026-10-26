@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Threading;
 using System.Windows.Threading;
 
 namespace Yata;
@@ -15,8 +16,8 @@ public partial class MainWindow
 
     /// <summary>
     /// "parado" (just the clock), "musica" (a track with synced lyrics, notch closed),
-    /// "aberto" (the same track, notch open on the media page) or "foco" (Pomodoro running).
-    /// Null outside measurements.
+    /// "aberto" (the same track, notch open on the media page) or "foco" (Pomodoro running);
+    /// "erro" and "queda" throw on purpose, to check the error handling. Null outside measurements.
     /// </summary>
     internal string? Bench { get; init; }
 
@@ -34,7 +35,27 @@ public partial class MainWindow
             case "foco":
                 _focus.Start();
                 break;
+            // The safety net (App.CatchUnhandledErrors): a UI error must be survived, a background one
+            // must leave a crash file.
+            case "erro":
+                After(TimeSpan.FromSeconds(2), () => throw new InvalidOperationException("Erro de teste na interface (--bench erro)"));
+                break;
+            case "queda":
+                After(TimeSpan.FromSeconds(2), () => new Thread(() =>
+                    throw new InvalidOperationException("Erro de teste fora da interface (--bench queda)")).Start());
+                break;
         }
+    }
+
+    private void After(TimeSpan delay, Action action)
+    {
+        var timer = new DispatcherTimer { Interval = delay };
+        timer.Tick += (_, _) =>
+        {
+            timer.Stop();
+            action();
+        };
+        timer.Start();
     }
 
     private void SimulateTrack()

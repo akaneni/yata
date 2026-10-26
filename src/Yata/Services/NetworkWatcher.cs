@@ -1,6 +1,7 @@
 using System;
 using System.Windows.Threading;
 using Windows.Networking.Connectivity;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -63,8 +64,9 @@ internal sealed class NetworkWatcher : IDisposable
             bool connected = profile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess;
             return (connected, connected ? profile.ProfileName : null, profile.IsWlanConnectionProfile);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Log.Warn("network", "Falha ao ler o estado da rede", ex);
             return (false, null, false);
         }
     }

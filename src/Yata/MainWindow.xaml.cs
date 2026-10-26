@@ -259,21 +259,35 @@ public partial class MainWindow : Window
             await _media.InitializeAsync();
             StartupTimings.Mark("media");
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Media sessions unavailable (e.g. stripped-down Windows); the notch still works as a clock.
+            Log.Warn("media", "Sessões de mídia do Windows indisponíveis", ex);
         }
     }
 
+    /// <summary>One service failing to start shouldn't keep the ones after it from starting.</summary>
     private static void StartService(string name, Action start)
     {
-        start();
+        try
+        {
+            start();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(name, "Não iniciou; o resto do Yata segue sem ele", ex);
+        }
         StartupTimings.Mark(name);
     }
 
     private void OnContentRendered(object? sender, EventArgs e)
     {
         StartupTimings.Mark("first-frame");
+        Log.Info("app", string.Create(CultureInfo.InvariantCulture,
+            $"Yata {UpdateChecker.Current} aberto em {StartupTimings.SinceProcessStart:F0} ms ({Environment.OSVersion.Version})"));
+        if (_store.RecoveredFromDamage)
+            ShowHud(new HudMessage(Glyphs.Bell, "Dados ilegíveis; recomecei do zero", Warning: true, DurationMs: 6000,
+                Important: true));
     }
 
     private void OnClosed(object? sender, EventArgs e)
