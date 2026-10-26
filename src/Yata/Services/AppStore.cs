@@ -53,6 +53,15 @@ public sealed class SettingsData
     /// <summary>Calendars to show; null = the ones ticked in Google Calendar itself.</summary>
     public List<string>? CalendarIds { get; set; }
 
+    // Weather (Open-Meteo)
+    public bool WeatherEnabled { get; set; }
+    /// <summary>"Campinas, São Paulo" — just for display.</summary>
+    public string? WeatherPlace { get; set; }
+    /// <summary>Stored already rounded to ~1 km; nothing more precise is kept or sent.</summary>
+    public double? WeatherLatitude { get; set; }
+    public double? WeatherLongitude { get; set; }
+    public bool WeatherRainAlerts { get; set; } = true;
+
     // Notices
     public bool HudVolume { get; set; } = true;
     public bool HudBrightness { get; set; } = true;

@@ -4,7 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Controls.Primitives;
 using System.Windows.Interop;
 using Yata.Helpers;
@@ -45,6 +49,121 @@ public partial class SettingsWindow : Window
         _calendar.Changed += ShowCalendar;
         Closed += (_, _) => _calendar.Changed -= ShowCalendar;
         ShowCalendar();
+        ShowWeatherPlace();
+    }
+
+    // ---- Weather ----------------------------------------------------------------------
+
+    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
+    private CancellationTokenSource? _weatherSearch;
+
+    private void ShowWeatherPlace() =>
+        WeatherPlaceText.Text = _store.Settings.WeatherPlace ?? "nenhuma escolhida";
+
+    private void OnWeatherSearchChanged(object sender, TextChangedEventArgs e) =>
+        WeatherSearchPlaceholder.Visibility = WeatherSearchBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+    private void OnWeatherSearchKeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter)
+            return;
+        e.Handled = true;
+        _ = SearchWeatherAsync();
+    }
+
+    private void OnWeatherSearch(object sender, RoutedEventArgs e) => _ = SearchWeatherAsync();
+
+    private async Task SearchWeatherAsync()
+    {
+        string name = WeatherSearchBox.Text.Trim();
+        if (name.Length < 2)
+            return;
+
+        _weatherSearch?.Cancel();
+        var cts = _weatherSearch = new CancellationTokenSource();
+        SetWeatherStatus("Buscando…");
+        try
+        {
+            var places = await WeatherService.SearchAsync(name, cts.Token);
+            if (cts.IsCancellationRequested)
+                return;
+            WeatherResults.ItemsSource = places;
+            SetWeatherStatus(places.Count == 0 ? "Nenhuma cidade encontrada." : null);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
+        {
+            if (!cts.IsCancellationRequested)
+                SetWeatherStatus("Sem conexão com o Open-Meteo.");
+        }
+    }
+
+    private void OnWeatherPlacePicked(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement { DataContext: WeatherPlace place })
+            UseWeatherPlace(place.Detail.Length > 0 ? $"{place.Name}, {place.Detail}" : place.Name, place.Latitude, place.Longitude);
+        // The window-level Click handler saves and applies right after this.
+    }
+
+    private async void OnWeatherLocate(object sender, RoutedEventArgs e)
+    {
+        WeatherLocateButton.IsEnabled = false;
+        LocationSettingsButton.Visibility = Visibility.Collapsed;
+        SetWeatherStatus("Pedindo a localização ao Windows…");
+        var (result, latitude, longitude) = await WeatherService.LocateOnceAsync();
+        WeatherLocateButton.IsEnabled = true;
+
+        switch (result)
+        {
+            case LocateResult.Found:
+                UseWeatherPlace($"Minha localização ({latitude.ToString("0.00", PtBr)}, {longitude.ToString("0.00", PtBr)})",
+                    latitude, longitude);
+                // Arrived after the click was handled, so save and apply here.
+                _store.NotifySettingsChanged();
+                break;
+            case LocateResult.Denied:
+                SetWeatherStatus("A localização está desligada para apps da área de trabalho.");
+                LocationSettingsButton.Visibility = Visibility.Visible;
+                break;
+            default:
+                SetWeatherStatus("Não foi possível obter a localização agora. Tente de novo ou busque a cidade.");
+                break;
+        }
+    }
+
+    private void OnOpenLocationSettings(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo("ms-settings:privacy-location") { UseShellExecute = true });
+        }
+        catch (Exception)
+        {
+            // Settings app unavailable; the message already says where to look.
+        }
+    }
+
+    private void UseWeatherPlace(string name, double latitude, double longitude)
+    {
+        var settings = _store.Settings;
+        settings.WeatherPlace = name;
+        settings.WeatherLatitude = Weather.Coarse(latitude);
+        settings.WeatherLongitude = Weather.Coarse(longitude);
+        settings.WeatherEnabled = true;
+        // The switch is bound one way from the data it was created with; refresh it.
+        DataContext = null;
+        DataContext = _store.Data;
+
+        WeatherResults.ItemsSource = null;
+        WeatherSearchBox.Clear();
+        SetWeatherStatus(null);
+        LocationSettingsButton.Visibility = Visibility.Collapsed;
+        ShowWeatherPlace();
+    }
+
+    private void SetWeatherStatus(string? text)
+    {
+        WeatherSearchStatus.Text = text ?? "";
+        WeatherSearchStatus.Visibility = text == null ? Visibility.Collapsed : Visibility.Visible;
     }
 
     private sealed record CalendarChoice(string Id, string Name, string Hint, bool Included);
