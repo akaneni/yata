@@ -165,18 +165,21 @@ public sealed class GoogleCalendar
         }
         catch (GoogleAuthException ex)
         {
+            Log.Warn("calendar", "Acesso ao Google recusado", ex);
             _error = ex.Message;
             _account.Lost(ex);
             Changed?.Invoke();
         }
         catch (GoogleApiException ex) when (ex.ApiDisabled)
         {
+            Log.Warn("calendar", "API do Google Agenda desativada no projeto", ex);
             _error = "A API do Google Agenda não está ativada no projeto do Google Cloud.";
             Changed?.Invoke();
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             // Offline or a hiccup: keep showing what we had and retry soon.
+            Log.Warn("calendar", "Falha ao buscar eventos", ex);
             _error = "Sem conexão com o Google Agenda.";
             Changed?.Invoke();
         }

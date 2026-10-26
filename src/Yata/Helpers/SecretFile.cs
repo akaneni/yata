@@ -26,6 +26,7 @@ internal static class SecretFile
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or CryptographicException or JsonException)
         {
             // Unreadable (another user's file, corrupted): behave as if it weren't there.
+            Log.Warn("secrets", "Arquivo cifrado ilegível; tratado como ausente", ex);
             return null;
         }
     }
@@ -47,6 +48,7 @@ internal static class SecretFile
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            Log.Warn("secrets", "Não foi possível apagar o arquivo cifrado", ex);
         }
     }
 }

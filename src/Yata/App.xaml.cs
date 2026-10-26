@@ -1,5 +1,8 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Win32;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -13,10 +16,13 @@ public partial class App : Application
     private Mutex? _singleInstance;
     private Forms.NotifyIcon? _tray;
     private MainWindow? _window;
+    // More than this many UI errors a minute means something keeps failing: stop pretending it's fine.
+    private readonly ErrorBurst _uiErrors = new(limit: 5, window: System.TimeSpan.FromMinutes(1));
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        CatchUnhandledErrors();
         if (ArgValue(e.Args, "--timings") is { } timings)
             StartupTimings.Enable(timings);
         StartupTimings.Mark("OnStartup");
@@ -39,6 +45,8 @@ public partial class App : Application
         StartupTimings.Mark("Show");
         CreateTrayIcon();
         StartupTimings.Mark("tray");
+        AnnouncePreviousCrash();
+        SystemEvents.PowerModeChanged += OnPowerModeChanged;
 
         int show = System.Array.IndexOf(e.Args, "--show");
         if (show >= 0)
@@ -51,6 +59,63 @@ public partial class App : Application
             _window.OpenSettings();
         if (e.Args.Contains("--demo"))
             _window.Dispatcher.InvokeAsync(_window.RunCompanionDemo, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+    }
+
+    /// <summary>
+    /// The last line of defence. An error on the UI thread is logged and the notch carries on,
+    /// unless errors keep coming (then it's a loop, and the app closes with a crash file). Errors
+    /// elsewhere can't be survived: they leave a crash file, announced at the next start.
+    /// </summary>
+    private void CatchUnhandledErrors()
+    {
+        DispatcherUnhandledException += (_, e) =>
+        {
+            Log.Error("app", "Erro não tratado na interface", e.Exception);
+            if (_uiErrors.Record())
+                e.Handled = true;
+            else
+                Log.Crash(e.Exception);
+        };
+        System.AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            if (e.ExceptionObject is System.Exception error)
+                Log.Crash(error);
+            // Leave now rather than through Windows Error Reporting, which holds the process for
+            // seconds and may send the crash to Microsoft: the local crash file is the report.
+            System.Environment.Exit(1);
+        };
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            Log.Warn("app", "Tarefa em segundo plano falhou sem tratamento", e.Exception);
+            e.SetObserved();
+        };
+    }
+
+    private void AnnouncePreviousCrash()
+    {
+        if (_tray == null || Log.TakeUnseenCrash() is not { } crash)
+            return;
+        _tray.BalloonTipClicked += (_, _) => OpenInExplorer(crash);
+        _tray.ShowBalloonTip(10000, "O Yata fechou inesperadamente",
+            "Clique para ver o registro do erro. Ele fica só neste PC.", Forms.ToolTipIcon.Warning);
+    }
+
+    private static void OpenInExplorer(string file)
+    {
+        try
+        {
+            Process.Start("explorer.exe", $"/select,\"{file}\"");
+        }
+        catch (System.Exception ex)
+        {
+            Log.Warn("app", "Não foi possível abrir o Explorer", ex);
+        }
+    }
+
+    private static void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    {
+        if (e.Mode is PowerModes.Suspend or PowerModes.Resume)
+            Log.Info("app", e.Mode == PowerModes.Suspend ? "Suspendendo" : "Voltou da suspensão");
     }
 
     private static string? ArgValue(string[] args, string name)
@@ -88,6 +153,7 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
+        SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         if (_tray != null)
         {
             _tray.Visible = false;
@@ -95,6 +161,11 @@ public partial class App : Application
         }
         _window?.Close();
         _singleInstance?.Dispose();
+        if (_window != null) // A second instance only hands over to the first: nothing to report.
+        {
+            Log.Info("app", "Encerrado");
+            Log.Flush();
+        }
         base.OnExit(e);
     }
 }

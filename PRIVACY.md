@@ -8,6 +8,8 @@ O Yata é um app de código aberto para Windows que mostra um "notch" no topo da
 
 Tarefas, registro de água, caminhos da prateleira e configurações ficam em `%LOCALAPPDATA%\Yata\data.json`. Esses dados nunca são enviados para fora do PC, com uma exceção que você escolhe: se ligar a sincronização com o Google Tasks, as tarefas vão para a sua lista no Google (veja abaixo).
 
+O Yata também mantém um registro de diagnóstico em `%LOCALAPPDATA%\Yata\logs`: horário, qual parte do app agiu e os erros que aconteceram. Ele não guarda títulos de músicas, textos de tarefas, títulos de eventos, nomes de arquivos, localização nem conta; caminhos, endereços web e e-mails que apareçam numa mensagem de erro são apagados antes de gravar. Cada arquivo é guardado por 7 dias e tem no máximo 1 MB por dia. Se o Yata fechar por um erro, ele grava um `crash-*.log` ali e encerra sem acionar o Relatório de Erros do Windows. Nada disso é enviado: você decide se quer anexar a uma issue (Configurações → Abrir registro ou Copiar diagnóstico).
+
 ## Serviços externos
 
 O Yata só acessa a internet nestes casos:

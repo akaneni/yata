@@ -8,7 +8,7 @@ O nome vem de **Yatagarasu** (八咫烏), o corvo mensageiro e guia da mitologia
 
 Projeto de código aberto, sem conta e sem telemetria.
 
-**Dados locais:** tarefas, registro de água e caminhos da prateleira ficam em `%LOCALAPPDATA%\Yata\data.json`.
+**Dados locais:** tarefas, registro de água e caminhos da prateleira ficam em `%LOCALAPPDATA%\Yata\data.json`. Um registro de diagnóstico (erros e o que cada parte do app fez, sem músicas, tarefas, eventos, caminhos ou contas) fica em `%LOCALAPPDATA%\Yata\logs` por 7 dias, para você anexar numa issue se quiser.
 
 **Acesso à rede:** só o que você liga, e nada sobre o PC é enviado:
 - busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`. Pode ser desligada nas configurações.

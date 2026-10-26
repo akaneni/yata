@@ -2,6 +2,7 @@ using System;
 using System.Management;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -30,9 +31,10 @@ internal sealed class BrightnessWatcher : IDisposable
             watcher.Start();
             _watcher = watcher;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // No WMI brightness provider (external monitors only).
+            Log.Info("brightness", $"Sem aviso de brilho: o Windows não informa o brilho desta tela ({ex.GetType().Name})");
         }
     });
 

@@ -140,10 +140,15 @@ public sealed class AppStore
 
     private readonly string _path;
     private readonly DispatcherTimer _saveTimer = new() { Interval = TimeSpan.FromMilliseconds(500) };
+    private bool _readOnly;
+    private bool _saveFailing;
 
     public StoreData Data { get; }
 
     public SettingsData Settings => Data.Settings;
+
+    /// <summary>data.json was damaged and set aside; the app started over with defaults.</summary>
+    public bool RecoveredFromDamage { get; private init; }
 
     /// <summary>Raised after the settings window changed something; listeners re-apply.</summary>
     public event Action? SettingsChanged;
@@ -161,21 +166,32 @@ public sealed class AppStore
         _saveTimer.Tick += (_, _) => SaveNow();
     }
 
-    public static AppStore Load()
+    public static AppStore Load() => Load(Path.Combine(AppPaths.DataDir, "data.json"));
+
+    internal static AppStore Load(string path)
     {
-        string path = Path.Combine(AppPaths.DataDir, "data.json");
-        StoreData? data = null;
         try
         {
-            if (File.Exists(path))
-                data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(path), Options);
+            if (!File.Exists(path))
+                return new AppStore(path, new StoreData());
+            var data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(path), Options);
+            return new AppStore(path, data ?? new StoreData());
         }
-        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+        catch (JsonException ex)
         {
-            // Unreadable file: start fresh rather than refuse to run. The bad file is kept aside.
+            // Damaged (e.g. power lost mid-write on an older version): start fresh rather than
+            // refuse to run, and keep the bad file aside.
+            Log.Error("store", "data.json ilegível; guardado como data.json.bad", ex);
             TryBackup(path);
+            return new AppStore(path, new StoreData()) { RecoveredFromDamage = true };
         }
-        return new AppStore(path, data ?? new StoreData());
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            // There but unreadable right now (locked, permissions): run on defaults without
+            // saving, so the user's file isn't overwritten.
+            Log.Error("store", "data.json inacessível; nada será gravado nesta sessão", ex);
+            return new AppStore(path, new StoreData()) { _readOnly = true };
+        }
     }
 
     /// <summary>
@@ -195,16 +211,27 @@ public sealed class AppStore
     public void SaveNow()
     {
         _saveTimer.Stop();
+        if (_readOnly)
+            return;
         try
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_path)!);
             string temp = _path + ".tmp";
-            File.WriteAllText(temp, JsonSerializer.Serialize(Data, Options));
+            using (var stream = new FileStream(temp, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                JsonSerializer.Serialize(stream, Data, Options);
+                // On disk before the swap: a power cut can't leave an empty data.json behind.
+                stream.Flush(flushToDisk: true);
+            }
             File.Move(temp, _path, overwrite: true);
+            _saveFailing = false;
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            // Best effort; the next change retries.
+            // The next change retries; one log line per run of failures is enough.
+            if (!_saveFailing)
+                Log.Warn("store", "Falha ao gravar data.json", ex);
+            _saveFailing = true;
         }
     }
 
@@ -216,6 +243,7 @@ public sealed class AppStore
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
+            Log.Warn("store", "Não foi possível guardar a cópia data.json.bad", ex);
         }
     }
 }

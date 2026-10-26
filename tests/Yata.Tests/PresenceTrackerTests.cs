@@ -96,4 +96,14 @@ public class PresenceTrackerTests
 
         Assert.Empty(_reports);
     }
+
+    [Theory]
+    [InlineData(0, 60.05)]     // just used the PC: nothing can change for a minute
+    [InlineData(45, 15.05)]
+    [InlineData(60, 1)]        // a minute idle: look every second to catch the return
+    [InlineData(600, 1)]
+    public void Checks_rarely_while_active_and_every_second_while_away(double idleSeconds, double expectedSeconds)
+    {
+        Assert.Equal(TimeSpan.FromSeconds(expectedSeconds), PresenceTracker.NextCheck(TimeSpan.FromSeconds(idleSeconds)));
+    }
 }

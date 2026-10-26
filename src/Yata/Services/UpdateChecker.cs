@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -107,15 +108,14 @@ public sealed class UpdateChecker
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
+            Log.Info("updates", $"Não foi possível consultar a versão nova ({ex.GetType().Name})");
             return null;
         }
     }
 
     private static HttpClient CreateClient()
     {
-        var client = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-        // GitHub's API requires a User-Agent; this one only names the app.
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Yata-update-check");
+        var client = HttpPool.Client(TimeSpan.FromSeconds(10));
         client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
         return client;
     }

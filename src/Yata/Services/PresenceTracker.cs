@@ -25,7 +25,10 @@ public sealed class PresenceTracker
     private const int BatteryChangeWorthReporting = 5;
 
     private readonly SettingsData _settings;
-    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
+    // While away it looks every second, to greet the user back at once.
+    private static readonly TimeSpan AwayCheck = TimeSpan.FromSeconds(1);
+
+    private readonly DispatcherTimer _timer = new() { Interval = AwayCheck };
     private readonly List<AwayItem> _items = new();
     private TimeSpan _lastIdle;
     private int? _batteryAtAway;
@@ -100,7 +103,15 @@ public sealed class PresenceTracker
             State = state;
             StateChanged?.Invoke();
         }
+        _timer.Interval = NextCheck(idle);
     }
+
+    /// <summary>
+    /// When to look again. Nothing can change before the inactivity reaches the first threshold
+    /// (<see cref="UnseenAfter"/>; the others are later), so an active user costs one check a minute.
+    /// </summary>
+    internal static TimeSpan NextCheck(TimeSpan idle) =>
+        idle >= UnseenAfter ? AwayCheck : UnseenAfter - idle + TimeSpan.FromMilliseconds(50);
 
     private void ReportReturn(TimeSpan duration)
     {

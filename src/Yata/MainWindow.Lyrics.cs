@@ -32,6 +32,8 @@ public partial class MainWindow
     private static readonly TimeSpan LyricLead = TimeSpan.FromMilliseconds(200);
     private static readonly Color LyricDimColor = Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF);
     private const double LyricZoom = 1.04;
+    private static readonly TimeSpan LyricMinWait = TimeSpan.FromMilliseconds(15);
+    private static readonly TimeSpan LyricResync = TimeSpan.FromSeconds(5);
 
     private readonly LyricsService _lyricsService = new();
     private string? _lyricsTrack;
@@ -55,9 +57,11 @@ public partial class MainWindow
             if (!cts.IsCancellationRequested)
                 SetLyrics(lyrics);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Cancelled by a track change, or lyrics unavailable; the player works without them.
+            if (ex is not OperationCanceledException)
+                Log.Warn("lyrics", "Falha ao carregar a letra", ex);
         }
     }
 
@@ -99,13 +103,22 @@ public partial class MainWindow
         UpdateCompactText();
     }
 
+    /// <summary>
+    /// Wakes up when the next line is due rather than polling the position. Media changes
+    /// (seek, pause, new track) call this again, and long lines are re-checked every few seconds
+    /// because some players (browsers) report their position late.
+    /// </summary>
     private void UpdateLyricsTimer()
     {
-        bool run = _lyrics != null && _state?.IsPlaying == true && IsVisible;
-        if (run)
-            _lyricsTimer.Start();
-        else
-            _lyricsTimer.Stop();
+        _lyricsTimer.Stop();
+        if (_lyrics == null || _state?.IsPlaying != true || !IsVisible)
+            return;
+        if (_lyrics.UntilNextLine(_state.CurrentPosition + LyricLead) is not { } until)
+            return; // Past the last line; a seek back comes in as a media change.
+
+        var wait = TimeSpan.FromTicks((long)(until.Ticks / Math.Max(_state.PlaybackRate, 0.1)));
+        _lyricsTimer.Interval = wait < LyricMinWait ? LyricMinWait : wait > LyricResync ? LyricResync : wait;
+        _lyricsTimer.Start();
     }
 
     private void UpdateLyricLine()

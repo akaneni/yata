@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
 using Yata.Interop;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -46,9 +47,10 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
             BindDevices();
             Refresh();
         }
-        catch (COMException)
+        catch (COMException ex)
         {
             // No audio subsystem: nothing can use a microphone either.
+            Log.Warn("microphone", "Core Audio indisponível; uso do microfone não é detectado", ex);
         }
     }
 

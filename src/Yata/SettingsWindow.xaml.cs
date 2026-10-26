@@ -285,6 +285,7 @@ public partial class SettingsWindow : Window
         catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException)
         {
             // Registry locked down by policy: show the real state.
+            Log.Warn("settings", "Não foi possível mudar o início com o Windows", ex);
         }
         StartupSwitch.IsChecked = Autostart.IsEnabled;
     }
@@ -338,6 +339,36 @@ public partial class SettingsWindow : Window
         {
             // Folder not created yet (nothing saved so far).
         }
+    }
+
+    private void OnOpenLogs(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.IO.Directory.CreateDirectory(Log.Directory);
+            Process.Start(new ProcessStartInfo(Log.Directory) { UseShellExecute = true });
+        }
+        catch (Exception ex)
+        {
+            Log.Warn("settings", "Não foi possível abrir a pasta do registro", ex);
+        }
+    }
+
+    private async void OnCopyDiagnostics(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Clipboard.SetText(Diagnostics.Describe(_store.Settings, _google.Status));
+        }
+        catch (System.Runtime.InteropServices.COMException ex)
+        {
+            // Another app is holding the clipboard.
+            Log.Warn("settings", "Área de transferência ocupada", ex);
+            return;
+        }
+        DiagnosticsButton.Content = "Copiado";
+        await Task.Delay(2000);
+        DiagnosticsButton.Content = "Copiar diagnóstico";
     }
 
     private void UseDarkTitleBar()

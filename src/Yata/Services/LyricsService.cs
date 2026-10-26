@@ -42,6 +42,13 @@ public sealed class Lyrics
         return found;
     }
 
+    /// <summary>Time from <paramref name="position"/> until another line starts; null after the last one.</summary>
+    public TimeSpan? UntilNextLine(TimeSpan position)
+    {
+        int next = IndexAt(position) + 1;
+        return next < Lines.Count ? Lines[next].Time - position : null;
+    }
+
     public static Lyrics? Parse(string lrc)
     {
         var lines = new List<LyricLine>();
@@ -73,7 +80,9 @@ public sealed class Lyrics
 public sealed class LyricsService
 {
     private static readonly TimeSpan MissExpiry = TimeSpan.FromDays(3);
-    private static readonly HttpClient Http = CreateClient();
+    // A few KB each; the songs heard most recently are the ones worth keeping.
+    internal const int MaxCached = 2000;
+    private static readonly HttpClient Http = HttpPool.Client(TimeSpan.FromSeconds(10), new Uri("https://lrclib.net/"));
 
     private readonly string _cacheDir;
 
@@ -82,6 +91,8 @@ public sealed class LyricsService
     }
 
     internal LyricsService(string cacheDir) => _cacheDir = cacheDir;
+
+    private bool _pruned;
 
     public async Task<Lyrics?> FindAsync(MediaState media, CancellationToken ct)
     {
@@ -189,6 +200,11 @@ public sealed class LyricsService
         {
             Directory.CreateDirectory(_cacheDir);
             File.WriteAllText(file, content);
+            if (!_pruned)
+            {
+                _pruned = true;
+                Task.Run(() => Prune(MaxCached));
+            }
         }
         catch (IOException)
         {
@@ -199,18 +215,26 @@ public sealed class LyricsService
         }
     }
 
+    /// <summary>Keeps the <paramref name="keep"/> most recently written entries; once a run is enough.</summary>
+    internal void Prune(int keep)
+    {
+        try
+        {
+            foreach (var old in new DirectoryInfo(_cacheDir).GetFiles("*.lrc")
+                         .OrderByDescending(f => f.LastWriteTimeUtc)
+                         .Skip(keep))
+                old.Delete();
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            Log.Warn("lyrics", "Falha ao limpar o cache de letras", ex);
+        }
+    }
+
     private static string CacheKey(string artist, string title)
     {
         var bytes = SHA1.HashData(Encoding.UTF8.GetBytes((artist + "\n" + title).ToLowerInvariant()));
         return Convert.ToHexString(bytes);
-    }
-
-    private static HttpClient CreateClient()
-    {
-        var client = new HttpClient { BaseAddress = new Uri("https://lrclib.net/"), Timeout = TimeSpan.FromSeconds(10) };
-        // LRCLIB asks clients to identify themselves.
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Yata/0.1 (open-source Windows notch app)");
-        return client;
     }
 }
 
