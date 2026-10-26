@@ -192,7 +192,7 @@ public partial class MainWindow : Window
         _musicRaven = new RavenAnimator(MusicRaven);
         _newsRaven = new RavenAnimator(NewsRaven);
         _hudRaven = new RavenAnimator(HudRaven);
-        _hudRavenLand.Tick += (_, _) => { _hudRavenLand.Stop(); _hudRaven.Perch(); };
+        _hudRavenLand.Tick += (_, _) => { _hudRavenLand.Stop(); _hudRaven.Land(); };
         BuildEqualizer();
         _idleRaven = new RavenAnimator(IdleRaven);
         // Hidden means a full-screen app is up: someone is watching it, not away.
