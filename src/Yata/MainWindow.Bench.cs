@@ -16,7 +16,8 @@ public partial class MainWindow
 
     /// <summary>
     /// "parado" (just the clock), "musica" (a track with synced lyrics, notch closed),
-    /// "aberto" (the same track, notch open on the media page) or "foco" (Pomodoro running);
+    /// "aberto" (the same track, notch open on the media page), "foco" (Pomodoro running) or
+    /// "dormindo" (Yata asleep in the closed notch);
     /// "erro" and "queda" throw on purpose, to check the error handling. Null outside measurements.
     /// </summary>
     internal string? Bench { get; init; }
@@ -34,6 +35,11 @@ public partial class MainWindow
                 break;
             case "foco":
                 _focus.Start();
+                break;
+            case "dormindo":
+                // Nothing playing and the user long gone: Yata dozes in the closed notch.
+                Settings.CompanionEnabled = true;
+                _presence.Simulate(TimeSpan.FromMinutes(30));
                 break;
             // The safety net (App.CatchUnhandledErrors): a UI error must be survived, a background one
             // must leave a crash file.

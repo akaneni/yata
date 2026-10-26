@@ -243,8 +243,9 @@ public partial class MainWindow
     }
 
     /// <summary>
-    /// Endless decorative animations run at 15 fps instead of 60. Each frame repaints the
-    /// whole transparent window; at 60 fps the equalizer alone cost ~25% of a CPU core.
+    /// Endless decorative animations run at 15 fps instead of 60: each frame repaints the whole
+    /// transparent window. Even so a running animation keeps WPF producing frames, so the
+    /// equalizer and the sleeping "z" step on timers instead; this is for the few that remain.
     /// </summary>
     internal static T Ambient<T>(T animation) where T : Timeline
     {

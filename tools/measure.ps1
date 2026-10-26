@@ -3,12 +3,13 @@
 # reminders and notices off, so the user's data, media sessions and network are never touched and
 # what the user does meanwhile doesn't change the numbers. A running Yata is closed and reopened.
 #
-# Usage: ./tools/measure.ps1 [-States parado,musica,aberto,foco] [-Rounds 3] [-Seconds 20]
+# Usage: ./tools/measure.ps1 [-States parado,musica,aberto,foco,dormindo] [-Rounds 3] [-Seconds 20]
 #                            [-Warmup 90] [-Exe path\Yata.exe] [-OutFile medicao.csv] [-Phases]
 #   parado  just the clock            musica  a track with synced lyrics, notch closed
 #   aberto  the same, notch open      foco    Pomodoro running
+#   dormindo  Yata asleep in the closed notch (the user away)
 param(
-    [string[]]$States = @("parado", "musica", "aberto", "foco"),
+    [string[]]$States = @("parado", "musica", "aberto", "foco", "dormindo"),
     [int]$Rounds = 3,
     [int]$Seconds = 20,
     # The .NET JIT keeps recompiling hot code for the first minute or so (measured: still ~20 ms/s

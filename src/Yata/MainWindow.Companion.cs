@@ -28,6 +28,12 @@ namespace Yata;
 // Yata the raven: ambient perch, nodding, news while you were away.
 public partial class MainWindow
 {
+    // From 3 px below its place to 6 px above, fading out, in 2.2 s.
+    private const int ZzzStart = 3;
+    private const int ZzzRise = 9;
+    private readonly DispatcherTimer _zzzTimer = new() { Interval = TimeSpan.FromMilliseconds(2200.0 / (ZzzRise + 1)) };
+    private int _zzzStep;
+
     private void UpdateCompanion()
     {
         bool idle = Settings.CompanionEnabled && _presence.State != Presence.Active;
@@ -92,21 +98,31 @@ public partial class MainWindow
         AmbientRavenShift.X = 0;
     }
 
+    /// <summary>
+    /// The "z" drifts up a pixel at a time and fades, over and over while Yata sleeps. A timer
+    /// steps it: an endless WPF animation would keep frames coming for as long as the user is
+    /// away, which can be all night.
+    /// </summary>
     private void SetZzz(bool on)
     {
         Zzz.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        if (on == _zzzTimer.IsEnabled)
+            return;
         if (!on)
         {
-            ZzzShift.BeginAnimation(TranslateTransform.YProperty, null);
-            Zzz.BeginAnimation(OpacityProperty, null);
+            _zzzTimer.Stop();
             return;
         }
+        _zzzStep = 0;
+        StepZzz();
+        _zzzTimer.Start();
+    }
 
-        var period = TimeSpan.FromSeconds(2.2);
-        ZzzShift.BeginAnimation(TranslateTransform.YProperty,
-            Ambient(new DoubleAnimation(3, -6, period) { RepeatBehavior = RepeatBehavior.Forever }));
-        Zzz.BeginAnimation(OpacityProperty,
-            Ambient(new DoubleAnimation(1, 0, period) { RepeatBehavior = RepeatBehavior.Forever }));
+    private void StepZzz()
+    {
+        ZzzShift.Y = ZzzStart - _zzzStep;
+        Zzz.Opacity = 1 - (double)_zzzStep / ZzzRise;
+        _zzzStep = (_zzzStep + 1) % (ZzzRise + 1);
     }
 
     private void OnWentAway(TimeSpan unattended)
