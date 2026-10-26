@@ -19,7 +19,7 @@ public sealed class FocusTimer
     private readonly SettingsData _settings;
     private readonly Func<DateTime> _now;
     private readonly Action _chime;
-    private readonly DispatcherTimer _tick = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    private readonly DispatcherTimer _tick = new();
     private TimeSpan _pausedRemaining;
     private DateTime _endsAt;
 
@@ -147,18 +147,34 @@ public sealed class FocusTimer
         if (State != FocusState.Running)
             return;
         if (Remaining <= TimeSpan.Zero)
+        {
             Advance(notify: true);
+        }
         else
+        {
+            ScheduleTick();
             Changed?.Invoke();
+        }
     }
+
+    /// <summary>
+    /// Time until the countdown shows another second (it reads whole seconds, rounded down),
+    /// plus a hair so the tick lands after the change rather than just before it.
+    /// </summary>
+    internal static TimeSpan UntilNextSecond(TimeSpan remaining) =>
+        TimeSpan.FromTicks(remaining.Ticks % TimeSpan.TicksPerSecond) + TimeSpan.FromMilliseconds(5);
 
     private void Run()
     {
         _endsAt = _now() + _pausedRemaining;
         State = FocusState.Running;
+        ScheduleTick();
         _tick.Start();
         Changed?.Invoke();
     }
+
+    // One wake-up per second shown, instead of polling four times a second.
+    private void ScheduleTick() => _tick.Interval = UntilNextSecond(Remaining);
 
     private void Freeze(TimeSpan remaining)
     {

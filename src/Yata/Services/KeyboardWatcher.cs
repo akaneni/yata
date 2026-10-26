@@ -13,7 +13,8 @@ internal sealed class KeyboardWatcher : IDisposable
 {
     private const int VK_CAPITAL = 0x14;
 
-    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(150) };
+    // Fast enough that the Caps Lock notice feels immediate; there is no event for it without a hook.
+    private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private bool _capsLock;
     private IntPtr _window;
     private IntPtr _layout;

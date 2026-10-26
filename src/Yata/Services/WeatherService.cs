@@ -162,7 +162,7 @@ public sealed class WeatherService
     private static readonly TimeSpan RetryAfter = TimeSpan.FromMinutes(5);
     // One rain notice per spell, not one per refresh.
     private static readonly TimeSpan RainNoticeGap = TimeSpan.FromHours(3);
-    private static readonly HttpClient Http = CreateClient();
+    private static readonly HttpClient Http = HttpPool.Client(TimeSpan.FromSeconds(15));
 
     private readonly AppStore _store;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMinutes(1) };
@@ -300,12 +300,5 @@ public sealed class WeatherService
         string when = at <= DateTime.Now ? "Pode chover a qualquer momento" : $"Chuva prevista por volta das {at:HH}h";
         Message?.Invoke(new HudMessage(Glyphs.Cloud, when, $"{report.RainChance}%", DurationMs: 5000, Important: true,
             Kind: HudKind.Weather));
-    }
-
-    private static HttpClient CreateClient()
-    {
-        var client = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Yata/0.1 (open-source Windows notch app)");
-        return client;
     }
 }

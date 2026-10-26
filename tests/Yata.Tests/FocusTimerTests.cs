@@ -279,6 +279,15 @@ public class FocusTimerTests
         Assert.Equal(2, timer.CompletedSessions);
     }
 
+    [Theory]
+    [InlineData(1500.0, 5)]      // exactly 25:00: shows 24:59 a moment later
+    [InlineData(1499.75, 755)]   // 24:59.75 shows 24:59 until 24:59.00
+    [InlineData(0.4, 405)]
+    public void Ticks_when_the_shown_second_changes(double remainingSeconds, double expectedMs)
+    {
+        Assert.Equal(TimeSpan.FromMilliseconds(expectedMs), FocusTimer.UntilNextSecond(TimeSpan.FromSeconds(remainingSeconds)));
+    }
+
     private void CompleteFocus(FocusTimer timer)
     {
         timer.Start();

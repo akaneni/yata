@@ -16,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using Windows.System.Power;
 using Yata.Helpers;
 using Yata.Interop;
 using Yata.Services;
@@ -41,6 +42,9 @@ public partial class MainWindow
     private static readonly Color MonochromeAccent = Color.FromRgb(0xE0, 0xE0, 0xE0);
 
     private bool _equalizerRunning;
+    private readonly DispatcherTimer _equalizerTimer = new() { Interval = TimeSpan.FromMilliseconds(EqualizerStepMs) };
+    private int _equalizerStep;
+    private bool _reduceMotion = ReduceMotionNow();
     private BitmapImage? _artwork;
     // The compact line waiting for the outgoing one to slide away; null when no swap is running.
     private string? _incomingCompactText;
@@ -73,7 +77,6 @@ public partial class MainWindow
         }
 
         UpdateCompactTimer();
-        SetEqualizer(_state?.IsPlaying == true && IsVisible);
 
         string? track = _state == null ? null : $"{_state.SourceApp}\n{_state.Artist}\n{_state.Title}";
         if (track != _lyricsTrack)
@@ -163,6 +166,59 @@ public partial class MainWindow
             _focusWasActive = active;
             UpdateTargets(); // The idle notch widens to fit the countdown.
         }
+        UpdateEqualizer();
+    }
+
+    /// <summary>
+    /// The bars move only where they can be seen: a running animation keeps WPF drawing frames
+    /// even behind the open notch (where the closed view is just transparent) or when collapsed.
+    /// </summary>
+    private void UpdateEqualizer() =>
+        SetEqualizer(_state?.IsPlaying == true && IsVisible && !_expanded && Equalizer.Visibility == Visibility.Visible &&
+                     !_reduceMotion);
+
+    /// <summary>
+    /// Windows' "Animation effects" switched off, or energy saver on: the bars stand still.
+    /// Both can change while Yata runs.
+    /// </summary>
+    private static bool ReduceMotionNow()
+    {
+        bool saver;
+        try
+        {
+            saver = PowerManager.EnergySaverStatus == EnergySaverStatus.On;
+        }
+        catch (Exception)
+        {
+            saver = false; // Not reported on this Windows (e.g. no battery API).
+        }
+        return !SystemParameters.ClientAreaAnimation || saver;
+    }
+
+    private void WatchMotionPreferences()
+    {
+        SystemParameters.StaticPropertyChanged += OnSystemParameterChanged;
+        PowerManager.EnergySaverStatusChanged += OnEnergySaverChanged;
+    }
+
+    private void UnwatchMotionPreferences()
+    {
+        SystemParameters.StaticPropertyChanged -= OnSystemParameterChanged;
+        PowerManager.EnergySaverStatusChanged -= OnEnergySaverChanged;
+    }
+
+    private void OnSystemParameterChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(SystemParameters.ClientAreaAnimation))
+            RefreshMotion();
+    }
+
+    private void OnEnergySaverChanged(object? sender, object e) => Dispatcher.InvokeAsync(RefreshMotion);
+
+    private void RefreshMotion()
+    {
+        _reduceMotion = ReduceMotionNow();
+        UpdateEqualizer();
     }
 
     private void SetArtwork(BitmapImage? image)
@@ -202,31 +258,38 @@ public partial class MainWindow
             return;
         _equalizerRunning = running;
 
+        if (running)
+        {
+            StepEqualizer();
+            _equalizerTimer.Start();
+        }
+        else
+        {
+            _equalizerTimer.Stop();
+            foreach (Rectangle bar in Equalizer.Children)
+                ((ScaleTransform)bar.RenderTransform).ScaleY = 2 / EqualizerRows;
+        }
+    }
+
+    /// <summary>
+    /// Discrete steps: the bars jump between whole pixel rows like the sprite. A plain timer at
+    /// the step rate does it without an animation clock, which kept WPF producing 15 frames a
+    /// second (and the UI thread waking ~220 times a second) for a picture that changes 7.
+    /// </summary>
+    private void StepEqualizer()
+    {
         for (int i = 0; i < Equalizer.Children.Count; i++)
         {
-            var scale = (ScaleTransform)((Rectangle)Equalizer.Children[i]).RenderTransform;
-            if (running)
-            {
-                // Discrete steps: the bars jump between whole pixel rows like the sprite, and the
-                // notch only repaints when a bar actually changes height.
-                var bar = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
-                var steps = EqualizerSteps[i];
-                for (int s = 0; s < steps.Length; s++)
-                    bar.KeyFrames.Add(new DiscreteDoubleKeyFrame(steps[s] / EqualizerRows,
-                        KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(s * EqualizerStepMs))));
-                bar.Duration = TimeSpan.FromMilliseconds(steps.Length * EqualizerStepMs);
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, Ambient(bar));
-            }
-            else
-            {
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                scale.ScaleY = 2 / EqualizerRows;
-            }
+            var steps = EqualizerSteps[i];
+            ((ScaleTransform)((Rectangle)Equalizer.Children[i]).RenderTransform).ScaleY =
+                steps[_equalizerStep % steps.Length] / EqualizerRows;
         }
+        _equalizerStep++;
     }
 
     private void BuildEqualizer()
     {
+        _equalizerTimer.Tick += (_, _) => StepEqualizer();
         foreach (var _ in EqualizerSteps)
         {
             Equalizer.Children.Add(new Rectangle
