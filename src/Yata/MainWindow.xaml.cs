@@ -752,6 +752,16 @@ public partial class MainWindow : Window
         _accent.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(accent, TimeSpan.FromMilliseconds(500)));
     }
 
+    /// <summary>
+    /// Endless decorative animations run at 15 fps instead of 60. Each frame repaints the
+    /// whole transparent window; at 60 fps the equalizer alone cost ~25% of a CPU core.
+    /// </summary>
+    internal static T Ambient<T>(T animation) where T : Timeline
+    {
+        Timeline.SetDesiredFrameRate(animation, 15);
+        return animation;
+    }
+
     private void SetEqualizer(bool running)
     {
         if (running == _equalizerRunning)
@@ -763,12 +773,13 @@ public partial class MainWindow : Window
             var scale = (ScaleTransform)((Rectangle)Equalizer.Children[i]).RenderTransform;
             if (running)
             {
-                scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(0.25, 1, TimeSpan.FromMilliseconds(EqualizerPeriods[i]))
+                var bar = new DoubleAnimation(0.25, 1, TimeSpan.FromMilliseconds(EqualizerPeriods[i]))
                 {
                     AutoReverse = true,
                     RepeatBehavior = RepeatBehavior.Forever,
                     EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
-                });
+                };
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, Ambient(bar));
             }
             else
             {
@@ -862,9 +873,9 @@ public partial class MainWindow : Window
 
         var period = TimeSpan.FromSeconds(2.2);
         ZzzShift.BeginAnimation(TranslateTransform.YProperty,
-            new DoubleAnimation(3, -6, period) { RepeatBehavior = RepeatBehavior.Forever });
+            Ambient(new DoubleAnimation(3, -6, period) { RepeatBehavior = RepeatBehavior.Forever }));
         Zzz.BeginAnimation(OpacityProperty,
-            new DoubleAnimation(1, 0, period) { RepeatBehavior = RepeatBehavior.Forever });
+            Ambient(new DoubleAnimation(1, 0, period) { RepeatBehavior = RepeatBehavior.Forever }));
     }
 
     private void OnWentAway(TimeSpan unattended)

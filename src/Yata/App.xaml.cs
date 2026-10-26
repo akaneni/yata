@@ -1,6 +1,8 @@
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
 using Forms = System.Windows.Forms;
 
 namespace Yata;
@@ -14,6 +16,11 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        // Measured: for a small transparent overlay, GPU rendering costs more than it saves —
+        // each frame is read back from the GPU — and the Direct3D device alone took ~75 MB.
+        // Software rendering cut Task Manager memory from ~119 MB to ~43 MB and halved CPU.
+        RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
         _singleInstance = new Mutex(true, "Yata.SingleInstance", out bool isFirstInstance);
         if (!isFirstInstance)

@@ -101,12 +101,12 @@ public partial class FocusPage : UserControl
             return;
         _blinking = on;
         TimeText.BeginAnimation(OpacityProperty, on
-            ? new DoubleAnimation(1, 0.35, TimeSpan.FromMilliseconds(900))
+            ? MainWindow.Ambient(new DoubleAnimation(1, 0.35, TimeSpan.FromMilliseconds(900))
             {
                 AutoReverse = true,
                 RepeatBehavior = RepeatBehavior.Forever,
                 EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
-            }
+            })
             : null);
     }
 
