@@ -21,7 +21,19 @@ public partial class FocusPage : UserControl
     private FocusTimer? _timer;
     private bool _blinking;
 
-    public FocusPage() => InitializeComponent();
+    public FocusPage()
+    {
+        InitializeComponent();
+        // Hidden (notch closed or another tab) it doesn't redraw every second, and the paused blink
+        // stops, since a running animation keeps WPF rendering frames; it all catches up when shown.
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible)
+                Refresh();
+            else
+                SetBlinking(false);
+        };
+    }
 
     public void Attach(FocusTimer timer)
     {
@@ -32,7 +44,7 @@ public partial class FocusPage : UserControl
 
     private void Refresh()
     {
-        if (_timer == null)
+        if (_timer == null || !IsVisible)
             return;
 
         var remaining = _timer.Remaining;

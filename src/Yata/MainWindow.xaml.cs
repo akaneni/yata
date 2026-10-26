@@ -67,7 +67,7 @@ public partial class MainWindow : Window
     private static readonly CultureInfo PtBr = new("pt-BR");
 
     private readonly MediaService _media;
-    private readonly DispatcherTimer _lyricsTimer = new() { Interval = TimeSpan.FromMilliseconds(120) };
+    private readonly DispatcherTimer _lyricsTimer = new();
     private readonly DispatcherTimer _hudTimer = new() { Interval = TimeSpan.FromMilliseconds(1800) };
     private readonly AudioWatcher _audio;
     private readonly BrightnessWatcher _brightness;
@@ -95,7 +95,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _titleReveal = new() { Interval = TimeSpan.FromMilliseconds(450) };
     private readonly SolidColorBrush _accent = new(ColorExtractor.Default);
     private readonly DispatcherTimer _hoverTimer = new();
-    private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly DispatcherTimer _clockTimer = new();
 
     private readonly Spring _width = new(CompactIdle.Width, 0.1);
     private readonly Spring _height = new(CompactIdle.Height, 0.1);
@@ -127,6 +127,8 @@ public partial class MainWindow : Window
     private bool _dropHinting;
 
     private bool _fullscreenApp;
+    // Locked (or the session moved away): nobody can see the notch, so it stops drawing.
+    private bool _sessionLocked;
     private DateTime _pinnedUntil;
     private SettingsWindow? _settingsWindow;
 
@@ -146,8 +148,14 @@ public partial class MainWindow : Window
         _media.Changed += OnMediaChanged;
 
         _hoverTimer.Tick += OnHoverTimer;
-        _clockTimer.Tick += (_, _) => { UpdateClock(); RefreshProgress(); CollapseIfCursorLeft(); };
-        _lyricsTimer.Tick += (_, _) => UpdateLyricLine();
+        _clockTimer.Tick += (_, _) =>
+        {
+            UpdateClock();
+            RefreshProgress();
+            CollapseIfCursorLeft();
+            ScheduleClock();
+        };
+        _lyricsTimer.Tick += (_, _) => { UpdateLyricLine(); UpdateLyricsTimer(); };
         _hudTimer.Tick += (_, _) => HideHud();
         _titleReveal.Tick += (_, _) => { _titleReveal.Stop(); TitleMarquee.Run(); };
 
@@ -198,8 +206,9 @@ public partial class MainWindow : Window
         _hudRavenLand.Tick += (_, _) => { _hudRavenLand.Stop(); _hudRaven.Land(); };
         BuildEqualizer();
         _idleRaven = new RavenAnimator(IdleRaven);
-        // Hidden means a full-screen app is up: someone is watching it, not away.
-        _presence.IsSurelyPresent = () => !IsVisible;
+        // Hidden for a full-screen app means someone is watching it, not away. Hidden because the
+        // session is locked is the opposite, so that time counts as away.
+        _presence.IsSurelyPresent = () => _fullscreenApp && !IsVisible;
         _presence.StateChanged += UpdateCompanion;
         _presence.WentAway += OnWentAway;
         _presence.Returned += OnReturned;
@@ -210,6 +219,8 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         Closed += OnClosed;
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+        SystemEvents.SessionSwitch += OnSessionSwitch;
+        WatchMotionPreferences();
         DpiChanged += OnDpiChanged;
 
         UpdateClock();
@@ -235,7 +246,7 @@ public partial class MainWindow : Window
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         StartupTimings.Mark("Loaded");
-        StartService("clock", _clockTimer.Start);
+        StartService("clock", () => { ScheduleClock(); _clockTimer.Start(); });
         StartService("audio", _audio.Start);
         StartService("brightness", _brightness.Start);
         StartService("power", _power.Start);
@@ -293,6 +304,8 @@ public partial class MainWindow : Window
     private void OnClosed(object? sender, EventArgs e)
     {
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
+        SystemEvents.SessionSwitch -= OnSessionSwitch;
+        UnwatchMotionPreferences();
         _fullscreen?.Dispose();
         _clockTimer.Stop();
         _hoverTimer.Stop();
@@ -362,7 +375,31 @@ public partial class MainWindow : Window
     private void OnFullscreenChanged(bool fullscreen)
     {
         _fullscreenApp = fullscreen;
-        if (fullscreen && Settings.HideInFullscreen)
+        UpdateShown();
+    }
+
+    private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+        bool? locked = e.Reason switch
+        {
+            SessionSwitchReason.SessionLock or SessionSwitchReason.ConsoleDisconnect or SessionSwitchReason.RemoteDisconnect => true,
+            SessionSwitchReason.SessionUnlock or SessionSwitchReason.ConsoleConnect or SessionSwitchReason.RemoteConnect => false,
+            _ => null,
+        };
+        if (locked is not { } value || value == _sessionLocked)
+            return;
+        _sessionLocked = value;
+        Log.Info("app", value ? "Sessão bloqueada: notch em pausa" : "Sessão desbloqueada");
+        UpdateShown();
+    }
+
+    /// <summary>
+    /// Hidden while a full-screen app is up (if the user wants) or the session is locked. Hidden,
+    /// nothing animates; reminders that come meanwhile wait and show when the notch is back.
+    /// </summary>
+    private void UpdateShown()
+    {
+        if (_sessionLocked || (_fullscreenApp && Settings.HideInFullscreen))
         {
             _hoverTimer.Stop();
             SetExpanded(false);
@@ -372,7 +409,7 @@ public partial class MainWindow : Window
         else if (!IsVisible)
         {
             Show();
-            SetEqualizer(_state?.IsPlaying == true);
+            UpdateEqualizer();
             ShowPendingHud();
         }
         UpdateLyricsTimer();
@@ -420,7 +457,7 @@ public partial class MainWindow : Window
         PositionWindow();
         UpdateHotkey();
         _ = _updates.CheckIfDueAsync(); // Just switched on: look now rather than within the hour.
-        OnFullscreenChanged(_fullscreenApp);
+        UpdateShown();
         UpdatePrivacy();
         UpdateCompanion();
     }
@@ -576,11 +613,12 @@ public partial class MainWindow : Window
             TasksPage.EndTyping();
             EndDropHint();
         }
-        _clockTimer.Interval = TimeSpan.FromMilliseconds(expanded ? 250 : 1000);
+        ScheduleClock();
         UpdateTargets();
         RefreshProgress();
         if (!expanded)
             ShowPendingHud();
+        UpdateEqualizer();
     }
 
     // ---- Animation ------------------------------------------------------------------
@@ -796,6 +834,16 @@ public partial class MainWindow : Window
     }
 
     // ---- Clock ----------------------------------------------------------------------
+
+    /// <summary>
+    /// Open, the progress bar and the "mouse left" check need a quick tick. Closed, only the
+    /// minutes change, so the clock wakes up when the minute turns.
+    /// </summary>
+    private void ScheduleClock() =>
+        _clockTimer.Interval = _expanded ? TimeSpan.FromMilliseconds(250) : UntilNextMinute(DateTime.Now);
+
+    internal static TimeSpan UntilNextMinute(DateTime now) =>
+        TimeSpan.FromMinutes(1) - TimeSpan.FromTicks(now.Ticks % TimeSpan.TicksPerMinute) + TimeSpan.FromMilliseconds(20);
 
     private void UpdateClock()
     {

@@ -55,4 +55,23 @@ public class LyricsTests
 
         Assert.Equal(expected, lyrics.IndexAt(S(position)));
     }
+
+    [Theory]
+    [InlineData(0, 5)]       // before the first line: wait for it
+    [InlineData(5, 4)]       // on a stamp: the next one
+    [InlineData(10.5, 1.5)]
+    public void Time_until_the_next_line_starts(double position, double expected)
+    {
+        var lyrics = Lyrics.Parse("[00:05.00]One\n[00:09.00]Two\n[00:12.00]Three")!;
+
+        Assert.Equal(S(expected), lyrics.UntilNextLine(S(position)));
+    }
+
+    [Fact]
+    public void Nothing_to_wait_for_after_the_last_line()
+    {
+        var lyrics = Lyrics.Parse("[00:05.00]One\n[00:09.00]Two")!;
+
+        Assert.Null(lyrics.UntilNextLine(S(9)));
+    }
 }

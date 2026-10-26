@@ -4,14 +4,16 @@
 # what the user does meanwhile doesn't change the numbers. A running Yata is closed and reopened.
 #
 # Usage: ./tools/measure.ps1 [-States parado,musica,aberto,foco] [-Rounds 3] [-Seconds 20]
-#                            [-Exe path\Yata.exe] [-OutFile medicao.csv] [-Phases]
+#                            [-Warmup 90] [-Exe path\Yata.exe] [-OutFile medicao.csv] [-Phases]
 #   parado  just the clock            musica  a track with synced lyrics, notch closed
 #   aberto  the same, notch open      foco    Pomodoro running
 param(
     [string[]]$States = @("parado", "musica", "aberto", "foco"),
     [int]$Rounds = 3,
     [int]$Seconds = 20,
-    [int]$Warmup = 10,
+    # The .NET JIT keeps recompiling hot code for the first minute or so (measured: still ~20 ms/s
+    # at 40 s, gone by 90 s); measuring earlier counts startup work as steady-state cost.
+    [int]$Warmup = 90,
     [string]$Exe,
     [string]$OutFile,
     [switch]$Phases
@@ -95,6 +97,8 @@ function Write-Profile([string]$dir) {
     if (Test-Path $dir) { Remove-Item -Recurse -Force $dir }
     New-Item -ItemType Directory -Force $dir | Out-Null
     $off = [ordered]@{
+        # Otherwise a full-screen app of the user's hides the notch and the run measures a pause.
+        HideInFullscreen = $false
         CompanionEnabled = $false; AwaySummaryEnabled = $false; PauseFocusWhenAway = $false
         HudVolume = $false; HudBrightness = $false; HudPower = $false; HudAudioDevice = $false
         HudCapsLock = $false; HudKeyboardLayout = $false; HudNetwork = $false; HudPrivacy = $false

@@ -108,7 +108,7 @@ public sealed class GoogleAuth
     private const string TokenUrl = "https://oauth2.googleapis.com/token";
     private const string RevokeUrl = "https://oauth2.googleapis.com/revoke";
     private static readonly TimeSpan SignInTimeout = TimeSpan.FromMinutes(5);
-    private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(20) };
+    private static readonly HttpClient Http = HttpPool.Client(TimeSpan.FromSeconds(20));
 
     private readonly string _file = Path.Combine(AppPaths.DataDir, "google.dat");
     private readonly GoogleClient? _client = GoogleClient.Load();
