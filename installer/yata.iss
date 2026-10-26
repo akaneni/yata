@@ -74,7 +74,7 @@ Name: "{autodesktop}\Yata"; Filename: "{app}\Yata.exe"; Tasks: desktopicon
 
 [Registry]
 ; Same value format the app's own "Start with Windows" switch writes, so the two stay in sync.
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Yata"; ValueData: """{app}\Yata.exe"""; Tasks: autostart
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Yata"; ValueData: """{app}\Yata.exe"" --autostart"; Tasks: autostart
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueName: "Yata"; Flags: deletevalue; Tasks: not autostart
 ; Remove it on uninstall even if it was turned on later from the app's settings.
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: none; ValueName: "Yata"; Flags: uninsdeletevalue

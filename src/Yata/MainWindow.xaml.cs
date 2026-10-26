@@ -111,6 +111,8 @@ public partial class MainWindow : Window
     private bool _pendingExpand;
     private bool _peeking;
     private bool _animating;
+    // --timings: note when the first frame of an opening is drawn (how fast the notch responds).
+    private bool _markExpandFrame;
     private TimeSpan _lastFrame;
     private bool _seeking;
     private Lyrics? _lyrics;
@@ -141,8 +143,10 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
+        StartupTimings.Mark("fields");
         Resources["AccentBrush"] = _accent;
         InitializeComponent();
+        StartupTimings.Mark("InitializeComponent");
 
         _media = new MediaService(Dispatcher);
         _media.Changed += OnMediaChanged;
@@ -195,6 +199,7 @@ public partial class MainWindow : Window
         _weather = new WeatherService(_store);
         _weather.Message += ShowHud;
         _weather.Changed += UpdateWeather;
+        StartupTimings.Mark("services");
         TasksPage.KeyboardRequested += EnterKeyboardMode;
         TasksPage.KeyboardReleased += ExitKeyboardMode;
         Deactivated += OnDeactivated;
@@ -246,20 +251,13 @@ public partial class MainWindow : Window
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         StartupTimings.Mark("Loaded");
+        // What the first moments show: the clock, the volume and Caps Lock notices, presence.
         StartService("clock", () => { ScheduleClock(); _clockTimer.Start(); });
         StartService("audio", _audio.Start);
-        StartService("brightness", _brightness.Start);
-        StartService("power", _power.Start);
-        StartService("network", _network.Start);
         StartService("keyboard", _keyboard.Start);
-        StartService("privacy", _privacy.Start);
-        StartService("updates", _updates.Start);
-        StartService("water", _water.Start);
-        StartService("tasks", _tasks.Start);
-        StartService("calendar", _calendar.Start);
-        StartService("google-tasks", _googleTasks.Start);
-        StartService("weather", _weather.Start);
         StartService("presence", _presence.Start);
+        // The rest waits for the notch to be on screen.
+        _ = Dispatcher.InvokeAsync(StartRestOfServices, DispatcherPriority.ApplicationIdle);
         if (Bench != null)
         {
             StartBench(Bench);
@@ -275,6 +273,43 @@ public partial class MainWindow : Window
             // Media sessions unavailable (e.g. stripped-down Windows); the notch still works as a clock.
             Log.Warn("media", "Sessões de mídia do Windows indisponíveis", ex);
         }
+    }
+
+    // Signing in to Windows, the disk and the network are busy; what goes online can wait a little.
+    private static readonly TimeSpan OnlineDelayAtLogon = TimeSpan.FromSeconds(15);
+
+    /// <summary>Opened by the "start with Windows" entry (--autostart) rather than by the user.</summary>
+    internal bool StartedWithWindows { get; init; }
+
+    private void StartRestOfServices()
+    {
+        StartService("brightness", _brightness.Start);
+        StartService("power", _power.Start);
+        StartService("network", _network.Start);
+        StartService("privacy", _privacy.Start);
+        StartService("water", _water.Start);
+        StartService("tasks", _tasks.Start);
+
+        if (!StartedWithWindows)
+        {
+            StartOnlineServices();
+            return;
+        }
+        var wait = new DispatcherTimer { Interval = OnlineDelayAtLogon };
+        wait.Tick += (_, _) =>
+        {
+            wait.Stop();
+            StartOnlineServices();
+        };
+        wait.Start();
+    }
+
+    private void StartOnlineServices()
+    {
+        StartService("updates", _updates.Start);
+        StartService("calendar", _calendar.Start);
+        StartService("google-tasks", _googleTasks.Start);
+        StartService("weather", _weather.Start);
     }
 
     /// <summary>One service failing to start shouldn't keep the ones after it from starting.</summary>
@@ -598,6 +633,8 @@ public partial class MainWindow : Window
         _peeking = false;
         if (expanded)
         {
+            StartupTimings.Mark("expand");
+            _markExpandFrame = true;
             _hudActive = false;
             _hudTimer.Stop();
             StopHudRaven();
@@ -738,6 +775,11 @@ public partial class MainWindow : Window
 
     private void OnRendering(object? sender, EventArgs e)
     {
+        if (_markExpandFrame)
+        {
+            _markExpandFrame = false;
+            StartupTimings.Mark("expand-frame");
+        }
         var now = ((RenderingEventArgs)e).RenderingTime;
         if (_lastFrame == TimeSpan.Zero)
         {

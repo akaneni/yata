@@ -12,16 +12,31 @@ internal static class Autostart
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
     private const string ValueName = "Yata";
 
-    private static string Command => $"\"{Environment.ProcessPath}\"";
+    /// <summary>Tells Yata it was opened at sign-in, so it can leave the network for later.</summary>
+    public const string Argument = "--autostart";
+
+    private static string Path => $"\"{Environment.ProcessPath}\"";
+
+    private static string Command => $"{Path} {Argument}";
 
     public static bool IsEnabled
     {
         get
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKey);
+            // Entries written before --autostart existed are just the quoted path.
             return key?.GetValue(ValueName) is string value &&
-                   string.Equals(value, Command, StringComparison.OrdinalIgnoreCase);
+                   (string.Equals(value, Command, StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(value, Path, StringComparison.OrdinalIgnoreCase));
         }
+    }
+
+    /// <summary>Brings an entry from before --autostart up to date; leaves everything else alone.</summary>
+    public static void Upgrade()
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+        if (key?.GetValue(ValueName) is string value && string.Equals(value, Path, StringComparison.OrdinalIgnoreCase))
+            key.SetValue(ValueName, Command);
     }
 
     public static void Set(bool enabled)

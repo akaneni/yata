@@ -39,13 +39,18 @@ public partial class App : Application
             return;
         }
 
-        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench") };
+        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench"), StartedWithWindows = e.Args.Contains(Autostart.Argument) };
         StartupTimings.Mark("MainWindow");
         _window.Show();
         StartupTimings.Mark("Show");
-        CreateTrayIcon();
-        StartupTimings.Mark("tray");
-        AnnouncePreviousCrash();
+        // The tray icon brings in Windows Forms (~55 ms): it comes once the notch is on screen.
+        _window.Dispatcher.InvokeAsync(() =>
+        {
+            CreateTrayIcon();
+            StartupTimings.Mark("tray");
+            AnnouncePreviousCrash();
+            UpgradeAutostart();
+        }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
         SystemEvents.PowerModeChanged += OnPowerModeChanged;
 
         int show = System.Array.IndexOf(e.Args, "--show");
@@ -98,6 +103,18 @@ public partial class App : Application
         _tray.BalloonTipClicked += (_, _) => OpenInExplorer(crash);
         _tray.ShowBalloonTip(10000, "O Yata fechou inesperadamente",
             "Clique para ver o registro do erro. Ele fica só neste PC.", Forms.ToolTipIcon.Warning);
+    }
+
+    private static void UpgradeAutostart()
+    {
+        try
+        {
+            Autostart.Upgrade();
+        }
+        catch (System.Exception ex) when (ex is System.UnauthorizedAccessException or System.Security.SecurityException)
+        {
+            Log.Warn("app", "Não foi possível atualizar o início com o Windows", ex);
+        }
     }
 
     private static void OpenInExplorer(string file)
