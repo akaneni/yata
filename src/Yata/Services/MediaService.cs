@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -36,9 +38,13 @@ public sealed record MediaState(
     }
 }
 
+/// <summary>One media session as seen by <see cref="MediaService.Pick"/>.</summary>
+internal readonly record struct SessionCandidate(bool IsPlaying, bool IsShown, bool IsSystemCurrent);
+
 /// <summary>
-/// Follows the current Windows media session (SMTC), which covers Spotify, browsers and
-/// most players. All events and state changes are delivered on the UI dispatcher.
+/// Follows a Windows media session (SMTC), which covers Spotify, browsers and most players:
+/// the one actually playing, rather than whatever Windows last called "current".
+/// All events and state changes are delivered on the UI dispatcher.
 /// </summary>
 public sealed class MediaService
 {
@@ -46,9 +52,12 @@ public sealed class MediaService
     private readonly TypedEventHandler<GlobalSystemMediaTransportControlsSession, MediaPropertiesChangedEventArgs> _onMediaProperties;
     private readonly TypedEventHandler<GlobalSystemMediaTransportControlsSession, PlaybackInfoChangedEventArgs> _onPlaybackInfo;
     private readonly TypedEventHandler<GlobalSystemMediaTransportControlsSession, TimelinePropertiesChangedEventArgs> _onTimeline;
+    // Watches every session's play/pause, so a player that starts in the background can take over.
+    private readonly TypedEventHandler<GlobalSystemMediaTransportControlsSession, PlaybackInfoChangedEventArgs> _onAnyPlayback;
 
     private GlobalSystemMediaTransportControlsSessionManager? _manager;
     private GlobalSystemMediaTransportControlsSession? _session;
+    private IReadOnlyList<GlobalSystemMediaTransportControlsSession> _watched = Array.Empty<GlobalSystemMediaTransportControlsSession>();
     private int _propertiesVersion;
 
     private string _title = "";
@@ -70,14 +79,99 @@ public sealed class MediaService
         _onMediaProperties = (_, _) => _dispatcher.InvokeAsync(() => _ = ReadMediaPropertiesAsync());
         _onPlaybackInfo = (_, _) => _dispatcher.InvokeAsync(() => { ReadPlaybackInfo(); Publish(); });
         _onTimeline = (_, _) => _dispatcher.InvokeAsync(() => { ReadTimeline(); Publish(); });
+        _onAnyPlayback = (_, _) => _dispatcher.InvokeAsync(AttachBestSession);
     }
 
     public async Task InitializeAsync()
     {
         _manager = await GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
-        _manager.CurrentSessionChanged += (_, _) => _dispatcher.InvokeAsync(AttachCurrentSession);
-        _manager.SessionsChanged += (_, _) => _dispatcher.InvokeAsync(AttachCurrentSession);
-        AttachCurrentSession();
+        _manager.CurrentSessionChanged += (_, _) => _dispatcher.InvokeAsync(AttachBestSession);
+        _manager.SessionsChanged += (_, _) => _dispatcher.InvokeAsync(() => { WatchSessions(); AttachBestSession(); });
+        WatchSessions();
+        AttachBestSession();
+    }
+
+    /// <summary>
+    /// Which session to show: keep the shown one while it plays; otherwise prefer Windows'
+    /// current session if it plays, then any session that plays; with nothing playing, stay
+    /// on the paused one already shown, then fall back to Windows' current one. -1 for none.
+    /// </summary>
+    internal static int Pick(IReadOnlyList<SessionCandidate> sessions)
+    {
+        int Find(Func<SessionCandidate, bool> match)
+        {
+            for (int i = 0; i < sessions.Count; i++)
+                if (match(sessions[i]))
+                    return i;
+            return -1;
+        }
+
+        foreach (var rule in new Func<SessionCandidate, bool>[]
+                 {
+                     s => s.IsShown && s.IsPlaying,
+                     s => s.IsSystemCurrent && s.IsPlaying,
+                     s => s.IsPlaying,
+                     s => s.IsShown,
+                     s => s.IsSystemCurrent,
+                 })
+        {
+            int index = Find(rule);
+            if (index >= 0)
+                return index;
+        }
+        return sessions.Count > 0 ? 0 : -1;
+    }
+
+    private void WatchSessions()
+    {
+        foreach (var session in _watched)
+            session.PlaybackInfoChanged -= _onAnyPlayback;
+        try
+        {
+            _watched = _manager?.GetSessions().ToList() ?? new List<GlobalSystemMediaTransportControlsSession>();
+        }
+        catch (Exception)
+        {
+            _watched = Array.Empty<GlobalSystemMediaTransportControlsSession>();
+        }
+        foreach (var session in _watched)
+            session.PlaybackInfoChanged += _onAnyPlayback;
+    }
+
+    private void AttachBestSession()
+    {
+        var current = _manager?.GetCurrentSession();
+        var candidates = _watched.Select(s => new SessionCandidate(
+            IsPlaying(s),
+            _session != null && SameSession(s, _session),
+            current != null && SameSession(s, current))).ToList();
+        int index = Pick(candidates);
+        Attach(index >= 0 ? _watched[index] : current);
+    }
+
+    private static bool IsPlaying(GlobalSystemMediaTransportControlsSession session)
+    {
+        try
+        {
+            return session.GetPlaybackInfo().PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+        }
+        catch (Exception)
+        {
+            return false; // Closed between the listing and the read.
+        }
+    }
+
+    // WinRT may hand out a new wrapper for the same session; the app id is what identifies it.
+    private static bool SameSession(GlobalSystemMediaTransportControlsSession a, GlobalSystemMediaTransportControlsSession b)
+    {
+        try
+        {
+            return ReferenceEquals(a, b) || a.SourceAppUserModelId == b.SourceAppUserModelId;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 
     public Task TogglePlayPauseAsync() => Run(s => s.TryTogglePlayPauseAsync());
@@ -110,10 +204,9 @@ public sealed class MediaService
         }
     }
 
-    private void AttachCurrentSession()
+    private void Attach(GlobalSystemMediaTransportControlsSession? next)
     {
-        var next = _manager?.GetCurrentSession();
-        if (_session != null && next != null && _session.SourceAppUserModelId == next.SourceAppUserModelId)
+        if (_session != null && next != null && SameSession(_session, next))
             return;
 
         if (_session != null)

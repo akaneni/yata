@@ -8,7 +8,9 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 **Dados locais:** tarefas, registro de água e caminhos da prateleira ficam em `%LOCALAPPDATA%\Yata\data.json`.
 
-**Acesso à rede:** o único acesso é a busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`.
+**Acesso à rede:** só dois, e nada sobre você ou o PC é enviado:
+- busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`. Pode ser desligada nas configurações.
+- aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. A instalação continua manual.
 
 ## Identidade
 
@@ -19,9 +21,12 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 - **Notch compacto**: relógio quando nada toca; capa, título e equalizador animado quando há mídia.
 - **Expande ao passar o mouse** com animação de mola; recolhe ao sair.
-- **Player de mídia** de qualquer app que use os controles de mídia do Windows (Spotify, YouTube no navegador, etc.): capa, título, artista, barra de progresso com busca, anterior/play/próxima.
+- **Player de mídia** de qualquer app que use os controles de mídia do Windows (Spotify, YouTube no navegador, etc.): capa, título, artista, barra de progresso com busca, anterior/play/próxima. Com vários players abertos, segue o que está **tocando de fato**.
 - **Letras sincronizadas**: o notch se divide em dois (player + letra rolando), a linha atual fica em destaque e clicar numa linha pula para ela. No modo compacto aparece a linha sendo cantada.
 - **Avisos do sistema** no notch compacto: volume/mudo, brilho, carregador conectado/desconectado, bateria baixa (20% e 10%), troca de saída de áudio (fone/caixa), Caps Lock, troca de idioma do teclado e conexão de rede. O teclado é lido por consulta de estado, **sem hook** — o app nunca vê o que é digitado.
+- **Câmera e microfone em uso**: ponto laranja (microfone) ou verde (câmera) no notch fechado e o nome dos apps no notch aberto. O microfone vem das sessões de áudio do Windows (Core Audio). A câmera depende do registro que o Windows mantinha até a versão 25H2; no Windows 11 26H2 esse dado passou a exigir administrador, então lá só o microfone é detectado.
+- **Atalho Ctrl+Alt+Y** abre e fecha o notch de qualquer lugar (`RegisterHotKey`: o Windows avisa só essa combinação).
+- **Vários monitores**: escolha nas configurações em qual tela o notch fica; respeita a escala de cada tela.
 - **Abas no notch aberto**: Mídia, Foco, Água, Tarefas e Prateleira.
 - **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
 - **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
@@ -60,7 +65,7 @@ Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instala
 dotnet run --project src/Yata
 ```
 
-Testes automáticos (fluxos do Pomodoro com relógio simulado):
+Testes automáticos (Pomodoro, letras, tarefas, água, presença, escolha do player e aviso de versão, com relógio simulado e sem rede). Rodam também no GitHub Actions a cada push:
 
 ```powershell
 dotnet test
@@ -91,6 +96,7 @@ git push origin v0.1.0
 src/Yata/
   App.xaml(.cs)               inicialização, instância única, ícone na bandeja
   MainWindow.xaml(.cs)        janela do notch, formato, animação, modos compacto/expandido
+  MainWindow.*.cs             partes por assunto: mídia, letra, avisos, Yata, privacidade, atalho...
   Views/RavenSprite.cs        o Yata: quadros em pixel art e renderização nítida
   Views/RavenAnimator.cs      comportamento do Yata (piscar, olhar, dormir, voar)
   Views/                      páginas Foco, Água, Tarefas e Prateleira
@@ -103,6 +109,8 @@ src/Yata/
   Services/NetworkWatcher.cs  conexão de rede
   Services/KeyboardWatcher.cs Caps Lock e idioma do teclado (sem hook)
   Services/FullscreenWatcher.cs  detecta app em tela cheia e mantém o notch no topo
+  Services/PrivacyWatcher.cs  câmera e microfone em uso (MicrophoneMonitor.cs: Core Audio)
+  Services/UpdateChecker.cs   aviso opcional de versão nova (releases do GitHub)
   Services/AppStore.cs        persistência local (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    água e lembretes
@@ -114,6 +122,8 @@ src/Yata/
   SettingsWindow.xaml(.cs)    janela de configurações
 installer/yata.iss            instalador (Inno Setup)
 tools/                        gerar ícone e instalador
+tests/Yata.Tests/             testes (xUnit)
+.github/workflows/ci.yml      build e testes a cada push
 .github/workflows/release.yml release automático por tag
 ```
 
@@ -127,4 +137,6 @@ tools/                        gerar ícone e instalador
 6. ~~Identidade (Yata) e companheiro~~
 7. ~~Configurações, iniciar com o Windows, instalador~~
 
-Próximas ideias: projeção WinRT enxuta (instalador menor), assinatura digital, suporte a vários monitores.
+8. ~~Câmera/microfone em uso, vários monitores, atalho global, aviso de versão~~
+
+Próximas ideias: projeção WinRT enxuta (instalador menor), assinatura digital.

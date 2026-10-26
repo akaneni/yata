@@ -91,6 +91,23 @@
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
+                        <TextBlock Text="Tela do notch" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <!-- Each click moves to the next connected display -->
+                        <Button x:Name="MonitorButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                ToolTip="Clique para trocar de tela" Click="OnMonitorClick"/>
+                    </Grid>
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
+                            <TextBlock Text="Abrir e fechar com Ctrl+Alt+Y" Style="{StaticResource Label}"/>
+                            <TextBlock Text="O Windows avisa só essa combinação; nada mais do que você digita é lido."
+                                       Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.HotkeyEnabled}"/>
+                    </Grid>
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
                         <TextBlock Text="Esconder em apps de tela cheia" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.HideInFullscreen}"/>
@@ -113,6 +130,28 @@
                 </StackPanel>
             </Border>
 
+            <!-- Updates -->
+            <TextBlock Text="Atualizações" Style="{StaticResource Section}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
+                            <TextBlock Text="Avisar quando houver versão nova" Style="{StaticResource Label}"/>
+                            <TextBlock Style="{StaticResource Hint}"
+                                       Text="Uma consulta por dia à página pública de versões do GitHub. Nada sobre você ou o PC é enviado, e a instalação continua manual."/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.UpdateCheckEnabled}"/>
+                    </Grid>
+                    <!-- Shown when the last check found a newer version -->
+                    <Grid x:Name="UpdateRow" Style="{StaticResource Row}" Visibility="Collapsed">
+                        <TextBlock x:Name="UpdateText" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <Button Style="{StaticResource PrimaryPillButton}" Content="Abrir página de download"
+                                HorizontalAlignment="Right" Click="OnOpenReleases"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Media -->
             <TextBlock Text="Mídia" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
@@ -120,7 +159,7 @@
                     <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
                         <TextBlock Text="Letras sincronizadas" Style="{StaticResource Label}"/>
                         <TextBlock Style="{StaticResource Hint}"
-                                   Text="Busca no LRCLIB (lrclib.net) enviando só artista, título e duração. É o único recurso que usa a internet."/>
+                                   Text="Busca no LRCLIB (lrclib.net) enviando só artista, título e duração."/>
                     </StackPanel>
                     <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                               IsChecked="{Binding Settings.LyricsEnabled}"/>

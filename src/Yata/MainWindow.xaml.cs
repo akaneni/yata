@@ -66,6 +66,7 @@ public partial class MainWindow : Window
     private readonly NetworkWatcher _network;
     private readonly KeyboardWatcher _keyboard = new();
     private readonly PrivacyWatcher _privacy;
+    private readonly UpdateChecker _updates;
     private readonly AppStore _store = AppStore.Load();
     private readonly FocusTimer _focus;
     private readonly WaterTracker _water;
@@ -146,6 +147,8 @@ public partial class MainWindow : Window
         _keyboard.Message += ShowHud;
         _privacy = new PrivacyWatcher(Dispatcher);
         _privacy.Changed += OnPrivacyChanged;
+        _updates = new UpdateChecker(_store);
+        _updates.Message += ShowHud;
 
         _focus = new FocusTimer(_store.Settings);
         _presence = new PresenceTracker(_store.Settings);
@@ -183,6 +186,7 @@ public partial class MainWindow : Window
         Loaded += OnLoaded;
         Closed += OnClosed;
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
+        DpiChanged += OnDpiChanged;
 
         UpdateClock();
         UpdateTargets();
@@ -197,6 +201,7 @@ public partial class MainWindow : Window
         HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
 
         PositionWindow();
+        UpdateHotkey();
 
         _fullscreen = new FullscreenWatcher(hwnd);
         _fullscreen.Changed += OnFullscreenChanged;
@@ -212,6 +217,7 @@ public partial class MainWindow : Window
         _network.Start();
         _keyboard.Start();
         _privacy.Start();
+        _updates.Start();
         _water.Start();
         _tasks.Start();
         _presence.Start();
@@ -242,6 +248,7 @@ public partial class MainWindow : Window
         _network.Dispose();
         _keyboard.Dispose();
         _privacy.Dispose();
+        _updates.Stop();
         _water.Stop();
         _tasks.Stop();
         _presence.Stop();
@@ -256,16 +263,39 @@ public partial class MainWindow : Window
             handled = true;
             return new IntPtr(NativeMethods.MA_NOACTIVATE);
         }
+        if (msg == NativeMethods.WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+        {
+            handled = true;
+            OnHotkey();
+        }
         return IntPtr.Zero;
     }
 
     private void OnDisplaySettingsChanged(object? sender, EventArgs e) => Dispatcher.InvokeAsync(PositionWindow);
 
+    /// <summary>
+    /// Centers the window at the top of the chosen display. Positioned in physical pixels, since
+    /// WPF's Left/Top are in the primary display's units and displays can have different scales.
+    /// </summary>
     private void PositionWindow()
     {
-        Left = (SystemParameters.PrimaryScreenWidth - Width) / 2;
-        Top = 0;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        if (hwnd == IntPtr.Zero)
+        {
+            // Not created yet: a first guess; OnSourceInitialized places it properly.
+            Left = (SystemParameters.PrimaryScreenWidth - Width) / 2;
+            Top = 0;
+            return;
+        }
+
+        var display = Monitors.Resolve(Settings.Monitor);
+        double scale = NativeMethods.ScaleAt(display.X + display.Width / 2, display.Y);
+        int width = (int)Math.Round(Width * scale);
+        NativeMethods.MoveWindow(hwnd, display.X + (display.Width - width) / 2, display.Y);
     }
+
+    // Moving to a display with another scale makes WPF resize the window; center it again.
+    private void OnDpiChanged(object sender, DpiChangedEventArgs e) => Dispatcher.InvokeAsync(PositionWindow);
 
     private void OnFullscreenChanged(bool fullscreen)
     {
@@ -323,6 +353,9 @@ public partial class MainWindow : Window
         }
 
         ApplyAccent();
+        PositionWindow();
+        UpdateHotkey();
+        _ = _updates.CheckIfDueAsync(); // Just switched on: look now rather than within the hour.
         OnFullscreenChanged(_fullscreenApp);
         UpdatePrivacy();
         UpdateCompanion();
