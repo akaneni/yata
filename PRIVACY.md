@@ -6,7 +6,7 @@ O Yata é um app de código aberto para Windows que mostra um "notch" no topo da
 
 ## Dados que ficam no seu computador
 
-Tarefas, registro de água, caminhos da prateleira e configurações ficam em `%LOCALAPPDATA%\Yata\data.json`. Esses dados nunca são enviados para fora do PC.
+Tarefas, registro de água, caminhos da prateleira e configurações ficam em `%LOCALAPPDATA%\Yata\data.json`. Esses dados nunca são enviados para fora do PC, com uma exceção que você escolhe: se ligar a sincronização com o Google Tasks, as tarefas vão para a sua lista no Google (veja abaixo).
 
 ## Serviços externos
 
@@ -14,7 +14,7 @@ O Yata só acessa a internet nestes casos:
 
 - **LRCLIB** (lrclib.net), para buscar letras de músicas: envia artista, título e duração da faixa que está tocando. Pode ser desligado nas Configurações.
 - **Open-Meteo** (open-meteo.com), para o tempo, somente se você ligar: envia a latitude e a longitude da cidade escolhida, arredondadas para cerca de 1 km. Ao buscar a cidade, envia o nome digitado. Se você clicar em "Usar minha localização", o Yata pede ao Windows a posição uma única vez, arredonda para cerca de 1 km na hora e descarta o valor preciso. Ele não acompanha a localização depois disso e nunca descobre onde você está pelo IP. Guarda nas configurações só o nome escolhido e as coordenadas arredondadas.
-- **Google Agenda**, somente se você conectar sua conta (veja abaixo).
+- **Google Agenda** e **Google Tasks**, somente se você conectar sua conta e liberar cada um (veja abaixo).
 
 ## Google Agenda
 
@@ -32,11 +32,21 @@ Como os dados são usados:
 - A comunicação é feita **diretamente** entre o seu PC e os servidores do Google. Nenhum dado passa por servidores do Yata ou de terceiros, porque eles não existem.
 - O Yata **não** cria, altera nem apaga eventos, **não** compartilha seus dados com ninguém, **não** os usa para publicidade e **não** os usa para treinar modelos de IA.
 
+## Google Tasks
+
+Se você liga **Tarefas** nas Configurações, o Yata pede ao Google permissão para **ver e editar suas tarefas**. A edição é necessária porque a sincronização vale nos dois sentidos.
+
+- O Yata lê **uma lista** escolhida por você (de início, "Minhas tarefas"): as tarefas abertas e as concluídas hoje. Usa título, situação (aberta ou concluída) e data.
+- Quando você cria, conclui, reabre ou remove uma tarefa no Yata, ele faz o mesmo nessa lista. Ele **não** mexe em outras listas nem em notas e subtarefas.
+- As tarefas sincronizadas ficam em `%LOCALAPPDATA%\Yata\data.json`, junto com as tarefas locais, para a aba funcionar sem internet. Ao desligar a sincronização ou desconectar a conta, as tarefas vindas do Google são apagadas desse arquivo (elas continuam no Google).
+- O horário de um lembrete ("Reunião 15:30") fica só no Yata. O Google Tasks recebe apenas o dia.
+- Como na agenda, a comunicação é direta entre o seu PC e o Google, e os dados não são compartilhados, usados para publicidade ou para treinar modelos de IA.
+
 O uso e a transferência, pelo Yata, de informações recebidas das APIs do Google seguem a [Política de dados do usuário dos serviços de API do Google](https://developers.google.com/terms/api-services-user-data-policy), incluindo os requisitos de Uso Limitado (*Limited Use*).
 
 ### Como remover o acesso
 
-- No Yata: **Configurações → Agenda → Desconectar**. O acesso é revogado no Google e o arquivo local é apagado.
+- No Yata: **Configurações → Google → Desconectar**. O acesso (agenda e tarefas) é revogado no Google e o arquivo local é apagado.
 - No Google: <https://myaccount.google.com/connections>, removendo o Yata.
 - Desinstalar o Yata não apaga a pasta `%LOCALAPPDATA%\Yata`. Apague a pasta manualmente se quiser remover tudo.
 

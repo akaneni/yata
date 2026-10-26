@@ -25,12 +25,16 @@ public partial class SettingsWindow : Window
     private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
 
     private readonly AppStore _store;
+    private readonly GoogleAccount _google;
     private readonly GoogleCalendar _calendar;
+    private readonly GoogleTasks _googleTasks;
 
-    public SettingsWindow(AppStore store, GoogleCalendar calendar)
+    public SettingsWindow(AppStore store, GoogleAccount google, GoogleCalendar calendar, GoogleTasks googleTasks)
     {
         _store = store;
+        _google = google;
         _calendar = calendar;
+        _googleTasks = googleTasks;
         InitializeComponent();
         DataContext = store.Data;
 
@@ -46,9 +50,14 @@ public partial class SettingsWindow : Window
         AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler((_, _) => _store.NotifySettingsChanged()));
         SourceInitialized += (_, _) => UseDarkTitleBar();
 
-        _calendar.Changed += ShowCalendar;
-        Closed += (_, _) => _calendar.Changed -= ShowCalendar;
-        ShowCalendar();
+        _calendar.Changed += ShowGoogle;
+        _googleTasks.Changed += ShowGoogle;
+        Closed += (_, _) =>
+        {
+            _calendar.Changed -= ShowGoogle;
+            _googleTasks.Changed -= ShowGoogle;
+        };
+        ShowGoogle();
         ShowWeatherPlace();
     }
 
@@ -168,48 +177,97 @@ public partial class SettingsWindow : Window
 
     private sealed record CalendarChoice(string Id, string Name, string Hint, bool Included);
 
-    private void ShowCalendar()
+    private void ShowGoogle()
     {
-        var (title, hint, button) = _calendar.Status switch
+        var (title, hint, button) = _google.Status switch
         {
-            CalendarStatus.NotConfigured => ("Google Agenda",
+            GoogleAccountStatus.NotConfigured => ("Conta Google",
                 "Esta versão foi compilada sem credenciais do Google (veja docs/google-calendar.md).", null),
-            CalendarStatus.Connecting => ("Google Agenda", "Continue no navegador que abriu…", "Cancelar"),
-            CalendarStatus.Connected => ($"Conectado como {_calendar.Email}",
-                _calendar.Error ?? "Só leitura: suas agendas e os eventos de hoje e amanhã ficam só na memória.", "Desconectar"),
-            CalendarStatus.NeedsReconnect => (_calendar.Email ?? "Google Agenda", _calendar.Error ?? "Conecte de novo.", "Reconectar"),
-            _ => ("Google Agenda", _calendar.Error ??
-                "Mostra seus próximos eventos e avisa antes de cada um. Só leitura; o acesso fica protegido pelo Windows neste PC.",
+            GoogleAccountStatus.Connecting => ("Conta Google", "Continue no navegador que abriu…", "Cancelar"),
+            GoogleAccountStatus.Connected => ($"Conectado como {_google.Email}", _google.Error ??
+                "O acesso fica protegido pelo Windows neste PC. Desconectar revoga o acesso no Google.", "Desconectar"),
+            GoogleAccountStatus.NeedsReconnect => (_google.Email ?? "Conta Google", _google.Error ?? "Conecte de novo.", "Reconectar"),
+            _ => ("Conta Google", _google.Error ??
+                "Agenda e tarefas do Google no notch. Na tela do Google você escolhe o que liberar; o acesso fica protegido pelo Windows neste PC.",
                 (string?)"Conectar com Google"),
         };
-        CalendarTitle.Text = title;
-        CalendarHint.Text = hint;
-        CalendarButton.Content = button;
-        CalendarButton.Visibility = button == null ? Visibility.Collapsed : Visibility.Visible;
+        GoogleTitle.Text = title;
+        GoogleHint.Text = hint;
+        GoogleButton.Content = button;
+        GoogleButton.Visibility = button == null ? Visibility.Collapsed : Visibility.Visible;
+        GoogleFeatures.Visibility = _google.Status == GoogleAccountStatus.Connected ? Visibility.Visible : Visibility.Collapsed;
 
-        bool connected = _calendar.Status == CalendarStatus.Connected;
-        CalendarOptions.Visibility = connected ? Visibility.Visible : Visibility.Collapsed;
-        CalendarList.ItemsSource = connected
+        // Calendar
+        bool calendar = _calendar.Status == CalendarStatus.Connected;
+        CalendarHint.Text = !calendar ? "Mostra seus próximos eventos e avisa antes de cada um. Só leitura."
+            : _calendar.Error ?? "Só leitura: suas agendas e os eventos de hoje e amanhã ficam só na memória.";
+        CalendarButton.Visibility = calendar ? Visibility.Collapsed : Visibility.Visible;
+        CalendarOptions.Visibility = calendar ? Visibility.Visible : Visibility.Collapsed;
+        CalendarList.ItemsSource = calendar
             ? _calendar.Calendars
                 .Select(c => new CalendarChoice(c.Id, c.Name, c.Primary ? "Agenda principal" : "", _calendar.IsIncluded(c)))
                 .ToList()
             : null;
+
+        // Tasks
+        bool access = _googleTasks.HasAccess, on = _googleTasks.IsOn;
+        TasksHint.Text = !on
+            ? "Sincroniza a aba Tarefas com o Google Tasks, nos dois sentidos; as abertas daqui vão para a lista. O horário dos lembretes fica só no Yata."
+            : _googleTasks.Error ?? "Concluir, criar e remover aqui vale também no Google. Desligar tira da aba as tarefas do Google.";
+        TasksButton.Visibility = access ? Visibility.Collapsed : Visibility.Visible;
+        TasksSwitch.Visibility = access ? Visibility.Visible : Visibility.Collapsed;
+        TasksSwitch.IsChecked = on;
+        TasksOptions.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        TasksListButton.Content = _store.Settings.TasksListName ?? "Carregando…";
+        TasksListButton.IsEnabled = _googleTasks.Lists.Count > 1;
     }
 
-    private void OnCalendarButton(object sender, RoutedEventArgs e)
+    private void OnGoogleButton(object sender, RoutedEventArgs e)
     {
-        switch (_calendar.Status)
+        switch (_google.Status)
         {
-            case CalendarStatus.Connecting:
-                _calendar.CancelConnect();
+            case GoogleAccountStatus.Connecting:
+                _google.CancelConnect();
                 break;
-            case CalendarStatus.Connected:
-                _ = _calendar.DisconnectAsync();
+            case GoogleAccountStatus.Connected:
+                _ = _google.DisconnectAsync();
                 break;
             default:
-                _ = _calendar.ConnectAsync();
+                _ = ConnectGoogleAsync();
                 break;
         }
+    }
+
+    /// <summary>Asks for both; whatever the user ticks on Google's screen is what gets turned on.</summary>
+    private async Task ConnectGoogleAsync()
+    {
+        await _google.ConnectAsync(GoogleAuth.CalendarScopes.Concat(GoogleAuth.TasksScopes).ToArray(),
+            "Algumas permissões ficaram desmarcadas; dá para liberar depois aqui.");
+        if (_googleTasks.HasAccess && !_googleTasks.IsOn)
+            await _googleTasks.EnableAsync();
+        await _calendar.RefreshAsync();
+    }
+
+    private void OnCalendarButton(object sender, RoutedEventArgs e) => _ = _calendar.ConnectAsync();
+
+    private void OnTasksButton(object sender, RoutedEventArgs e) => _ = _googleTasks.EnableAsync();
+
+    private void OnTasksSwitch(object sender, RoutedEventArgs e)
+    {
+        if (TasksSwitch.IsChecked == true)
+            _ = _googleTasks.EnableAsync();
+        else
+            _googleTasks.Disable();
+    }
+
+    /// <summary>Next list, wrapping around, like the display picker.</summary>
+    private void OnTasksList(object sender, RoutedEventArgs e)
+    {
+        var lists = _googleTasks.Lists;
+        if (lists.Count < 2)
+            return;
+        int index = lists.ToList().FindIndex(l => l.Id == _store.Settings.TasksListId);
+        _googleTasks.SetList(lists[(index + 1) % lists.Count]);
     }
 
     private void OnCalendarToggle(object sender, RoutedEventArgs e)

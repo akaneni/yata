@@ -12,6 +12,8 @@ public sealed class StoreData
     public SettingsData Settings { get; set; } = new();
     public WaterData Water { get; set; } = new();
     public List<TaskData> Tasks { get; set; } = new();
+    /// <summary>Google Tasks ids removed here while offline, still to be deleted in Google.</summary>
+    public List<string> TaskDeletes { get; set; } = new();
     /// <summary>Paths parked on the shelf (references only, files are never copied).</summary>
     public List<string> Shelf { get; set; } = new();
     public UpdateData Updates { get; set; } = new();
@@ -52,6 +54,12 @@ public sealed class SettingsData
     public bool CalendarInCompact { get; set; } = true;
     /// <summary>Calendars to show; null = the ones ticked in Google Calendar itself.</summary>
     public List<string>? CalendarIds { get; set; }
+
+    // Tasks (Google Tasks, two-way)
+    public bool TasksSyncEnabled { get; set; }
+    /// <summary>Google task list mirrored in the Tasks tab; null = the account's default list.</summary>
+    public string? TasksListId { get; set; }
+    public string? TasksListName { get; set; }
 
     // Weather (Open-Meteo)
     public bool WeatherEnabled { get; set; }
@@ -116,7 +124,13 @@ public sealed class TaskData
     public string Text { get; set; } = "";
     public bool Done { get; set; }
     public DateTime? Due { get; set; }
+    /// <summary>The due has a day but no time (set in Google Tasks, which only keeps dates).</summary>
+    public bool DueAllDay { get; set; }
     public bool Reminded { get; set; }
+    /// <summary>Id in Google Tasks once synced; null for tasks that live only here.</summary>
+    public string? GoogleId { get; set; }
+    /// <summary>Changed here and not yet sent to Google.</summary>
+    public bool Dirty { get; set; }
 }
 
 /// <summary>Local JSON storage in %LOCALAPPDATA%\Yata\data.json. Nothing leaves the PC.</summary>

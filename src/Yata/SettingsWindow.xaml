@@ -166,17 +166,28 @@
                 </Grid>
             </Border>
 
-            <!-- Calendar -->
-            <TextBlock Text="Agenda" Style="{StaticResource Section}"/>
+            <!-- Google: one account, a permission per feature -->
+            <TextBlock Text="Google" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,170,8">
-                            <TextBlock x:Name="CalendarTitle" Text="Google Agenda" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="GoogleTitle" Text="Conta Google" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="GoogleHint" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <Button x:Name="GoogleButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Click="OnGoogleButton"/>
+                    </Grid>
+
+                    <StackPanel x:Name="GoogleFeatures">
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,130,8">
+                            <TextBlock Text="Agenda" Style="{StaticResource Label}"/>
                             <TextBlock x:Name="CalendarHint" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <Button x:Name="CalendarButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                VerticalAlignment="Center" Click="OnCalendarButton"/>
+                                VerticalAlignment="Center" Content="Permitir" Click="OnCalendarButton"/>
                     </Grid>
 
                     <StackPanel x:Name="CalendarOptions">
@@ -217,6 +228,31 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                    </StackPanel>
+
+                    <!-- Tasks: two-way with one Google Tasks list -->
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,130,8">
+                            <TextBlock Text="Tarefas" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="TasksHint" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <Button x:Name="TasksButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Content="Permitir" Click="OnTasksButton"/>
+                        <CheckBox x:Name="TasksSwitch" Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  Click="OnTasksSwitch"/>
+                    </Grid>
+                    <StackPanel x:Name="TasksOptions">
+                        <Border Style="{StaticResource Divider}"/>
+                        <Grid Style="{StaticResource Row}">
+                            <StackPanel VerticalAlignment="Center" Margin="0,8,190,8">
+                                <TextBlock Text="Lista" Style="{StaticResource Label}"/>
+                                <TextBlock Text="Clique para trocar. A aba Tarefas mostra esta lista." Style="{StaticResource Hint}"/>
+                            </StackPanel>
+                            <Button x:Name="TasksListButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" MaxWidth="180" Click="OnTasksList"/>
+                        </Grid>
+                    </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
