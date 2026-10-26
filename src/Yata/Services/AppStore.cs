@@ -45,6 +45,14 @@ public sealed class SettingsData
     // Updates: off unless the user opts in, since it's a network request.
     public bool UpdateCheckEnabled { get; set; }
 
+    // Calendar (Google)
+    /// <summary>Notice this long before an event; 0 = only when it starts.</summary>
+    public int CalendarReminderMinutes { get; set; } = 5;
+    /// <summary>The closed notch shows the next event in the minutes before it.</summary>
+    public bool CalendarInCompact { get; set; } = true;
+    /// <summary>Calendars to show; null = the ones ticked in Google Calendar itself.</summary>
+    public List<string>? CalendarIds { get; set; }
+
     // Notices
     public bool HudVolume { get; set; } = true;
     public bool HudBrightness { get; set; } = true;

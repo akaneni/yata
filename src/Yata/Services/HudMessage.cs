@@ -46,4 +46,5 @@ internal static class Glyphs
     public const string Camera = "";
     public const string Microphone = "";
     public const string Bell = "";
+    public const string Calendar = "";
 }

@@ -36,7 +36,8 @@ public partial class MainWindow
             return; // Fired by the default tab while the XAML is still loading.
 
         var previous = _page;
-        _page = sender == TabFocus ? NotchPage.Focus
+        _page = sender == TabAgenda ? NotchPage.Agenda
+              : sender == TabFocus ? NotchPage.Focus
               : sender == TabWater ? NotchPage.Water
               : sender == TabTasks ? NotchPage.Tasks
               : sender == TabShelf ? NotchPage.Shelf
@@ -52,6 +53,7 @@ public partial class MainWindow
 
     private FrameworkElement PageElement(NotchPage page) => page switch
     {
+        NotchPage.Agenda => AgendaPage,
         NotchPage.Focus => FocusPage,
         NotchPage.Water => WaterPage,
         NotchPage.Tasks => TasksPage,

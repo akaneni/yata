@@ -173,6 +173,8 @@
                         <StackPanel Orientation="Horizontal">
                             <RadioButton x:Name="TabMedia" Style="{StaticResource TabButton}" GroupName="Pages"
                                          Content="&#xE8D6;" ToolTip="Mídia" IsChecked="True" Checked="OnTabChecked"/>
+                            <RadioButton x:Name="TabAgenda" Style="{StaticResource TabButton}" GroupName="Pages"
+                                         Content="&#xE787;" ToolTip="Agenda" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabFocus" Style="{StaticResource TabButton}" GroupName="Pages"
                                          Content="&#xE916;" ToolTip="Foco" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabWater" Style="{StaticResource TabButton}" GroupName="Pages"
@@ -311,6 +313,7 @@
                     </StackPanel>
                     </Grid>
 
+                    <views:AgendaPage x:Name="AgendaPage" Grid.Row="1" Visibility="Collapsed"/>
                     <views:FocusPage x:Name="FocusPage" Grid.Row="1" Visibility="Collapsed"/>
                     <views:WaterPage x:Name="WaterPage" Grid.Row="1" Visibility="Collapsed"/>
                     <views:ShelfPage x:Name="ShelfPage" Grid.Row="1" Visibility="Collapsed"/>

@@ -166,6 +166,61 @@
                 </Grid>
             </Border>
 
+            <!-- Calendar -->
+            <TextBlock Text="Agenda" Style="{StaticResource Section}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,170,8">
+                            <TextBlock x:Name="CalendarTitle" Text="Google Agenda" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="CalendarHint" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <Button x:Name="CalendarButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Click="OnCalendarButton"/>
+                    </Grid>
+
+                    <StackPanel x:Name="CalendarOptions">
+                        <Border Style="{StaticResource Divider}"/>
+                        <Grid Style="{StaticResource Row}">
+                            <StackPanel VerticalAlignment="Center" Margin="0,8,150,8">
+                                <TextBlock Text="Avisar antes do evento" Style="{StaticResource Label}"/>
+                                <TextBlock Text="Com 0, avisa só quando começa." Style="{StaticResource Hint}"/>
+                            </StackPanel>
+                            <views:Stepper HorizontalAlignment="Right" Minimum="0" Maximum="30" Step="1" Suffix=" min"
+                                           Value="{Binding Settings.CalendarReminderMinutes}"/>
+                        </Grid>
+                        <Border Style="{StaticResource Divider}"/>
+                        <Grid Style="{StaticResource Row}">
+                            <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
+                                <TextBlock Text="Próximo evento no notch fechado" Style="{StaticResource Label}"/>
+                                <TextBlock Text="Nos 15 minutos antes, no lugar do relógio." Style="{StaticResource Hint}"/>
+                            </StackPanel>
+                            <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                      IsChecked="{Binding Settings.CalendarInCompact}"/>
+                        </Grid>
+
+                        <!-- One switch per calendar in the account -->
+                        <ItemsControl x:Name="CalendarList" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <Border Style="{StaticResource Divider}"/>
+                                        <Grid Style="{StaticResource Row}">
+                                            <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
+                                                <TextBlock Text="{Binding Name}" Style="{StaticResource Label}"/>
+                                                <TextBlock Text="{Binding Hint}" Style="{StaticResource Hint}"/>
+                                            </StackPanel>
+                                            <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                                      IsChecked="{Binding Included, Mode=OneWay}" Click="OnCalendarToggle"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- Notices -->
             <TextBlock Text="Avisos no notch" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
