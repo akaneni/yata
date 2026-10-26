@@ -39,6 +39,8 @@ WizardSmallImageFile=wizard-small-100.png,wizard-small-125.png,wizard-small-150.
 WizardImageStretch=no
 WizardImageBackColor=black
 WizardSmallImageBackColor=black
+; Greet with Yata up front; Inno skips the Welcome page by default, leaving the art for the end.
+DisableWelcomePage=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0.19041

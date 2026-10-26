@@ -77,6 +77,8 @@ function Save-Pixels([string[]]$rows, [string]$path, [int]$scale = 1, [switch]$o
 function Invoke-PhotoCraft([string[]]$arguments) {
   # Windows PowerShell (and pwsh before 7.3) drops the quotes inside native arguments.
   if ($PSVersionTable.PSVersion -lt [version]"7.3") { $arguments = $arguments | ForEach-Object { $_ -replace '"', '\"' } }
+  # Progress goes to stderr, which Windows PowerShell would turn into an error under Stop.
+  $ErrorActionPreference = "Continue"
   $output = & $PhotoCraft @arguments 2>&1
   if ($LASTEXITCODE -ne 0) { throw "photocraft-cli failed: $output" }
 }

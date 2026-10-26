@@ -19,7 +19,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Minimalista e monocromático**: notch preto, texto branco; a cor da capa da música é o único acento.
 - **O Yata**: um corvo em pixel art 1-bit (16×14), branco sobre o preto do notch. Desenhado à mão em `Views/RavenSprite.cs`; o ícone do app é gerado a partir do mesmo sprite (`tools/make-icon.ps1`).
 - **Repertório**: pisca, olha para trás, se ajeita e, de vez em quando, olha para cima, estica a asa ou dá um pulinho; dorme respirando devagar; grasna quando traz um lembrete, se sacode quando a meta de água é batida e chega com uma carta quando traz as novidades.
-- **Artes maiores** (README e instalador): o mesmo traço no dobro da resolução e com três pernas, como o Yatagarasu do mito, diante de um sol pontilhado em 1-bit. Geradas com o PhotoCraft da suíte ArtCraft (`tools/make-art.ps1`).
+- **Artes maiores** (README e instalador): o mesmo traço no dobro da resolução e com três pernas, como o Yatagarasu do mito, diante de um sol pontilhado em 1-bit. Geradas com o PhotoCraft da suíte ArtCraft (`tools/make-art.ps1`); o GIF abaixo sai do próprio sprite e é codificado no EffectCraft (`tools/make-gif.ps1`).
 
 ![O repertório do Yata no notch](docs/yata.gif)
 
@@ -129,7 +129,7 @@ src/Yata/
   SettingsWindow.xaml(.cs)    janela de configurações
 installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
 docs/                         imagens do README
-tools/                        gerar ícone, artes (PhotoCraft) e instalador
+tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft) e instalador
 tests/Yata.Tests/             testes (xUnit)
 .github/workflows/ci.yml      build e testes a cada push
 .github/workflows/release.yml release automático por tag
