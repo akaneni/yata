@@ -27,6 +27,13 @@ internal static class NativeMethods
     public const int QUNS_RUNNING_D3D_FULL_SCREEN = 3;
     public const int QUNS_PRESENTATION_MODE = 4;
 
+    public const uint REG_NOTIFY_CHANGE_NAME = 0x1;
+    public const uint REG_NOTIFY_CHANGE_LAST_SET = 0x4;
+
+    [DllImport("advapi32.dll")]
+    public static extern int RegNotifyChangeKeyValue(Microsoft.Win32.SafeHandles.SafeRegistryHandle key, bool watchSubtree,
+        uint filter, Microsoft.Win32.SafeHandles.SafeWaitHandle evt, bool asynchronous);
+
     [StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {

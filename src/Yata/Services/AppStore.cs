@@ -35,6 +35,7 @@ public sealed class SettingsData
     public bool HudCapsLock { get; set; } = true;
     public bool HudKeyboardLayout { get; set; } = true;
     public bool HudNetwork { get; set; } = true;
+    public bool HudPrivacy { get; set; } = true;
 
     // Focus
     public int FocusMinutes { get; set; } = 25;
@@ -58,6 +59,7 @@ public sealed class SettingsData
         HudKind.CapsLock => HudCapsLock,
         HudKind.KeyboardLayout => HudKeyboardLayout,
         HudKind.Network => HudNetwork,
+        HudKind.Privacy => HudPrivacy,
         _ => true,
     };
 }

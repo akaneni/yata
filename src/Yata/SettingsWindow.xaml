@@ -165,6 +165,11 @@
                         <TextBlock Text="Conexão de rede" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudNetwork}"/>
                     </Grid>
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
+                        <TextBlock Text="Câmera e microfone em uso" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudPrivacy}"/>
+                    </Grid>
                 </StackPanel>
             </Border>
 

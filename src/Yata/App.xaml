@@ -11,6 +11,9 @@
         <SolidColorBrush x:Key="TextSecondary" Color="#99FFFFFF"/>
         <SolidColorBrush x:Key="TrackBrush" Color="#33FFFFFF"/>
         <SolidColorBrush x:Key="SurfaceBrush" Color="#1FFFFFFF"/>
+        <!-- Privacy indicators keep the colors people know from phones and laptops -->
+        <SolidColorBrush x:Key="CameraBrush" Color="#FF34C759"/>
+        <SolidColorBrush x:Key="MicrophoneBrush" Color="#FFFF9F0A"/>
 
         <Style x:Key="IconButton" TargetType="Button">
             <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>

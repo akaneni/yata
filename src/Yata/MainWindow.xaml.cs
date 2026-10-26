@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -18,6 +20,7 @@ using Yata.Helpers;
 using Yata.Interop;
 using Yata.Services;
 using Yata.Views;
+using Glyphs = Yata.Services.Glyphs;
 using MediaState = Yata.Services.MediaState;
 
 namespace Yata;
@@ -52,6 +55,7 @@ public partial class MainWindow : Window
     private const double PeekWidth = 8;
     private const double PeekHeight = 3;
     private const double TabPitch = 34;
+    private const double PrivacyGap = 8;
 
     // Equalizer bar heights, in 2px rows out of 7, one sequence per bar; each step lasts StepMs.
     private static readonly int[][] EqualizerSteps =
@@ -80,6 +84,7 @@ public partial class MainWindow : Window
     private readonly PowerWatcher _power;
     private readonly NetworkWatcher _network;
     private readonly KeyboardWatcher _keyboard = new();
+    private readonly PrivacyWatcher _privacy;
     private readonly AppStore _store = AppStore.Load();
     private readonly FocusTimer _focus;
     private readonly WaterTracker _water;
@@ -171,6 +176,8 @@ public partial class MainWindow : Window
         _power.Message += ShowHud;
         _network.Message += ShowHud;
         _keyboard.Message += ShowHud;
+        _privacy = new PrivacyWatcher(Dispatcher);
+        _privacy.Changed += OnPrivacyChanged;
 
         _focus = new FocusTimer(_store.Settings);
         _presence = new PresenceTracker(_store.Settings);
@@ -236,6 +243,7 @@ public partial class MainWindow : Window
         _power.Start();
         _network.Start();
         _keyboard.Start();
+        _privacy.Start();
         _water.Start();
         _tasks.Start();
         _presence.Start();
@@ -265,6 +273,7 @@ public partial class MainWindow : Window
         _power.Dispose();
         _network.Dispose();
         _keyboard.Dispose();
+        _privacy.Dispose();
         _water.Stop();
         _tasks.Stop();
         _presence.Stop();
@@ -347,7 +356,68 @@ public partial class MainWindow : Window
 
         ApplyAccent();
         OnFullscreenChanged(_fullscreenApp);
+        UpdatePrivacy();
         UpdateCompanion();
+    }
+
+    // ---- Camera / microphone in use -------------------------------------------------
+
+    private bool PrivacyShown => Settings.HudPrivacy && _privacy.Current.Any;
+
+    private void OnPrivacyChanged(PrivacyState previous, PrivacyState current)
+    {
+        UpdatePrivacy();
+
+        // Announce only what just started; stopping is shown by the dot going away.
+        var camera = current.Camera.Except(previous.Camera).ToList();
+        var microphone = current.Microphone.Except(previous.Microphone).ToList();
+        if (camera.Count == 0 && microphone.Count == 0)
+            return;
+
+        var apps = string.Join(", ", camera.Concat(microphone).Distinct());
+        var message = camera.Count > 0 && microphone.Count > 0
+            ? new HudMessage(Glyphs.Camera, "Câmera e microfone em uso", apps, DurationMs: 3000, Kind: HudKind.Privacy)
+            : camera.Count > 0
+                ? new HudMessage(Glyphs.Camera, "Câmera em uso", apps, DurationMs: 3000, Kind: HudKind.Privacy)
+                : new HudMessage(Glyphs.Microphone, "Microfone em uso", apps, DurationMs: 3000, Kind: HudKind.Privacy);
+        ShowHud(message);
+    }
+
+    private void UpdatePrivacy()
+    {
+        var state = _privacy.Current;
+        bool shown = PrivacyShown;
+        bool camera = shown && state.Camera.Count > 0;
+        bool microphone = shown && state.Microphone.Count > 0;
+
+        PrivacyDots.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        CameraDot.Visibility = camera ? Visibility.Visible : Visibility.Collapsed;
+        MicrophoneDot.Visibility = microphone ? Visibility.Visible : Visibility.Collapsed;
+        MicrophoneDot.Margin = new Thickness(camera ? 3 : 0, 0, 0, 0);
+
+        // Open notch: the header says who is using what, in place of the date.
+        PrivacyText.Inlines.Clear();
+        if (camera)
+            AddPrivacyInline(Glyphs.Camera, "CameraBrush", state.Camera);
+        if (microphone)
+            AddPrivacyInline(Glyphs.Microphone, "MicrophoneBrush", state.Microphone);
+        PrivacyText.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
+        HeaderDate.Visibility = shown ? Visibility.Collapsed : Visibility.Visible;
+
+        UpdateTargets();
+    }
+
+    private void AddPrivacyInline(string glyph, string brushKey, IReadOnlyList<string> apps)
+    {
+        if (PrivacyText.Inlines.Count > 0)
+            PrivacyText.Inlines.Add(new Run("    "));
+        PrivacyText.Inlines.Add(new Run(glyph)
+        {
+            FontFamily = (FontFamily)FindResource("IconFont"),
+            Foreground = (Brush)FindResource(brushKey),
+            BaselineAlignment = BaselineAlignment.Center,
+        });
+        PrivacyText.Inlines.Add(new Run(" " + string.Join(", ", apps)));
     }
 
     // ---- Keyboard (task input) ------------------------------------------------------
@@ -628,6 +698,11 @@ public partial class MainWindow : Window
                      : ambient ? CompactAmbient
                      : _focus.IsActive ? CompactIdleTimer
                      : CompactIdle;
+        // The privacy dots get their own space at the left edge of the closed notch.
+        int dots = !PrivacyShown ? 0 : (_privacy.Current.Camera.Count > 0 ? 1 : 0) + (_privacy.Current.Microphone.Count > 0 ? 1 : 0);
+        double privacyRoom = dots == 0 ? 0 : dots * 6 + (dots - 1) * 3 + PrivacyGap;
+        compact = new Size(compact.Width + privacyRoom, compact.Height);
+        CompactView.Margin = new Thickness(12 + privacyRoom, 0, 12, 0);
         Size expanded = _page switch
         {
             NotchPage.Focus => ExpandedFocus,
@@ -762,6 +837,8 @@ public partial class MainWindow : Window
 
         CompactView.Opacity = underOverlay * (1 - ambient);
         AmbientView.Opacity = underOverlay * ambient;
+        // Dots stay through HUDs; the open notch names the apps in its header instead.
+        PrivacyDots.Opacity = compactOpacity * (_overlayIsNews ? 1 - overlay : 1);
         HudView.Opacity = _overlayIsNews ? 0 : compactOpacity * overlay;
         NewsView.Opacity = _overlayIsNews ? compactOpacity * overlay : 0;
         foreach (var view in new UIElement[] { CompactView, AmbientView, HudView, NewsView })
@@ -1176,7 +1253,9 @@ public partial class MainWindow : Window
         _hudTimer.Interval = TimeSpan.FromMilliseconds(message.DurationMs);
 
         HudIcon.Text = message.Glyph;
-        HudIcon.Foreground = message.Warning ? WarningBrush : Brushes.White;
+        HudIcon.Foreground = message.Warning ? WarningBrush
+                           : message.Kind == HudKind.Privacy ? (Brush)FindResource(message.Glyph == Glyphs.Camera ? "CameraBrush" : "MicrophoneBrush")
+                           : Brushes.White;
         HudIcon.Visibility = message.Celebrate ? Visibility.Collapsed : Visibility.Visible;
         HudRaven.Visibility = message.Celebrate ? Visibility.Visible : Visibility.Collapsed;
         if (message.Celebrate)

@@ -69,6 +69,13 @@
                                 SnapsToDevicePixels="True" RenderOptions.EdgeMode="Aliased"/>
                 </Grid>
 
+                <!-- Camera (green) / microphone (orange) in use; the expanded header names the apps -->
+                <StackPanel x:Name="PrivacyDots" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top"
+                            Margin="14,13,0,0" Visibility="Collapsed" IsHitTestVisible="False">
+                    <Ellipse x:Name="CameraDot" Width="6" Height="6" Fill="{StaticResource CameraBrush}"/>
+                    <Ellipse x:Name="MicrophoneDot" Width="6" Height="6" Fill="{StaticResource MicrophoneBrush}"/>
+                </StackPanel>
+
                 <!-- Ambient: Yata perched on the notch while the PC sits idle -->
                 <Grid x:Name="AmbientView" Opacity="0" Visibility="Collapsed">
                     <views:RavenSprite x:Name="AmbientRaven" PixelSize="1.5" HorizontalAlignment="Center"
@@ -152,6 +159,9 @@
                     <Grid Margin="24,10,16,0">
                         <TextBlock x:Name="HeaderDate" FontSize="12" VerticalAlignment="Center"
                                    Foreground="{StaticResource TextSecondary}"/>
+                        <!-- Takes the date's place while the camera or microphone is in use -->
+                        <TextBlock x:Name="PrivacyText" FontSize="12" VerticalAlignment="Center" MaxWidth="260"
+                                   TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" Visibility="Collapsed"/>
                         <Grid x:Name="TabStrip" HorizontalAlignment="Right">
                         <!-- Selection pill that glides to the chosen tab -->
                         <Border x:Name="TabIndicator" Width="32" Height="26" Margin="2,0,0,0" CornerRadius="8" Background="#26FFFFFF"
