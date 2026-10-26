@@ -12,6 +12,11 @@ internal static class AppPaths
 
     private static string Resolve()
     {
+        // A throwaway profile, so measurements (tools/measure.ps1) never touch the user's data.
+        string? overridden = Environment.GetEnvironmentVariable("YATA_DATA_DIR");
+        if (!string.IsNullOrWhiteSpace(overridden))
+            return overridden;
+
         string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string root = Path.Combine(local, "Yata");
 

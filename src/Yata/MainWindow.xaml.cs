@@ -206,6 +206,7 @@ public partial class MainWindow : Window
         _newsTimer.Tick += (_, _) => HideNews();
 
         SourceInitialized += OnSourceInitialized;
+        ContentRendered += OnContentRendered;
         Loaded += OnLoaded;
         Closed += OnClosed;
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
@@ -233,28 +234,46 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        _clockTimer.Start();
-        _audio.Start();
-        _brightness.Start();
-        _power.Start();
-        _network.Start();
-        _keyboard.Start();
-        _privacy.Start();
-        _updates.Start();
-        _water.Start();
-        _tasks.Start();
-        _calendar.Start();
-        _googleTasks.Start();
-        _weather.Start();
-        _presence.Start();
+        StartupTimings.Mark("Loaded");
+        StartService("clock", _clockTimer.Start);
+        StartService("audio", _audio.Start);
+        StartService("brightness", _brightness.Start);
+        StartService("power", _power.Start);
+        StartService("network", _network.Start);
+        StartService("keyboard", _keyboard.Start);
+        StartService("privacy", _privacy.Start);
+        StartService("updates", _updates.Start);
+        StartService("water", _water.Start);
+        StartService("tasks", _tasks.Start);
+        StartService("calendar", _calendar.Start);
+        StartService("google-tasks", _googleTasks.Start);
+        StartService("weather", _weather.Start);
+        StartService("presence", _presence.Start);
+        if (Bench != null)
+        {
+            StartBench(Bench);
+            return;
+        }
         try
         {
             await _media.InitializeAsync();
+            StartupTimings.Mark("media");
         }
         catch (Exception)
         {
             // Media sessions unavailable (e.g. stripped-down Windows); the notch still works as a clock.
         }
+    }
+
+    private static void StartService(string name, Action start)
+    {
+        start();
+        StartupTimings.Mark(name);
+    }
+
+    private void OnContentRendered(object? sender, EventArgs e)
+    {
+        StartupTimings.Mark("first-frame");
     }
 
     private void OnClosed(object? sender, EventArgs e)

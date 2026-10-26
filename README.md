@@ -90,6 +90,12 @@ Abrir o notch numa aba sem usar o mouse, por N segundos (prévias, capturas e te
 Yata.exe --show foco 30     # foco | agua | tarefas | prateleira | media
 ```
 
+Medir CPU, despertares, memória e tempo de abertura em estados fixos (nada tocando, música com letra, notch aberto e Pomodoro). Cada rodada usa um perfil descartável, uma música simulada e nenhuma rede, então seus dados e o que você faz no PC durante a medição não entram nos números. Um Yata aberto é fechado e reaberto no fim:
+
+```powershell
+./tools/measure.ps1 -Phases             # -States parado,musica -Rounds 3 -Seconds 20 -OutFile medicao.csv
+```
+
 Gerar o instalador localmente (precisa do [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```powershell
@@ -136,7 +142,7 @@ src/Yata/
   SettingsWindow.xaml(.cs)    janela de configurações
 installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
 docs/                         imagens do README
-tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft) e instalador
+tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft), instalador e medição
 tests/Yata.Tests/             testes (xUnit)
 .github/workflows/ci.yml      build e testes a cada push
 .github/workflows/release.yml release automático por tag

@@ -75,7 +75,13 @@ public sealed class LyricsService
     private static readonly TimeSpan MissExpiry = TimeSpan.FromDays(3);
     private static readonly HttpClient Http = CreateClient();
 
-    private readonly string _cacheDir = Path.Combine(AppPaths.DataDir, "lyrics");
+    private readonly string _cacheDir;
+
+    public LyricsService() : this(Path.Combine(AppPaths.DataDir, "lyrics"))
+    {
+    }
+
+    internal LyricsService(string cacheDir) => _cacheDir = cacheDir;
 
     public async Task<Lyrics?> FindAsync(MediaState media, CancellationToken ct)
     {
@@ -93,6 +99,13 @@ public sealed class LyricsService
         WriteCache(cacheFile, lrc ?? "");
         return lrc == null ? null : Lyrics.Parse(lrc);
     }
+
+    /// <summary>
+    /// Caches lyrics as if LRCLIB had returned them, so measurements (--bench) never touch the
+    /// network. The names must already be clean: <see cref="TrackQuery"/> would leave them as they are.
+    /// </summary>
+    internal void Seed(string artist, string title, string lrc) =>
+        WriteCache(Path.Combine(_cacheDir, CacheKey(artist, title) + ".lrc"), lrc);
 
     private static async Task<string?> SearchAsync(string artist, string title, TimeSpan duration, double maxDurationDiff, CancellationToken ct)
     {
