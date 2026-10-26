@@ -27,12 +27,15 @@ public partial class MainWindow : Window
     // Width of the concave "ears" that blend the notch into the top edge of the screen.
     private const double Ear = 10;
 
-    private enum NotchPage { Media, Focus, Water, Tasks, Shelf }
+    private enum NotchPage { Media, Agenda, Focus, Water, Tasks, Shelf }
 
     private static readonly Size CompactIdle = new(170, 32);
     private static readonly Size CompactIdleTimer = new(250, 32);
     private static readonly Size CompactMedia = new(260, 32);
     private static readonly Size CompactLyrics = new(380, 32);
+    // The next calendar event takes the clock's place in the minutes before it.
+    private static readonly Size CompactEvent = new(300, 32);
+    private static readonly Size CompactEventTimer = new(380, 32);
     // Expanded heights include the 42px header with the page tabs.
     private static readonly Size ExpandedIdle = new(420, 170);
     private static readonly Size ExpandedMedia = new(520, 196);
@@ -41,6 +44,9 @@ public partial class MainWindow : Window
     private static readonly Size ExpandedWater = new(440, 196);
     private static readonly Size ExpandedTasks = new(440, 270);
     private static readonly Size ExpandedShelf = new(520, 250);
+    private static readonly Size ExpandedAgenda = new(460, 250);
+    // How early the closed notch starts showing the next event.
+    private static readonly TimeSpan UpcomingWindow = TimeSpan.FromMinutes(15);
     private static readonly Size CompactAmbient = new(130, 32);
     private const double NewsWidth = 460;
     private const int NewsMaxItems = 4;
@@ -74,6 +80,7 @@ public partial class MainWindow : Window
     private readonly WaterTracker _water;
     private readonly TaskList _tasks;
     private readonly Shelf _shelf;
+    private readonly GoogleCalendar _calendar;
     private readonly PresenceTracker _presence;
     private readonly DispatcherTimer _newsTimer = new() { Interval = TimeSpan.FromSeconds(9) };
     private readonly RavenAnimator _ambientRaven;
@@ -115,6 +122,8 @@ public partial class MainWindow : Window
 
     private NotchPage _page = NotchPage.Media;
     private bool _focusWasActive;
+    // "Daily em 8 min" while an event is close and nothing is playing; null otherwise.
+    private string? _upcomingText;
     // True while the task box is being typed in; the notch accepts focus only then.
     private bool _keyboardMode;
     private IntPtr _previousForeground;
@@ -171,6 +180,10 @@ public partial class MainWindow : Window
         FocusPage.Attach(_focus);
         WaterPage.Attach(_water);
         TasksPage.Attach(_tasks);
+        _calendar = new GoogleCalendar(_store);
+        _calendar.Message += ShowHud;
+        _calendar.Changed += UpdateClock;
+        AgendaPage.Attach(_calendar);
         TasksPage.KeyboardRequested += EnterKeyboardMode;
         TasksPage.KeyboardReleased += ExitKeyboardMode;
         Deactivated += OnDeactivated;
@@ -220,6 +233,7 @@ public partial class MainWindow : Window
         _keyboard.Start();
         _water.Start();
         _tasks.Start();
+        _calendar.Start();
         _presence.Start();
         try
         {
@@ -247,6 +261,7 @@ public partial class MainWindow : Window
         _keyboard.Dispose();
         _water.Stop();
         _tasks.Stop();
+        _calendar.Stop();
         _presence.Stop();
         _newsTimer.Stop();
         _store.SaveNow();
@@ -298,7 +313,7 @@ public partial class MainWindow : Window
         SetExpanded(false);
         if (_settingsWindow == null)
         {
-            _settingsWindow = new SettingsWindow(_store);
+            _settingsWindow = new SettingsWindow(_store, _calendar);
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
             _settingsWindow.Show();
         }
@@ -326,6 +341,7 @@ public partial class MainWindow : Window
         }
 
         ApplyAccent();
+        UpdateClock();
         OnFullscreenChanged(_fullscreenApp);
         UpdateCompanion();
     }
@@ -394,6 +410,7 @@ public partial class MainWindow : Window
     {
         var tab = page.ToLowerInvariant() switch
         {
+            "agenda" or "calendar" => TabAgenda,
             "foco" or "focus" => TabFocus,
             "agua" or "água" or "water" => TabWater,
             "tarefas" or "tasks" => TabTasks,
@@ -490,7 +507,8 @@ public partial class MainWindow : Window
         if (TasksPage == null)
             return; // Fired by the default tab while the XAML is still loading.
 
-        _page = sender == TabFocus ? NotchPage.Focus
+        _page = sender == TabAgenda ? NotchPage.Agenda
+              : sender == TabFocus ? NotchPage.Focus
               : sender == TabWater ? NotchPage.Water
               : sender == TabTasks ? NotchPage.Tasks
               : sender == TabShelf ? NotchPage.Shelf
@@ -557,10 +575,12 @@ public partial class MainWindow : Window
         Size compact = hasLyrics ? CompactLyrics
                      : hasMedia ? CompactMedia
                      : ambient ? CompactAmbient
+                     : _upcomingText != null ? (_focus.IsActive ? CompactEventTimer : CompactEvent)
                      : _focus.IsActive ? CompactIdleTimer
                      : CompactIdle;
         Size expanded = _page switch
         {
+            NotchPage.Agenda => ExpandedAgenda,
             NotchPage.Focus => ExpandedFocus,
             NotchPage.Water => ExpandedWater,
             NotchPage.Tasks => ExpandedTasks,
@@ -593,6 +613,7 @@ public partial class MainWindow : Window
         LyricsDivider.Visibility = LyricsPanel.Visibility;
 
         MediaPage.Visibility = _page == NotchPage.Media ? Visibility.Visible : Visibility.Collapsed;
+        AgendaPage.Visibility = _page == NotchPage.Agenda ? Visibility.Visible : Visibility.Collapsed;
         FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Collapsed;
         WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Collapsed;
         TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
@@ -1323,8 +1344,19 @@ public partial class MainWindow : Window
         var now = DateTime.Now;
         string time = now.ToString("HH:mm", PtBr);
 
+        string? upcoming = null;
+        if (_state == null && Settings.CalendarInCompact &&
+            CalendarReminders.NextWithin(_calendar.Events, now, UpcomingWindow) is CalendarEvent next)
+            upcoming = $"{next.Title} {CalendarReminders.Until(next.Start, now)}";
+        if ((upcoming == null) != (_upcomingText == null))
+        {
+            _upcomingText = upcoming;
+            UpdateTargets(); // The notch widens for the event's name.
+        }
+        _upcomingText = upcoming;
+
         if (_state == null)
-            SetCompactText(time);
+            SetCompactText(upcoming ?? time);
 
         IdleClock.Text = time;
         string date = now.ToString("dddd, d 'de' MMMM", PtBr);

@@ -31,6 +31,10 @@ jobs:
 
       - name: Build installer
         shell: pwsh
+        env:
+          # Google OAuth client for the calendar (see docs/google-calendar.md).
+          YATA_GOOGLE_CLIENT_ID: ${{ secrets.YATA_GOOGLE_CLIENT_ID }}
+          YATA_GOOGLE_CLIENT_SECRET: ${{ secrets.YATA_GOOGLE_CLIENT_SECRET }}
         run: ./tools/build-installer.ps1 -Version $env:VERSION
 
       - name: Checksums

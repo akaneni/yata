@@ -8,7 +8,9 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 **Dados locais:** tarefas, registro de água e caminhos da prateleira ficam em `%LOCALAPPDATA%\Yata\data.json`.
 
-**Acesso à rede:** o único acesso é a busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`.
+**Acesso à rede:**
+- busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`;
+- **Google Agenda**, só se você conectar sua conta: leitura das agendas e dos eventos de hoje e amanhã, direto entre o PC e o Google. O acesso fica cifrado com DPAPI em `%LOCALAPPDATA%\Yata\google.dat` e os eventos ficam só na memória. Detalhes em [PRIVACY.md](PRIVACY.md).
 
 ## Identidade
 
@@ -22,7 +24,8 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Player de mídia** de qualquer app que use os controles de mídia do Windows (Spotify, YouTube no navegador, etc.): capa, título, artista, barra de progresso com busca, anterior/play/próxima.
 - **Letras sincronizadas**: o notch se divide em dois (player + letra rolando), a linha atual fica em destaque e clicar numa linha pula para ela. No modo compacto aparece a linha sendo cantada.
 - **Avisos do sistema** no notch compacto: volume/mudo, brilho, carregador conectado/desconectado, bateria baixa (20% e 10%), troca de saída de áudio (fone/caixa), Caps Lock, troca de idioma do teclado e conexão de rede. O teclado é lido por consulta de estado, **sem hook** — o app nunca vê o que é digitado.
-- **Abas no notch aberto**: Mídia, Foco, Água, Tarefas e Prateleira.
+- **Abas no notch aberto**: Mídia, Agenda, Foco, Água, Tarefas e Prateleira.
+- **Agenda (Google)**: conecte com sua conta Google (OAuth, só leitura) e escolha quais agendas aparecem. A aba mostra hoje e amanhã, destaca o evento em andamento e tem o botão **Entrar** para chamadas do Meet, Zoom e Teams. O notch fechado mostra "Daily em 8 min" nos 15 minutos antes, e chega um aviso (com som) alguns minutos antes, configurável, e outro quando o evento começa. Convites recusados não aparecem. Para cadastrar o app no Google, veja [docs/google-calendar.md](docs/google-calendar.md).
 - **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
 - **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
 - **Tarefas**: lista com marcar/remover; um horário no fim do texto ("Reunião 15:30") vira lembrete. O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
@@ -60,7 +63,9 @@ Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instala
 dotnet run --project src/Yata
 ```
 
-Testes automáticos (fluxos do Pomodoro com relógio simulado):
+A agenda do Google precisa de um cliente OAuth próprio, que não fica no repositório. Sem ele, o resto do app funciona normalmente. Veja [docs/google-calendar.md](docs/google-calendar.md).
+
+Testes automáticos (fluxos do Pomodoro com relógio simulado, leitura de eventos e avisos da agenda, partes do OAuth):
 
 ```powershell
 dotnet test

@@ -42,4 +42,5 @@ internal static class Glyphs
     public const string Timer = "";
     public const string Water = "";
     public const string Bell = "";
+    public const string Calendar = "";
 }

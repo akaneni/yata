@@ -31,4 +31,12 @@
     <InternalsVisibleTo Include="Yata.Tests" />
   </ItemGroup>
 
+  <!-- Google OAuth client ("Desktop app") for the calendar. Official releases get it from the
+       YATA_GOOGLE_CLIENT_ID / YATA_GOOGLE_CLIENT_SECRET environment variables (GitHub secrets); it is
+       never committed. Builds without it still run, with the calendar disabled. See docs/google-calendar.md. -->
+  <ItemGroup Condition="'$(YATA_GOOGLE_CLIENT_ID)' != '' And '$(YATA_GOOGLE_CLIENT_SECRET)' != ''">
+    <AssemblyMetadata Include="GoogleClientId" Value="$(YATA_GOOGLE_CLIENT_ID)" />
+    <AssemblyMetadata Include="GoogleClientSecret" Value="$(YATA_GOOGLE_CLIENT_SECRET)" />
+  </ItemGroup>
+
 </Project>

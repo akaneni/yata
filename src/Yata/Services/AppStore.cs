@@ -27,6 +27,14 @@ public sealed class SettingsData
     // Media
     public bool LyricsEnabled { get; set; } = true;
 
+    // Calendar (Google)
+    /// <summary>Notice this long before an event; 0 = only when it starts.</summary>
+    public int CalendarReminderMinutes { get; set; } = 5;
+    /// <summary>The closed notch shows the next event in the minutes before it.</summary>
+    public bool CalendarInCompact { get; set; } = true;
+    /// <summary>Calendars to show; null = the ones ticked in Google Calendar itself.</summary>
+    public List<string>? CalendarIds { get; set; }
+
     // Notices
     public bool HudVolume { get; set; } = true;
     public bool HudBrightness { get; set; } = true;
