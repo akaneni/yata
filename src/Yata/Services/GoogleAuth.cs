@@ -64,6 +64,8 @@ internal sealed class GoogleCredential
 {
     public string RefreshToken { get; set; } = "";
     public string Email { get; set; } = "";
+    /// <summary>Scopes granted so far; null for accesses saved before tasks existed (calendar only).</summary>
+    public List<string>? Scopes { get; set; }
 }
 
 public sealed class GoogleAuthException : Exception
@@ -74,16 +76,32 @@ public sealed class GoogleAuthException : Exception
     public GoogleAuthException(string message, bool needsReconnect = false) : base(message) => NeedsReconnect = needsReconnect;
 }
 
+/// <summary>A Google API answered with an error status.</summary>
+public sealed class GoogleApiException : HttpRequestException
+{
+    public string Body { get; }
+
+    public GoogleApiException(HttpStatusCode status, string body)
+        : base($"O Google respondeu {(int)status}.", null, status) => Body = body;
+
+    /// <summary>The API is switched off in the Cloud project: a setup problem, not a data one.</summary>
+    public bool ApiDisabled => Body.Contains("accessNotConfigured", StringComparison.Ordinal) ||
+                               Body.Contains("SERVICE_DISABLED", StringComparison.Ordinal);
+}
+
 /// <summary>
 /// "Sign in with Google" for an installed app, as Google recommends: the system browser, a one-shot
-/// listener on 127.0.0.1 for the redirect, PKCE and a state check. Asks for read-only calendar
-/// access plus the e-mail address (to show which account is connected).
+/// listener on 127.0.0.1 for the redirect, PKCE and a state check. Each feature asks for its own
+/// scopes when it's turned on (incremental authorization), plus the e-mail address to show which
+/// account is connected.
 /// </summary>
 public sealed class GoogleAuth
 {
     public const string CalendarListScope = "https://www.googleapis.com/auth/calendar.calendarlist.readonly";
     public const string EventsScope = "https://www.googleapis.com/auth/calendar.events.readonly";
-    private static readonly string[] Scopes = { "openid", "email", CalendarListScope, EventsScope };
+    public const string TasksScope = "https://www.googleapis.com/auth/tasks";
+    public static readonly string[] CalendarScopes = { CalendarListScope, EventsScope };
+    public static readonly string[] TasksScopes = { TasksScope };
 
     private const string AuthorizeUrl = "https://accounts.google.com/o/oauth2/v2/auth";
     private const string TokenUrl = "https://oauth2.googleapis.com/token";
@@ -108,7 +126,21 @@ public sealed class GoogleAuth
 
     public string? Email => _credential?.Email;
 
-    public async Task SignInAsync(CancellationToken ct)
+    /// <summary>Whether the saved access covers these scopes.</summary>
+    public bool Has(IEnumerable<string> scopes)
+    {
+        if (_credential == null)
+            return false;
+        var granted = _credential.Scopes ?? CalendarScopes.ToList();
+        return scopes.All(granted.Contains);
+    }
+
+    /// <summary>
+    /// Signs in asking for <paramref name="wanted"/> on top of whatever was already granted. People can
+    /// untick permissions on Google's screen; the access is kept as long as it's good for something.
+    /// </summary>
+    /// <returns>Whether every scope in <paramref name="wanted"/> was granted.</returns>
+    public async Task<bool> SignInAsync(string[] wanted, CancellationToken ct)
     {
         var client = _client ?? throw new GoogleAuthException("Esta versão do Yata não tem acesso ao Google configurado.");
 
@@ -122,7 +154,9 @@ public sealed class GoogleAuth
             ("client_id", client.Id),
             ("redirect_uri", redirect),
             ("response_type", "code"),
-            ("scope", string.Join(' ', Scopes)),
+            ("scope", string.Join(' ', new[] { "openid", "email" }.Concat(wanted))),
+            // The new access also covers what was granted before, so turning on tasks keeps the calendar.
+            ("include_granted_scopes", "true"),
             ("code_challenge", Pkce.Challenge(verifier)),
             ("code_challenge_method", "S256"),
             ("state", state),
@@ -159,20 +193,48 @@ public sealed class GoogleAuth
 
         // Google lets people untick individual permissions on the consent screen.
         string granted = root.TryGetProperty("scope", out var s) ? s.GetString() ?? "" : "";
-        if (!HasScopes(granted, CalendarListScope, EventsScope))
+        if (!HasScopes(granted, CalendarScopes) && !HasScopes(granted, TasksScopes))
         {
+            // Good for nothing: don't keep an access the user didn't mean to give.
             await RevokeAsync(refresh);
-            throw new GoogleAuthException("Marque a permissão de ver a agenda para o Yata poder mostrar seus eventos.");
+            throw new GoogleAuthException("Nenhuma permissão foi marcada no Google, então nada foi conectado.");
         }
 
         _credential = new GoogleCredential
         {
             RefreshToken = refresh,
             Email = root.TryGetProperty("id_token", out var id) ? EmailFromIdToken(id.GetString()) ?? "" : "",
+            Scopes = granted.Split(' ', StringSplitOptions.RemoveEmptyEntries).ToList(),
         };
         NeedsReconnect = false;
         SetAccessToken(root);
         SecretFile.Write(_file, _credential);
+        return HasScopes(granted, wanted);
+    }
+
+    /// <summary>
+    /// An API call with the access token; a rejected token is refreshed once and the call retried.
+    /// Returns the response body, or throws <see cref="GoogleApiException"/>.
+    /// </summary>
+    public async Task<string> SendAsync(HttpMethod method, string url, string? json, CancellationToken ct)
+    {
+        for (int attempt = 0; ; attempt++)
+        {
+            string token = await GetAccessTokenAsync(forceRefresh: attempt > 0, ct);
+            using var request = new HttpRequestMessage(method, url);
+            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            if (json != null)
+                request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            using var response = await Http.SendAsync(request, ct);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized && attempt == 0)
+                continue;
+
+            string body = await response.Content.ReadAsStringAsync(ct);
+            if (response.IsSuccessStatusCode)
+                return body;
+            throw new GoogleApiException(response.StatusCode, body);
+        }
     }
 
     /// <summary>A valid access token, refreshed when it's about to expire (or when Google rejected it).</summary>
@@ -201,7 +263,7 @@ public sealed class GoogleAuth
             // Revoked in the Google account, password changed, or expired (test-mode clients: 7 days).
             NeedsReconnect = true;
             _accessToken = null;
-            throw new GoogleAuthException("O acesso à agenda expirou. Conecte de novo.", needsReconnect: true);
+            throw new GoogleAuthException("O acesso à conta Google expirou. Conecte de novo.", needsReconnect: true);
         }
         catch (TokenEndpointException ex)
         {
@@ -260,7 +322,7 @@ public sealed class GoogleAuth
 
             if (query.TryGetValue("code", out var code) && code.Length > 0)
             {
-                await RespondAsync(connection, "200 OK", ResultPage("Agenda conectada", "Pode fechar esta aba e voltar ao Yata."), ct);
+                await RespondAsync(connection, "200 OK", ResultPage("Conta Google conectada", "Pode fechar esta aba e voltar ao Yata."), ct);
                 return code;
             }
 

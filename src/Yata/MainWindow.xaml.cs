@@ -81,7 +81,9 @@ public partial class MainWindow : Window
     private readonly WaterTracker _water;
     private readonly TaskList _tasks;
     private readonly Shelf _shelf;
+    private readonly GoogleAccount _google = new();
     private readonly GoogleCalendar _calendar;
+    private readonly GoogleTasks _googleTasks;
     private readonly WeatherService _weather;
     private readonly PresenceTracker _presence;
     private readonly DispatcherTimer _newsTimer = new() { Interval = TimeSpan.FromSeconds(9) };
@@ -177,7 +179,8 @@ public partial class MainWindow : Window
         FocusPage.Attach(_focus);
         WaterPage.Attach(_water);
         TasksPage.Attach(_tasks);
-        _calendar = new GoogleCalendar(_store);
+        _calendar = new GoogleCalendar(_store, _google);
+        _googleTasks = new GoogleTasks(_store, _google, _tasks);
         _calendar.Message += ShowHud;
         _calendar.Changed += UpdateClock;
         AgendaPage.Attach(_calendar);
@@ -241,6 +244,7 @@ public partial class MainWindow : Window
         _water.Start();
         _tasks.Start();
         _calendar.Start();
+        _googleTasks.Start();
         _weather.Start();
         _presence.Start();
         try
@@ -274,6 +278,7 @@ public partial class MainWindow : Window
         _water.Stop();
         _tasks.Stop();
         _calendar.Stop();
+        _googleTasks.Stop();
         _weather.Stop();
         _presence.Stop();
         _newsTimer.Stop();
@@ -349,7 +354,7 @@ public partial class MainWindow : Window
         SetExpanded(false);
         if (_settingsWindow == null)
         {
-            _settingsWindow = new SettingsWindow(_store, _calendar);
+            _settingsWindow = new SettingsWindow(_store, _google, _calendar, _googleTasks);
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
             _settingsWindow.Show();
         }

@@ -241,7 +241,7 @@ public class CalendarTests
             Assert.Equal(System.Net.HttpStatusCode.NotFound, (await http.GetAsync($"http://127.0.0.1:{port}/?state=other&code=x")).StatusCode);
 
             string page = await http.GetStringAsync($"http://127.0.0.1:{port}/?state=s3&code=4%2Fabc&scope=email");
-            Assert.Contains("Agenda conectada", page);
+            Assert.Contains("Conta Google conectada", page);
             Assert.EndsWith("</html>", page);
             Assert.Equal("4/abc", await waiting);
         }
