@@ -576,7 +576,38 @@ public partial class MainWindow : Window
         TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
         ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Collapsed;
 
+        FitWindow(allowShrink: false);
         StartAnimation();
+    }
+
+    /// <summary>
+    /// Keeps the transparent window just big enough for the notch, its shadow and the spring's
+    /// overshoot. Every animation frame repaints the whole window, so a window sized for the
+    /// largest state (1040×340) cost several times more than the ~300×80 a closed notch needs.
+    /// Grows before an animation starts (nothing gets clipped) and shrinks once it settles.
+    /// </summary>
+    private void FitWindow(bool allowShrink)
+    {
+        const double sideRoom = 40;   // shadow blur sideways + overshoot
+        const double bottomRoom = 48; // shadow below
+        const double overshoot = 1.06;
+
+        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom;
+        double height = Math.Max(_height.Value, _height.Target) * overshoot + bottomRoom;
+        width = Math.Ceiling(width / 2) * 2; // Even, so centering doesn't shift the notch by half a pixel.
+        height = Math.Ceiling(height);
+
+        if (!allowShrink)
+        {
+            width = Math.Max(width, Width);
+            height = Math.Max(height, Height);
+        }
+        if (width == Width && height == Height)
+            return;
+
+        Width = width;
+        Height = height;
+        PositionWindow();
     }
 
     private void StartAnimation()
@@ -611,6 +642,7 @@ public partial class MainWindow : Window
         {
             CompositionTarget.Rendering -= OnRendering;
             _animating = false;
+            FitWindow(allowShrink: true);
         }
     }
 

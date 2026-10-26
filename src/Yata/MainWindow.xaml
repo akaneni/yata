@@ -3,14 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:Yata.Views"
         Title="Yata"
-        Width="1040" Height="340"
+        Width="300" Height="80"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="False"
         FontFamily="{StaticResource UiFont}" Foreground="{StaticResource TextPrimary}"
         UseLayoutRounding="True">
     <Grid>
         <!-- Everything outside NotchHost is fully transparent, so clicks pass through to the desktop.
-             The window must stay wider than the widest notch (lyrics) plus ears, spring overshoot and shadow. -->
+             The window is resized in code (FitWindow) to the notch plus room for shadow and overshoot. -->
         <Grid x:Name="NotchHost" HorizontalAlignment="Center" VerticalAlignment="Top"
               MouseEnter="OnNotchMouseEnter" MouseLeave="OnNotchMouseLeave"
               MouseLeftButtonUp="OnNotchClick"
