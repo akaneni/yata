@@ -84,7 +84,7 @@ public sealed class TaskData
     public bool Reminded { get; set; }
 }
 
-/// <summary>Local JSON storage in %LOCALAPPDATA%\Notch\data.json. Nothing leaves the PC.</summary>
+/// <summary>Local JSON storage in %LOCALAPPDATA%\Yata\data.json. Nothing leaves the PC.</summary>
 public sealed class AppStore
 {
     private static readonly JsonSerializerOptions Options = new() { WriteIndented = true };
@@ -128,6 +128,13 @@ public sealed class AppStore
         }
         return new AppStore(path, data ?? new StoreData());
     }
+
+    /// <summary>
+    /// A store that lives only in memory, for tests. Saves are scheduled on a dispatcher timer
+    /// that never ticks without a message loop, so nothing is written.
+    /// </summary>
+    internal static AppStore InMemory() =>
+        new(Path.Combine(Path.GetTempPath(), "yata-tests", "unused.json"), new StoreData());
 
     /// <summary>Coalesces bursts of changes (e.g. several clicks) into one write.</summary>
     public void SaveSoon()

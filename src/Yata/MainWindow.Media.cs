@@ -1,0 +1,250 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Automation;
+using System.Windows.Controls;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
+using System.Windows.Threading;
+using Microsoft.Win32;
+using Yata.Helpers;
+using Yata.Interop;
+using Yata.Services;
+using Yata.Views;
+using Glyphs = Yata.Services.Glyphs;
+using MediaState = Yata.Services.MediaState;
+
+namespace Yata;
+
+// Now playing: compact line, artwork accent, equalizer, controls.
+public partial class MainWindow
+{
+    // Equalizer bar heights, in 2px rows out of 7, one sequence per bar; each step lasts StepMs.
+    private static readonly int[][] EqualizerSteps =
+    {
+        new[] { 2, 4, 6, 4, 3, 5, 7, 5, 3, 2 },
+        new[] { 5, 7, 5, 3, 6, 4, 2, 4, 6, 7 },
+        new[] { 3, 2, 4, 6, 7, 5, 4, 6, 3, 4 },
+        new[] { 6, 4, 3, 5, 2, 3, 5, 7, 6, 5 },
+    };
+    private const int EqualizerStepMs = 130;
+    private const double EqualizerRows = 7;
+    private static readonly Color MonochromeAccent = Color.FromRgb(0xE0, 0xE0, 0xE0);
+
+    private bool _equalizerRunning;
+    private BitmapImage? _artwork;
+    // The compact line waiting for the outgoing one to slide away; null when no swap is running.
+    private string? _incomingCompactText;
+
+    private void OnMediaChanged()
+    {
+        var previous = _state;
+        _state = _media.Current;
+
+        if (_state != null)
+        {
+            if (TitleText.Text != _state.Title)
+            {
+                TitleMarquee.Stop();
+                TitleText.Text = _state.Title;
+                if (_expanded)
+                    RevealOverflow(TitleMarquee);
+            }
+            ArtistText.Text = _state.Artist;
+            ArtistText.Visibility = string.IsNullOrEmpty(_state.Artist) ? Visibility.Collapsed : Visibility.Visible;
+            PlayPauseButton.Content = _state.IsPlaying ? "\uF8AE" : "\uF5B0";
+            AutomationProperties.SetName(PlayPauseButton, _state.IsPlaying ? "Pausar" : "Tocar");
+
+            if (previous == null || !ReferenceEquals(previous.Thumbnail, _state.Thumbnail))
+                SetArtwork(_state.Thumbnail);
+        }
+        else
+        {
+            SetArtwork(null);
+        }
+
+        UpdateCompactTimer();
+        SetEqualizer(_state?.IsPlaying == true && IsVisible);
+
+        string? track = _state == null ? null : $"{_state.SourceApp}\n{_state.Artist}\n{_state.Title}";
+        if (track != _lyricsTrack)
+        {
+            _lyricsTrack = track;
+            LoadLyrics(_state);
+        }
+
+        UpdateClock();
+        UpdateTargets();
+        RefreshProgress();
+        UpdateLyricsTimer();
+        UpdateLyricLine();
+        UpdateCompactText();
+        UpdateCompanion();
+    }
+
+    private void UpdateCompactText()
+    {
+        if (_state == null)
+            return; // The clock owns the compact text.
+
+        string? line = _lyrics != null && _lyricIndex >= 0 ? _lyrics.Lines[_lyricIndex].Text : null;
+        SetCompactText(string.IsNullOrWhiteSpace(line) ? _state.Title : line);
+    }
+
+    /// <summary>
+    /// Swaps the closed notch's line: the old text slides up and out, the new one rises in.
+    /// Changes that arrive mid-swap just replace the incoming text.
+    /// </summary>
+    private void SetCompactText(string text)
+    {
+        if (_incomingCompactText != null)
+        {
+            _incomingCompactText = text;
+            return;
+        }
+        if (text == CompactText.Text)
+            return;
+        CompactMarquee.Stop();
+        if (CompactView.Visibility != Visibility.Visible || string.IsNullOrEmpty(CompactText.Text))
+        {
+            CompactText.Text = text;
+            RevealOverflow(CompactMarquee);
+            return;
+        }
+
+        _incomingCompactText = text;
+        var ease = new CubicEase { EasingMode = EasingMode.EaseIn };
+        var outgoing = new DoubleAnimation(0, -10, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease };
+        outgoing.Completed += (_, _) =>
+        {
+            CompactText.Text = _incomingCompactText;
+            _incomingCompactText = null;
+            var rise = new CubicEase { EasingMode = EasingMode.EaseOut };
+            CompactTextShift.BeginAnimation(TranslateTransform.YProperty,
+                new DoubleAnimation(10, 0, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
+            CompactText.BeginAnimation(OpacityProperty,
+                new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
+            RevealOverflow(CompactMarquee);
+        };
+        CompactTextShift.BeginAnimation(TranslateTransform.YProperty, outgoing);
+        CompactText.BeginAnimation(OpacityProperty,
+            new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease });
+    }
+
+    /// <summary>Once the new text is laid out, scrolls it through once if it doesn't fit.</summary>
+    private void RevealOverflow(MarqueeText marquee) =>
+        Dispatcher.InvokeAsync(marquee.Run, DispatcherPriority.Loaded);
+
+    /// <summary>While a focus session is active its countdown takes the equalizer's slot.</summary>
+    private void UpdateCompactTimer()
+    {
+        bool active = _focus.IsActive;
+        CompactTimer.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+        bool nodding = MusicRaven.Visibility == Visibility.Visible;
+        Equalizer.Visibility = _state != null && !active && !nodding ? Visibility.Visible : Visibility.Collapsed;
+
+        var remaining = _focus.Remaining;
+        CompactTimerText.Text = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
+        // Paused reads differently from running at a glance: pause icon, dimmed time.
+        CompactTimerGlyph.Text = _focus.IsPaused ? "" : Glyphs.Timer;
+        CompactTimer.Opacity = _focus.IsPaused ? 0.55 : 1;
+
+        if (active != _focusWasActive)
+        {
+            _focusWasActive = active;
+            UpdateTargets(); // The idle notch widens to fit the countdown.
+        }
+    }
+
+    private void SetArtwork(BitmapImage? image)
+    {
+        CompactArtBrush.ImageSource = image;
+        ExpandedArtBrush.ImageSource = image;
+        CompactArt.Visibility = image != null ? Visibility.Visible : Visibility.Collapsed;
+        _artwork = image;
+        ApplyAccent();
+    }
+
+    /// <summary>
+    /// The cover's color, or plain light gray when the user prefers black and white.
+    /// Only media elements (equalizer, progress bar) wear it; everything else stays white.
+    /// </summary>
+    private void ApplyAccent()
+    {
+        var accent = !Settings.UseArtworkAccent ? MonochromeAccent
+                   : _artwork != null ? ColorExtractor.FromImage(_artwork)
+                   : ColorExtractor.Default;
+        _accent.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(accent, TimeSpan.FromMilliseconds(500)));
+    }
+
+    /// <summary>
+    /// Endless decorative animations run at 15 fps instead of 60. Each frame repaints the
+    /// whole transparent window; at 60 fps the equalizer alone cost ~25% of a CPU core.
+    /// </summary>
+    internal static T Ambient<T>(T animation) where T : Timeline
+    {
+        Timeline.SetDesiredFrameRate(animation, 15);
+        return animation;
+    }
+
+    private void SetEqualizer(bool running)
+    {
+        if (running == _equalizerRunning)
+            return;
+        _equalizerRunning = running;
+
+        for (int i = 0; i < Equalizer.Children.Count; i++)
+        {
+            var scale = (ScaleTransform)((Rectangle)Equalizer.Children[i]).RenderTransform;
+            if (running)
+            {
+                // Discrete steps: the bars jump between whole pixel rows like the sprite, and the
+                // notch only repaints when a bar actually changes height.
+                var bar = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
+                var steps = EqualizerSteps[i];
+                for (int s = 0; s < steps.Length; s++)
+                    bar.KeyFrames.Add(new DiscreteDoubleKeyFrame(steps[s] / EqualizerRows,
+                        KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(s * EqualizerStepMs))));
+                bar.Duration = TimeSpan.FromMilliseconds(steps.Length * EqualizerStepMs);
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, Ambient(bar));
+            }
+            else
+            {
+                scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+                scale.ScaleY = 2 / EqualizerRows;
+            }
+        }
+    }
+
+    private void BuildEqualizer()
+    {
+        foreach (var _ in EqualizerSteps)
+        {
+            Equalizer.Children.Add(new Rectangle
+            {
+                Width = 3,
+                Height = 14,
+                Margin = new Thickness(0, 0, 2, 0),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Fill = _accent,
+                RenderTransformOrigin = new Point(0.5, 1),
+                RenderTransform = new ScaleTransform(1, 2 / EqualizerRows),
+            });
+        }
+    }
+
+    private void OnPlayPause(object sender, RoutedEventArgs e) => _ = _media.TogglePlayPauseAsync();
+
+    private void OnNext(object sender, RoutedEventArgs e) => _ = _media.NextAsync();
+
+    private void OnPrevious(object sender, RoutedEventArgs e) => _ = _media.PreviousAsync();
+}

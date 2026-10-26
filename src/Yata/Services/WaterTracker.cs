@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,24 +14,29 @@ public sealed class WaterTracker
     private const int KeepDays = 60;
 
     private readonly AppStore _store;
+    private readonly Func<DateTime> _clock;
     private readonly DispatcherTimer _reminder = new() { Interval = TimeSpan.FromMinutes(1) };
     // Don't nag right after the app starts.
-    private DateTime _lastReminder = DateTime.Now;
+    private DateTime _lastReminder;
 
     public event Action? Changed;
     public event Action<HudMessage>? Message;
 
-    public WaterTracker(AppStore store)
+    /// <param name="clock">Current time; tests pass a fake one.</param>
+    public WaterTracker(AppStore store, Func<DateTime>? clock = null)
     {
         _store = store;
+        _clock = clock ?? (() => DateTime.Now);
+        _lastReminder = _clock();
         _reminder.Tick += (_, _) => CheckReminder();
     }
 
     private WaterData Data => _store.Data.Water;
+    private DateTime Today => _clock().Date;
 
     public int GoalMl => Data.GoalMl;
     public int CupMl => Data.CupMl;
-    public int TodayMl => AmountOn(DateTime.Today);
+    public int TodayMl => AmountOn(Today);
 
     public void Start() => _reminder.Start();
 
@@ -47,7 +52,7 @@ public sealed class WaterTracker
     /// <summary>Oldest first, ending today.</summary>
     public IReadOnlyList<(DateTime Day, int Ml)> LastDays(int count) =>
         Enumerable.Range(0, count)
-            .Select(i => DateTime.Today.AddDays(i - count + 1))
+            .Select(i => Today.AddDays(i - count + 1))
             .Select(day => (day, AmountOn(day)))
             .ToList();
 
@@ -55,9 +60,9 @@ public sealed class WaterTracker
     {
         int before = TodayMl;
         int today = Math.Max(0, before + ml);
-        Data.Days[Key(DateTime.Today)] = today;
+        Data.Days[Key(Today)] = today;
         if (ml > 0)
-            Data.LastDrink = DateTime.Now;
+            Data.LastDrink = _clock();
         Prune();
         _store.SaveSoon();
         Changed?.Invoke();
@@ -68,13 +73,16 @@ public sealed class WaterTracker
                 DurationMs: 4000, Important: true, Celebrate: true));
     }
 
+    /// <summary>One reminder check, as the minute timer does; for tests.</summary>
+    internal void Poll() => CheckReminder();
+
     private void CheckReminder()
     {
-        var now = DateTime.Now;
+        var now = _clock();
         if (!Data.RemindersEnabled || now.Hour < FirstReminderHour || now.Hour >= LastReminderHour || TodayMl >= GoalMl)
             return;
 
-        var dayStart = DateTime.Today.AddHours(FirstReminderHour);
+        var dayStart = now.Date.AddHours(FirstReminderHour);
         var since = new[] { dayStart, _lastReminder, Data.LastDrink ?? DateTime.MinValue }.Max();
         if (now - since < TimeSpan.FromMinutes(Data.ReminderMinutes))
             return;
@@ -88,7 +96,7 @@ public sealed class WaterTracker
 
     private void Prune()
     {
-        string oldest = Key(DateTime.Today.AddDays(-KeepDays));
+        string oldest = Key(Today.AddDays(-KeepDays));
         foreach (var key in Data.Days.Keys.Where(k => string.CompareOrdinal(k, oldest) < 0).ToList())
             Data.Days.Remove(key);
     }
