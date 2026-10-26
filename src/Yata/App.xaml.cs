@@ -3,6 +3,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Yata.Helpers;
 using Forms = System.Windows.Forms;
 
 namespace Yata;
@@ -16,6 +17,9 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (ArgValue(e.Args, "--timings") is { } timings)
+            StartupTimings.Enable(timings);
+        StartupTimings.Mark("OnStartup");
 
         // Measured: for a small transparent overlay, GPU rendering costs more than it saves —
         // each frame is read back from the GPU — and the Direct3D device alone took ~75 MB.
@@ -29,9 +33,12 @@ public partial class App : Application
             return;
         }
 
-        _window = new MainWindow();
+        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench") };
+        StartupTimings.Mark("MainWindow");
         _window.Show();
+        StartupTimings.Mark("Show");
         CreateTrayIcon();
+        StartupTimings.Mark("tray");
 
         int show = System.Array.IndexOf(e.Args, "--show");
         if (show >= 0)
@@ -44,6 +51,12 @@ public partial class App : Application
             _window.OpenSettings();
         if (e.Args.Contains("--demo"))
             _window.Dispatcher.InvokeAsync(_window.RunCompanionDemo, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+    }
+
+    private static string? ArgValue(string[] args, string name)
+    {
+        int index = System.Array.IndexOf(args, name);
+        return index >= 0 && index + 1 < args.Length ? args[index + 1] : null;
     }
 
     private void CreateTrayIcon()

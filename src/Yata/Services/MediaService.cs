@@ -294,6 +294,23 @@ public sealed class MediaService
         _positionUpdatedAt = timeline.LastUpdatedTime;
     }
 
+    /// <summary>
+    /// Shows a made-up track, playing from the start, instead of following Windows' sessions.
+    /// Only for measurements (--bench): the controls do nothing without a session.
+    /// </summary>
+    internal void Simulate(string title, string artist, TimeSpan duration)
+    {
+        _title = title;
+        _artist = artist;
+        _isPlaying = true;
+        _playbackRate = 1;
+        _position = TimeSpan.Zero;
+        _duration = duration;
+        _positionUpdatedAt = DateTimeOffset.Now;
+        Current = Snapshot();
+        Changed?.Invoke();
+    }
+
     private MediaState Snapshot() => new(
         _title, _artist, _session?.SourceAppUserModelId ?? "", _isPlaying,
         _position, _duration, _positionUpdatedAt, _playbackRate, _thumbnail);
