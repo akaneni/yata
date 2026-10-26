@@ -26,6 +26,13 @@ public partial class App : Application
         _window.Show();
         CreateTrayIcon();
 
+        int show = System.Array.IndexOf(e.Args, "--show");
+        if (show >= 0)
+        {
+            string page = show + 1 < e.Args.Length ? e.Args[show + 1] : "media";
+            int seconds = show + 2 < e.Args.Length && int.TryParse(e.Args[show + 2], out int s) ? s : 20;
+            _window.Dispatcher.InvokeAsync(() => _window.ShowPage(page, seconds), System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        }
         if (e.Args.Contains("--settings"))
             _window.OpenSettings();
         if (e.Args.Contains("--demo"))

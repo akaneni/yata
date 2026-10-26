@@ -27,4 +27,8 @@
     <Resource Include="Assets\yata.ico" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Yata.Tests" />
+  </ItemGroup>
+
 </Project>

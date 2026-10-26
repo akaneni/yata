@@ -19,6 +19,9 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
+      - name: Tests
+        run: dotnet test --nologo
+
       - name: Version from tag
         shell: pwsh
         run: echo "VERSION=$('${{ github.ref_name }}'.TrimStart('v'))" >> $env:GITHUB_ENV

@@ -114,6 +114,7 @@ public partial class MainWindow : Window
     private bool _dropHinting;
 
     private bool _fullscreenApp;
+    private DateTime _pinnedUntil;
     private SettingsWindow? _settingsWindow;
     private BitmapImage? _artwork;
     private static readonly Color MonochromeAccent = Color.FromRgb(0xE0, 0xE0, 0xE0);
@@ -360,7 +361,31 @@ public partial class MainWindow : Window
 
     // ---- Hover / expand -------------------------------------------------------------
 
-    private void OnNotchMouseEnter(object sender, MouseEventArgs e) => ScheduleExpanded(true, Settings.HoverDelayMs);
+    private void OnNotchMouseEnter(object sender, MouseEventArgs e)
+    {
+        _pinnedUntil = DateTime.MinValue; // The real mouse takes over from a preview.
+        ScheduleExpanded(true, Settings.HoverDelayMs);
+    }
+
+    /// <summary>
+    /// Opens the notch on a page and keeps it open for a while without the mouse
+    /// (<c>Yata.exe --show foco [segundos]</c>): for previews, screenshots and UI tests.
+    /// </summary>
+    public void ShowPage(string page, int seconds = 20)
+    {
+        var tab = page.ToLowerInvariant() switch
+        {
+            "foco" or "focus" => TabFocus,
+            "agua" or "água" or "water" => TabWater,
+            "tarefas" or "tasks" => TabTasks,
+            "prateleira" or "shelf" => TabShelf,
+            _ => TabMedia,
+        };
+        tab.IsChecked = true;
+        _pinnedUntil = DateTime.Now.AddSeconds(Math.Clamp(seconds, 1, 300));
+        _hoverTimer.Stop();
+        SetExpanded(true);
+    }
 
     private void OnNotchMouseLeave(object sender, MouseEventArgs e)
     {
@@ -374,7 +399,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void CollapseIfCursorLeft()
     {
-        if (!_expanded || _dropHinting || _seeking || _hoverTimer.IsEnabled ||
+        if (!_expanded || _dropHinting || _seeking || _hoverTimer.IsEnabled || DateTime.Now < _pinnedUntil ||
             TasksPage.HasDraft || ShelfPage.IsDraggingOut || IsCursorOverNotch())
             return;
         ScheduleExpanded(false, 350);
@@ -698,6 +723,9 @@ public partial class MainWindow : Window
 
         var remaining = _focus.Remaining;
         CompactTimerText.Text = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
+        // Paused reads differently from running at a glance: pause icon, dimmed time.
+        CompactTimerGlyph.Text = _focus.IsPaused ? "" : Glyphs.Timer;
+        CompactTimer.Opacity = _focus.IsPaused ? 0.55 : 1;
 
         if (active != _focusWasActive)
         {

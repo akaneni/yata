@@ -6,22 +6,33 @@ namespace Yata.Services;
 
 public enum FocusPhase { Focus, ShortBreak, LongBreak }
 
+/// <summary>Ready (not started) → Running ⇄ Paused; Stop goes back to Ready.</summary>
+public enum FocusState { Ready, Running, Paused }
+
 /// <summary>
 /// Pomodoro (by default 25 min focus, 5 min break, 15 min break after every 4th session;
-/// lengths come from the settings). Breaks start on their own; the next focus session waits.
+/// lengths come from the settings). Breaks start on their own; the next focus session waits
+/// in Ready until the user starts it.
 /// </summary>
 public sealed class FocusTimer
 {
     private readonly SettingsData _settings;
+    private readonly Func<DateTime> _now;
+    private readonly Action _chime;
     private readonly DispatcherTimer _tick = new() { Interval = TimeSpan.FromMilliseconds(250) };
     private TimeSpan _pausedRemaining;
     private DateTime _endsAt;
-    private bool _phaseStarted;
 
     public FocusPhase Phase { get; private set; } = FocusPhase.Focus;
-    public bool IsRunning { get; private set; }
+    public FocusState State { get; private set; } = FocusState.Ready;
     /// <summary>Focus sessions finished in the current cycle (0..SessionsPerCycle).</summary>
     public int CompletedSessions { get; private set; }
+
+    public bool IsRunning => State == FocusState.Running;
+    public bool IsPaused => State == FocusState.Paused;
+    /// <summary>A session or break is under way (running or paused).</summary>
+    public bool IsActive => State != FocusState.Ready;
+    public bool IsBreak => Phase != FocusPhase.Focus;
 
     public int SessionsPerCycle => Math.Max(1, _settings.SessionsPerCycle);
 
@@ -38,62 +49,82 @@ public sealed class FocusTimer
         {
             if (!IsRunning)
                 return _pausedRemaining;
-            var left = _endsAt - DateTime.Now;
+            var left = _endsAt - _now();
             return left > TimeSpan.Zero ? left : TimeSpan.Zero;
         }
     }
 
     public double Progress => 1 - Remaining.TotalSeconds / PhaseLength.TotalSeconds;
 
-    /// <summary>Running, or paused part-way through a phase.</summary>
-    public bool IsActive => IsRunning || Remaining < PhaseLength;
-
     public event Action? Changed;
     public event Action<HudMessage>? Message;
 
-    public FocusTimer(SettingsData settings)
+    /// <param name="clock">Time source; tests pass a fake one.</param>
+    /// <param name="chime">Sound at the end of a phase; tests pass a no-op.</param>
+    public FocusTimer(SettingsData settings, Func<DateTime>? clock = null, Action? chime = null)
     {
         _settings = settings;
+        _now = clock ?? (() => DateTime.Now);
+        _chime = chime ?? Chime.Play;
         _pausedRemaining = PhaseLength;
-        _tick.Tick += OnTick;
+        _tick.Tick += (_, _) => Poll();
     }
 
     /// <summary>
-    /// New lengths apply at once to a phase that hasn't started; a started one keeps its
-    /// countdown, capped at the new length.
+    /// New lengths apply at once while Ready; a session under way keeps its countdown,
+    /// capped at the new length.
     /// </summary>
     public void ApplySettings()
     {
-        if (!_phaseStarted || _pausedRemaining > PhaseLength)
+        if (State == FocusState.Ready || _pausedRemaining > PhaseLength)
             _pausedRemaining = PhaseLength;
         if (CompletedSessions > SessionsPerCycle)
             CompletedSessions = SessionsPerCycle;
         Changed?.Invoke();
     }
 
-    public void Toggle()
-    {
-        if (IsRunning)
-            Pause();
-        else
-            Start();
-    }
-
+    /// <summary>Ready → Running.</summary>
     public void Start()
     {
-        _endsAt = DateTime.Now + _pausedRemaining;
-        IsRunning = true;
-        _phaseStarted = true;
-        _tick.Start();
+        if (State != FocusState.Ready)
+            return;
+        Run();
+    }
+
+    /// <summary>Running → Paused.</summary>
+    public void Pause()
+    {
+        if (State != FocusState.Running)
+            return;
+        Freeze(Remaining);
+    }
+
+    /// <summary>Paused → Running, from where it stopped.</summary>
+    public void Resume()
+    {
+        if (State != FocusState.Paused)
+            return;
+        Run();
+    }
+
+    /// <summary>
+    /// Abandons whatever is under way and goes back to a fresh, not-started focus session.
+    /// Finished sessions in the cycle are kept.
+    /// </summary>
+    public void Stop()
+    {
+        _tick.Stop();
+        Phase = FocusPhase.Focus;
+        State = FocusState.Ready;
+        _pausedRemaining = PhaseLength;
         Changed?.Invoke();
     }
 
-    public void Pause()
+    /// <summary>Ends a break early (no chime). Does nothing during focus.</summary>
+    public void SkipBreak()
     {
-        _pausedRemaining = Remaining;
-        IsRunning = false;
-        _tick.Stop();
-        Changed?.Invoke();
+        if (IsBreak)
+            Advance(notify: false);
     }
 
     /// <summary>
@@ -102,36 +133,39 @@ public sealed class FocusTimer
     /// </summary>
     public bool PauseAfterIdle(TimeSpan unattended)
     {
-        if (!IsRunning)
+        if (State != FocusState.Running)
             return false;
 
         var remaining = Remaining + unattended;
-        _pausedRemaining = remaining < PhaseLength ? remaining : PhaseLength;
-        IsRunning = false;
-        _tick.Stop();
-        Changed?.Invoke();
+        Freeze(remaining < PhaseLength ? remaining : PhaseLength);
         return true;
     }
 
-    /// <summary>Restarts the current phase from its full length, stopped.</summary>
-    public void Reset()
+    /// <summary>Checks for the end of the phase. Called by the internal tick; tests call it directly.</summary>
+    internal void Poll()
     {
-        IsRunning = false;
-        _phaseStarted = false;
-        _tick.Stop();
-        _pausedRemaining = PhaseLength;
-        Changed?.Invoke();
-    }
-
-    /// <summary>Ends the current phase now, without the chime.</summary>
-    public void Skip() => Advance(notify: false);
-
-    private void OnTick(object? sender, EventArgs e)
-    {
+        if (State != FocusState.Running)
+            return;
         if (Remaining <= TimeSpan.Zero)
             Advance(notify: true);
         else
             Changed?.Invoke();
+    }
+
+    private void Run()
+    {
+        _endsAt = _now() + _pausedRemaining;
+        State = FocusState.Running;
+        _tick.Start();
+        Changed?.Invoke();
+    }
+
+    private void Freeze(TimeSpan remaining)
+    {
+        _pausedRemaining = remaining;
+        State = FocusState.Paused;
+        _tick.Stop();
+        Changed?.Invoke();
     }
 
     private void Advance(bool notify)
@@ -143,16 +177,15 @@ public sealed class FocusTimer
             _pausedRemaining = PhaseLength;
             if (notify)
                 Notify("Hora da pausa", $"{PhaseLength.TotalMinutes:0} min");
-            Start();
+            Run(); // Breaks start on their own.
         }
         else
         {
             if (Phase == FocusPhase.LongBreak)
                 CompletedSessions = 0;
-            Phase = FocusPhase.Focus;
-            IsRunning = false;
-            _phaseStarted = false;
             _tick.Stop();
+            Phase = FocusPhase.Focus;
+            State = FocusState.Ready;
             _pausedRemaining = PhaseLength;
             if (notify)
                 Notify("De volta ao foco", $"{PhaseLength.TotalMinutes:0} min");
@@ -162,7 +195,7 @@ public sealed class FocusTimer
 
     private void Notify(string text, string value)
     {
-        Chime.Play();
+        _chime();
         Message?.Invoke(new HudMessage(Glyphs.Timer, text, value, DurationMs: 4000, Important: true));
     }
 }
