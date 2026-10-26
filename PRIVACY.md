@@ -13,6 +13,7 @@ Tarefas, registro de água, caminhos da prateleira e configurações ficam em `%
 O Yata só acessa a internet nestes casos:
 
 - **LRCLIB** (lrclib.net), para buscar letras de músicas: envia artista, título e duração da faixa que está tocando. Pode ser desligado nas Configurações.
+- **Open-Meteo** (open-meteo.com), para o tempo, somente se você ligar: envia a latitude e a longitude da cidade escolhida, arredondadas para cerca de 1 km. Ao buscar a cidade, envia o nome digitado. Se você clicar em "Usar minha localização", o Yata pede ao Windows a posição uma única vez, arredonda para cerca de 1 km na hora e descarta o valor preciso. Ele não acompanha a localização depois disso e nunca descobre onde você está pelo IP. Guarda nas configurações só o nome escolhido e as coordenadas arredondadas.
 - **Google Agenda**, somente se você conectar sua conta (veja abaixo).
 
 ## Google Agenda

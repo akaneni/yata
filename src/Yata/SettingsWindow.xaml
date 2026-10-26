@@ -221,6 +221,104 @@
                 </StackPanel>
             </Border>
 
+            <!-- Weather -->
+            <TextBlock Text="Tempo" Style="{StaticResource Section}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
+                            <TextBlock Text="Mostrar o tempo" Style="{StaticResource Label}"/>
+                            <TextBlock Style="{StaticResource Hint}"
+                                       Text="Dados do Open-Meteo (open-meteo.com), sem conta. Envia só as coordenadas da cidade, arredondadas (~1 km)."/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.WeatherEnabled}"/>
+                    </Grid>
+                    <Border Style="{StaticResource Divider}"/>
+                    <StackPanel Margin="0,12,0,12">
+                        <Grid>
+                            <TextBlock Text="Cidade" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="WeatherPlaceText" Style="{StaticResource Hint}" Margin="0"
+                                       HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Grid Margin="0,10,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Height="32" CornerRadius="10" Background="#14FFFFFF">
+                                <Grid>
+                                    <TextBlock x:Name="WeatherSearchPlaceholder" Margin="12,0" VerticalAlignment="Center"
+                                               FontSize="13" IsHitTestVisible="False" Foreground="#66FFFFFF"
+                                               Text="Buscar cidade (ex.: Campinas)"/>
+                                    <TextBox x:Name="WeatherSearchBox" Margin="9,0" VerticalAlignment="Center" FontSize="13"
+                                             Background="Transparent" BorderThickness="0" Foreground="White"
+                                             CaretBrush="White" SelectionBrush="#66FFFFFF" MaxLength="80"
+                                             TextChanged="OnWeatherSearchChanged" KeyDown="OnWeatherSearchKeyDown"/>
+                                </Grid>
+                            </Border>
+                            <Button Grid.Column="1" Style="{StaticResource PillButton}" Content="Buscar" Margin="8,0,0,0"
+                                    Click="OnWeatherSearch"/>
+                        </Grid>
+                        <!-- Alternative to typing: one reading from Windows location, rounded right away -->
+                        <Grid Margin="0,10,0,0">
+                            <TextBlock Style="{StaticResource Hint}" Margin="0,0,190,0" VerticalAlignment="Center"
+                                       Text="Ou use a localização do Windows uma vez: a posição é arredondada para ~1 km na hora e nunca é guardada com precisão."/>
+                            <Button x:Name="WeatherLocateButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" Click="OnWeatherLocate">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE81D;" FontFamily="{StaticResource IconFont}" FontSize="11"
+                                               VerticalAlignment="Center"/>
+                                    <TextBlock Text="Usar minha localização" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                        <Grid Margin="0,8,0,0">
+                            <TextBlock x:Name="WeatherSearchStatus" Style="{StaticResource Hint}" Margin="0,0,190,0"
+                                       VerticalAlignment="Center" Visibility="Collapsed"/>
+                            <Button x:Name="LocationSettingsButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" Content="Abrir configurações do Windows" Visibility="Collapsed"
+                                    Click="OnOpenLocationSettings"/>
+                        </Grid>
+                        <!-- Search results: click one to use it -->
+                        <ItemsControl x:Name="WeatherResults" Margin="0,6,0,0" Focusable="False">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Click="OnWeatherPlacePicked" Cursor="Hand" Focusable="False"
+                                            HorizontalContentAlignment="Stretch">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="Bg" CornerRadius="8" Padding="10,7" Background="Transparent">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="Bg" Property="Background" Value="#14FFFFFF"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontSize="13" Foreground="White"/>
+                                            <TextBlock Text="{Binding Detail}" FontSize="11" Foreground="#8C8C8C"/>
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
+                            <TextBlock Text="Avisar quando for chover" Style="{StaticResource Label}"/>
+                            <TextBlock Text="Quando a chance passa de 60% nas próximas 2 horas." Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.WeatherRainAlerts}"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Notices -->
             <TextBlock Text="Avisos no notch" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">

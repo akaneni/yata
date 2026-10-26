@@ -59,6 +59,14 @@
                                    Typography.NumeralAlignment="Tabular"/>
                     </StackPanel>
 
+                    <!-- Weather beside the idle clock -->
+                    <StackPanel x:Name="CompactWeather" Grid.Column="2" Orientation="Horizontal"
+                                VerticalAlignment="Center" Visibility="Collapsed">
+                        <views:WeatherSprite x:Name="CompactWeatherIcon" PixelSize="1" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="CompactWeatherText" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                   Typography.NumeralAlignment="Tabular"/>
+                    </StackPanel>
+
                     <!-- Yata nods along when you're away but the music plays on -->
                     <views:RavenSprite x:Name="MusicRaven" Grid.Column="2" PixelSize="1" VerticalAlignment="Center"
                                        Visibility="Collapsed"/>
@@ -310,6 +318,12 @@
                         </StackPanel>
                         <TextBlock Text="Nada tocando" FontSize="13" HorizontalAlignment="Center"
                                    Foreground="{StaticResource TextSecondary}"/>
+                        <StackPanel x:Name="IdleWeather" Orientation="Horizontal" HorizontalAlignment="Center"
+                                    Margin="0,8,0,0" Visibility="Collapsed">
+                            <views:WeatherSprite x:Name="IdleWeatherIcon" PixelSize="1.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock x:Name="IdleWeatherText" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
                     </StackPanel>
                     </Grid>
 

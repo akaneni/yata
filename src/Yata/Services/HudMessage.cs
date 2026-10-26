@@ -1,7 +1,7 @@
 namespace Yata.Services;
 
 /// <summary>What a notice is about, so each kind can be switched off in the settings.</summary>
-public enum HudKind { Reminder, Volume, Brightness, Power, AudioDevice, CapsLock, KeyboardLayout, Network, Privacy }
+public enum HudKind { Reminder, Volume, Brightness, Power, AudioDevice, CapsLock, KeyboardLayout, Network, Privacy, Weather }
 
 /// <summary>A short-lived status shown in the compact notch (volume, battery, Caps Lock, ...).</summary>
 /// <param name="Glyph">Segoe Fluent Icons glyph.</param>
@@ -47,4 +47,5 @@ internal static class Glyphs
     public const string Microphone = "";
     public const string Bell = "";
     public const string Calendar = "";
+    public const string Cloud = "";
 }

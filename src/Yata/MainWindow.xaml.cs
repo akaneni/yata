@@ -34,6 +34,7 @@ public partial class MainWindow : Window
 
     private static readonly Size CompactIdle = new(170, 32);
     private static readonly Size CompactIdleTimer = new(250, 32);
+    private static readonly Size CompactIdleWeather = new(220, 32);
     private static readonly Size CompactMedia = new(260, 32);
     private static readonly Size CompactLyrics = new(380, 32);
     // The next calendar event takes the clock's place in the minutes before it.
@@ -41,6 +42,8 @@ public partial class MainWindow : Window
     private static readonly Size CompactEventTimer = new(380, 32);
     // Expanded heights include the 42px header with the page tabs.
     private static readonly Size ExpandedIdle = new(420, 170);
+    // Room for the weather line under "Nada tocando".
+    private static readonly Size ExpandedIdleWeather = new(420, 190);
     private static readonly Size ExpandedMedia = new(520, 196);
     private static readonly Size ExpandedLyrics = new(880, 196);
     private static readonly Size ExpandedFocus = new(440, 196);
@@ -79,6 +82,7 @@ public partial class MainWindow : Window
     private readonly TaskList _tasks;
     private readonly Shelf _shelf;
     private readonly GoogleCalendar _calendar;
+    private readonly WeatherService _weather;
     private readonly PresenceTracker _presence;
     private readonly DispatcherTimer _newsTimer = new() { Interval = TimeSpan.FromSeconds(9) };
     private readonly RavenAnimator _ambientRaven;
@@ -177,6 +181,9 @@ public partial class MainWindow : Window
         _calendar.Message += ShowHud;
         _calendar.Changed += UpdateClock;
         AgendaPage.Attach(_calendar);
+        _weather = new WeatherService(_store);
+        _weather.Message += ShowHud;
+        _weather.Changed += UpdateWeather;
         TasksPage.KeyboardRequested += EnterKeyboardMode;
         TasksPage.KeyboardReleased += ExitKeyboardMode;
         Deactivated += OnDeactivated;
@@ -234,6 +241,7 @@ public partial class MainWindow : Window
         _water.Start();
         _tasks.Start();
         _calendar.Start();
+        _weather.Start();
         _presence.Start();
         try
         {
@@ -266,6 +274,7 @@ public partial class MainWindow : Window
         _water.Stop();
         _tasks.Stop();
         _calendar.Stop();
+        _weather.Stop();
         _presence.Stop();
         _newsTimer.Stop();
         _store.SaveNow();
@@ -356,6 +365,7 @@ public partial class MainWindow : Window
     {
         _focus.ApplySettings();
         _water.ApplySettings();
+        _weather.ApplySettings();
 
         if (!Settings.LyricsEnabled && _lyrics != null)
         {
@@ -542,11 +552,15 @@ public partial class MainWindow : Window
         bool hasMedia = _state != null;
         bool hasLyrics = hasMedia && _lyrics != null;
         bool ambient = _ambientShown && _state?.IsPlaying != true;
+        var weather = _weather.Current;
+        // The idle clock's companion; gives way to media, the focus countdown and an upcoming event.
+        bool compactWeather = weather != null && !hasMedia && !_focus.IsActive && _upcomingText == null;
         Size compact = hasLyrics ? CompactLyrics
                      : hasMedia ? CompactMedia
                      : ambient ? CompactAmbient
                      : _upcomingText != null ? (_focus.IsActive ? CompactEventTimer : CompactEvent)
                      : _focus.IsActive ? CompactIdleTimer
+                     : compactWeather ? CompactIdleWeather
                      : CompactIdle;
         // The privacy dots get their own space at the left edge of the closed notch.
         int dots = !PrivacyShown ? 0 : (_privacy.Current.Camera.Count > 0 ? 1 : 0) + (_privacy.Current.Microphone.Count > 0 ? 1 : 0);
@@ -560,7 +574,7 @@ public partial class MainWindow : Window
             NotchPage.Water => ExpandedWater,
             NotchPage.Tasks => ExpandedTasks,
             NotchPage.Shelf => ExpandedShelf,
-            _ => hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : ExpandedIdle,
+            _ => hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : weather != null ? ExpandedIdleWeather : ExpandedIdle,
         };
         bool showNews = _newsActive && !_expanded;
         bool showHud = !showNews && _hudActive && !_expanded;
@@ -582,6 +596,8 @@ public partial class MainWindow : Window
 
         ExpandedView.Width = expanded.Width;
         ExpandedView.Height = expanded.Height;
+        CompactWeather.Visibility = compactWeather ? Visibility.Visible : Visibility.Collapsed;
+        IdleWeather.Visibility = weather != null ? Visibility.Visible : Visibility.Collapsed;
         MediaPanel.Visibility = hasMedia ? Visibility.Visible : Visibility.Collapsed;
         IdlePanel.Visibility = hasMedia ? Visibility.Collapsed : Visibility.Visible;
         LyricsPanel.Visibility = hasLyrics ? Visibility.Visible : Visibility.Collapsed;
@@ -719,6 +735,26 @@ public partial class MainWindow : Window
         }
         geometry.Freeze();
         return geometry;
+    }
+
+    // ---- Weather --------------------------------------------------------------------
+
+    private void UpdateWeather()
+    {
+        if (_weather.Current is WeatherReport report)
+        {
+            CompactWeatherIcon.Icon = report.Icon;
+            CompactWeatherText.Text = report.TemperatureText;
+            IdleWeatherIcon.Icon = report.Icon;
+
+            string line = $"{report.TemperatureText} · {report.Description}";
+            if (report.High is double high && report.Low is double low)
+                line += $" · {Weather.Degrees(high)} / {Weather.Degrees(low)}";
+            if (report.RainAt is DateTime rain && !Weather.IsWet(report.Code))
+                line += $" · chuva por volta das {rain:HH}h";
+            IdleWeatherText.Text = line;
+        }
+        UpdateTargets();
     }
 
     // ---- Clock ----------------------------------------------------------------------
