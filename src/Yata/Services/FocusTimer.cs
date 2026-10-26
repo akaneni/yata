@@ -176,7 +176,7 @@ public sealed class FocusTimer
             Phase = CompletedSessions >= SessionsPerCycle ? FocusPhase.LongBreak : FocusPhase.ShortBreak;
             _pausedRemaining = PhaseLength;
             if (notify)
-                Notify("Hora da pausa", $"{PhaseLength.TotalMinutes:0} min");
+                Notify("Hora da pausa", $"{PhaseLength.TotalMinutes:0} min", celebrate: true);
             Run(); // Breaks start on their own.
         }
         else
@@ -193,9 +193,9 @@ public sealed class FocusTimer
         }
     }
 
-    private void Notify(string text, string value)
+    private void Notify(string text, string value, bool celebrate = false)
     {
         _chime();
-        Message?.Invoke(new HudMessage(Glyphs.Timer, text, value, DurationMs: 4000, Important: true));
+        Message?.Invoke(new HudMessage(Glyphs.Timer, text, value, DurationMs: 4000, Important: true, Celebrate: celebrate));
     }
 }

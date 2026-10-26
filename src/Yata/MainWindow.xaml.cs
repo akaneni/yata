@@ -51,13 +51,24 @@ public partial class MainWindow : Window
     // How much the closed notch swells under the mouse, before the hover delay opens it.
     private const double PeekWidth = 8;
     private const double PeekHeight = 3;
+    private const double TabPitch = 34;
 
-    private static readonly int[] EqualizerPeriods = { 420, 560, 360, 500 };
+    // Equalizer bar heights, in 2px rows out of 7, one sequence per bar; each step lasts StepMs.
+    private static readonly int[][] EqualizerSteps =
+    {
+        new[] { 2, 4, 6, 4, 3, 5, 7, 5, 3, 2 },
+        new[] { 5, 7, 5, 3, 6, 4, 2, 4, 6, 7 },
+        new[] { 3, 2, 4, 6, 7, 5, 4, 6, 3, 4 },
+        new[] { 6, 4, 3, 5, 2, 3, 5, 7, 6, 5 },
+    };
+    private const int EqualizerStepMs = 130;
+    private const double EqualizerRows = 7;
     private static readonly CultureInfo PtBr = new("pt-BR");
 
     // Highlight a line slightly early so it doesn't feel late against the audio.
     private static readonly TimeSpan LyricLead = TimeSpan.FromMilliseconds(200);
-    private static readonly Brush LyricDim = Freeze(new SolidColorBrush(Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF)));
+    private static readonly Color LyricDimColor = Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF);
+    private const double LyricZoom = 1.04;
     private static readonly Brush WarningBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B)));
 
     private readonly MediaService _media;
@@ -80,6 +91,9 @@ public partial class MainWindow : Window
     private readonly RavenAnimator _musicRaven;
     private readonly RavenAnimator _newsRaven;
     private readonly RavenAnimator _idleRaven;
+    private readonly RavenAnimator _hudRaven;
+    private readonly DispatcherTimer _hudRavenLand = new() { Interval = TimeSpan.FromMilliseconds(1100) };
+    private readonly DispatcherTimer _titleReveal = new() { Interval = TimeSpan.FromMilliseconds(450) };
     private readonly SolidColorBrush _accent = new(ColorExtractor.Default);
     private readonly DispatcherTimer _hoverTimer = new();
     private readonly DispatcherTimer _clockTimer = new() { Interval = TimeSpan.FromSeconds(1) };
@@ -146,6 +160,7 @@ public partial class MainWindow : Window
         _clockTimer.Tick += (_, _) => { UpdateClock(); RefreshProgress(); CollapseIfCursorLeft(); };
         _lyricsTimer.Tick += (_, _) => UpdateLyricLine();
         _hudTimer.Tick += (_, _) => HideHud();
+        _titleReveal.Tick += (_, _) => { _titleReveal.Stop(); TitleMarquee.Run(); };
 
         _audio = new AudioWatcher(Dispatcher);
         _brightness = new BrightnessWatcher(Dispatcher);
@@ -178,6 +193,9 @@ public partial class MainWindow : Window
         _ambientRaven = new RavenAnimator(AmbientRaven);
         _musicRaven = new RavenAnimator(MusicRaven);
         _newsRaven = new RavenAnimator(NewsRaven);
+        _hudRaven = new RavenAnimator(HudRaven);
+        _hudRavenLand.Tick += (_, _) => { _hudRavenLand.Stop(); _hudRaven.Perch(); };
+        BuildEqualizer();
         _idleRaven = new RavenAnimator(IdleRaven);
         // Hidden means a full-screen app is up: someone is watching it, not away.
         _presence.IsSurelyPresent = () => !IsVisible;
@@ -240,6 +258,8 @@ public partial class MainWindow : Window
         _lyricsTimer.Stop();
         _lyricsCts?.Cancel();
         _hudTimer.Stop();
+        _hudRavenLand.Stop();
+        _titleReveal.Stop();
         _audio.Dispose();
         _brightness.Dispose();
         _power.Dispose();
@@ -490,6 +510,7 @@ public partial class MainWindow : Window
         if (TasksPage == null)
             return; // Fired by the default tab while the XAML is still loading.
 
+        var previous = _page;
         _page = sender == TabFocus ? NotchPage.Focus
               : sender == TabWater ? NotchPage.Water
               : sender == TabTasks ? NotchPage.Tasks
@@ -497,6 +518,48 @@ public partial class MainWindow : Window
               : NotchPage.Media;
         TasksPage.EndTyping();
         UpdateTargets();
+
+        bool animate = ExpandedView.Visibility == Visibility.Visible && previous != _page;
+        MoveTabIndicator(animate);
+        if (animate)
+            SlideInPage(PageElement(_page), _page > previous ? 1 : -1);
+    }
+
+    private FrameworkElement PageElement(NotchPage page) => page switch
+    {
+        NotchPage.Focus => FocusPage,
+        NotchPage.Water => WaterPage,
+        NotchPage.Tasks => TasksPage,
+        NotchPage.Shelf => ShelfPage,
+        _ => MediaPage,
+    };
+
+    /// <summary>Tabs are fixed-size (TabButton: 32 wide, 2 apart), so the pill's spot is just the index.</summary>
+    private void MoveTabIndicator(bool animate)
+    {
+        double x = (int)_page * TabPitch;
+        if (!animate)
+        {
+            TabIndicatorShift.BeginAnimation(TranslateTransform.XProperty, null);
+            TabIndicatorShift.X = x;
+            return;
+        }
+        TabIndicatorShift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(x, TimeSpan.FromMilliseconds(260))
+        {
+            EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+        });
+    }
+
+    /// <summary>The new page drifts in from the side of the tab that was picked.</summary>
+    private static void SlideInPage(FrameworkElement page, int direction)
+    {
+        if (page.RenderTransform is not TranslateTransform shift)
+            page.RenderTransform = shift = new TranslateTransform();
+
+        var duration = TimeSpan.FromMilliseconds(240);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        shift.BeginAnimation(TranslateTransform.XProperty, new DoubleAnimation(18 * direction, 0, duration) { EasingFunction = ease });
+        page.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, duration) { EasingFunction = ease });
     }
 
     private void OnNotchClick(object sender, MouseButtonEventArgs e)
@@ -533,10 +596,16 @@ public partial class MainWindow : Window
         {
             _hudActive = false;
             _hudTimer.Stop();
+            StopHudRaven();
             HideNews();
+            // Wait for the page to fade in before scrolling a long title.
+            _titleReveal.Stop();
+            _titleReveal.Start();
         }
         else
         {
+            _titleReveal.Stop();
+            TitleMarquee.Stop();
             TasksPage.EndTyping();
             EndDropHint();
         }
@@ -732,7 +801,13 @@ public partial class MainWindow : Window
 
         if (_state != null)
         {
-            TitleText.Text = _state.Title;
+            if (TitleText.Text != _state.Title)
+            {
+                TitleMarquee.Stop();
+                TitleText.Text = _state.Title;
+                if (_expanded)
+                    RevealOverflow(TitleMarquee);
+            }
             ArtistText.Text = _state.Artist;
             ArtistText.Visibility = string.IsNullOrEmpty(_state.Artist) ? Visibility.Collapsed : Visibility.Visible;
             PlayPauseButton.Content = _state.IsPlaying ? "\uF8AE" : "\uF5B0";
@@ -787,9 +862,11 @@ public partial class MainWindow : Window
         }
         if (text == CompactText.Text)
             return;
+        CompactMarquee.Stop();
         if (CompactView.Visibility != Visibility.Visible || string.IsNullOrEmpty(CompactText.Text))
         {
             CompactText.Text = text;
+            RevealOverflow(CompactMarquee);
             return;
         }
 
@@ -805,11 +882,16 @@ public partial class MainWindow : Window
                 new DoubleAnimation(10, 0, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
             CompactText.BeginAnimation(OpacityProperty,
                 new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(220)) { EasingFunction = rise });
+            RevealOverflow(CompactMarquee);
         };
         CompactTextShift.BeginAnimation(TranslateTransform.YProperty, outgoing);
         CompactText.BeginAnimation(OpacityProperty,
             new DoubleAnimation(1, 0, TimeSpan.FromMilliseconds(140)) { EasingFunction = ease });
     }
+
+    /// <summary>Once the new text is laid out, scrolls it through once if it doesn't fit.</summary>
+    private void RevealOverflow(MarqueeText marquee) =>
+        Dispatcher.InvokeAsync(marquee.Run, DispatcherPriority.Loaded);
 
     /// <summary>While a focus session is active its countdown takes the equalizer's slot.</summary>
     private void UpdateCompactTimer()
@@ -874,19 +956,38 @@ public partial class MainWindow : Window
             var scale = (ScaleTransform)((Rectangle)Equalizer.Children[i]).RenderTransform;
             if (running)
             {
-                var bar = new DoubleAnimation(0.25, 1, TimeSpan.FromMilliseconds(EqualizerPeriods[i]))
-                {
-                    AutoReverse = true,
-                    RepeatBehavior = RepeatBehavior.Forever,
-                    EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut },
-                };
+                // Discrete steps: the bars jump between whole pixel rows like the sprite, and the
+                // notch only repaints when a bar actually changes height.
+                var bar = new DoubleAnimationUsingKeyFrames { RepeatBehavior = RepeatBehavior.Forever };
+                var steps = EqualizerSteps[i];
+                for (int s = 0; s < steps.Length; s++)
+                    bar.KeyFrames.Add(new DiscreteDoubleKeyFrame(steps[s] / EqualizerRows,
+                        KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(s * EqualizerStepMs))));
+                bar.Duration = TimeSpan.FromMilliseconds(steps.Length * EqualizerStepMs);
                 scale.BeginAnimation(ScaleTransform.ScaleYProperty, Ambient(bar));
             }
             else
             {
                 scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
-                scale.ScaleY = 0.3;
+                scale.ScaleY = 2 / EqualizerRows;
             }
+        }
+    }
+
+    private void BuildEqualizer()
+    {
+        foreach (var _ in EqualizerSteps)
+        {
+            Equalizer.Children.Add(new Rectangle
+            {
+                Width = 3,
+                Height = 14,
+                Margin = new Thickness(0, 0, 2, 0),
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Fill = _accent,
+                RenderTransformOrigin = new Point(0.5, 1),
+                RenderTransform = new ScaleTransform(1, 2 / EqualizerRows),
+            });
         }
     }
 
@@ -1049,6 +1150,8 @@ public partial class MainWindow : Window
         _presence.Simulate(TimeSpan.Zero); // "You're back."
         await Task.Delay(1500);
         _presence.Simulate(null);
+        await Task.Delay(9000); // Let the news run out.
+        ShowHud(new HudMessage(Glyphs.Timer, "Hora da pausa", "5 min", DurationMs: 4000, Celebrate: true));
     }
 
     private static string FormatAway(TimeSpan duration) =>
@@ -1074,6 +1177,19 @@ public partial class MainWindow : Window
 
         HudIcon.Text = message.Glyph;
         HudIcon.Foreground = message.Warning ? WarningBrush : Brushes.White;
+        HudIcon.Visibility = message.Celebrate ? Visibility.Collapsed : Visibility.Visible;
+        HudRaven.Visibility = message.Celebrate ? Visibility.Visible : Visibility.Collapsed;
+        if (message.Celebrate)
+        {
+            // A quick flap, then Yata settles for the rest of the message.
+            _hudRaven.Fly();
+            _hudRavenLand.Stop();
+            _hudRavenLand.Start();
+        }
+        else
+        {
+            StopHudRaven();
+        }
         HudText.Text = message.Text;
         HudValue.Text = message.Value ?? "";
         HudValue.Visibility = message.Value == null ? Visibility.Collapsed : Visibility.Visible;
@@ -1102,7 +1218,14 @@ public partial class MainWindow : Window
     {
         _hudTimer.Stop();
         _hudActive = false;
+        StopHudRaven();
         UpdateTargets();
+    }
+
+    private void StopHudRaven()
+    {
+        _hudRavenLand.Stop();
+        _hudRaven.Stop();
     }
 
     // ---- Lyrics ---------------------------------------------------------------------
@@ -1149,8 +1272,11 @@ public partial class MainWindow : Window
                     FontSize = 15,
                     FontWeight = FontWeights.SemiBold,
                     TextWrapping = TextWrapping.Wrap,
-                    Margin = new Thickness(0, 4, 0, 4),
-                    Foreground = LyricDim,
+                    // Right margin leaves room for the current line's slight zoom.
+                    Margin = new Thickness(0, 4, 14, 4),
+                    Foreground = new SolidColorBrush(LyricDimColor),
+                    RenderTransformOrigin = new Point(0, 0.5),
+                    RenderTransform = new ScaleTransform(),
                     Cursor = Cursors.Hand,
                     Tag = i,
                 };
@@ -1184,13 +1310,38 @@ public partial class MainWindow : Window
             return;
 
         if (_lyricIndex >= 0 && _lyricIndex < LyricsLines.Children.Count)
-            ((TextBlock)LyricsLines.Children[_lyricIndex]).Foreground = LyricDim;
+            HighlightLyric((TextBlock)LyricsLines.Children[_lyricIndex], false);
         if (index >= 0)
-            ((TextBlock)LyricsLines.Children[index]).Foreground = Brushes.White;
+            HighlightLyric((TextBlock)LyricsLines.Children[index], true);
 
         _lyricIndex = index;
         ScrollLyrics(animate: true);
         UpdateCompactText();
+    }
+
+    /// <summary>The current line brightens and grows a little; eased only while the lyrics are on screen.</summary>
+    private void HighlightLyric(TextBlock line, bool current)
+    {
+        var brush = (SolidColorBrush)line.Foreground;
+        var scale = (ScaleTransform)line.RenderTransform;
+        Color color = current ? Colors.White : LyricDimColor;
+        double size = current ? LyricZoom : 1;
+
+        if (ExpandedView.Visibility != Visibility.Visible)
+        {
+            brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
+            scale.BeginAnimation(ScaleTransform.ScaleYProperty, null);
+            brush.Color = color;
+            scale.ScaleX = scale.ScaleY = size;
+            return;
+        }
+
+        var duration = TimeSpan.FromMilliseconds(320);
+        var ease = new CubicEase { EasingMode = EasingMode.EaseOut };
+        brush.BeginAnimation(SolidColorBrush.ColorProperty, new ColorAnimation(color, duration) { EasingFunction = ease });
+        scale.BeginAnimation(ScaleTransform.ScaleXProperty, new DoubleAnimation(size, duration) { EasingFunction = ease });
+        scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(size, duration) { EasingFunction = ease });
     }
 
     private void ScrollLyrics(bool animate)
@@ -1256,7 +1407,9 @@ public partial class MainWindow : Window
 
     private void SetProgress(double fraction, TimeSpan position, TimeSpan duration)
     {
-        ProgressFill.Width = Math.Clamp(fraction, 0, 1) * ProgressTrack.ActualWidth;
+        double fill = Math.Clamp(fraction, 0, 1) * ProgressTrack.ActualWidth;
+        ProgressFill.Width = fill;
+        ProgressThumb.Margin = new Thickness(fill - ProgressThumb.Width / 2, 0, 0, 0);
         ElapsedText.Text = FormatTime(position);
         DurationText.Text = FormatTime(duration);
     }

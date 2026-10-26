@@ -53,13 +53,19 @@ public sealed class WaterTracker
 
     private void Add(int ml)
     {
-        int today = Math.Max(0, TodayMl + ml);
+        int before = TodayMl;
+        int today = Math.Max(0, before + ml);
         Data.Days[Key(DateTime.Today)] = today;
         if (ml > 0)
             Data.LastDrink = DateTime.Now;
         Prune();
         _store.SaveSoon();
         Changed?.Invoke();
+
+        // Shown once the notch closes, since drinking is logged with it open.
+        if (before < GoalMl && today >= GoalMl)
+            Message?.Invoke(new HudMessage(Glyphs.Water, "Meta de água batida", $"{today}/{GoalMl} ml", 1,
+                DurationMs: 4000, Important: true, Celebrate: true));
     }
 
     private void CheckReminder()
