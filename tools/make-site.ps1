@@ -94,8 +94,18 @@ function Add-FaqJsonLd([string]$html) {
   $html.Replace("{{FAQ_JSONLD}}", "<script type=`"application/ld+json`">$(ConvertTo-Json $faq -Depth 5 -Compress)</script>")
 }
 
+# Cloudflare and browsers keep style.css and main.js for 4 hours, so a deploy could pair new
+# HTML with old CSS. A content hash in the URL makes every change a new file.
+function Get-Version([string]$file) {
+  $sha = [Security.Cryptography.SHA256]::Create()
+  $hash = $sha.ComputeHash([IO.File]::ReadAllBytes((Join-Path $site $file)))
+  -join ($hash[0..3] | ForEach-Object { $_.ToString("x2") })
+}
+$assets = @{ '"/style.css"' = "`"/style.css?v=$(Get-Version 'style.css')`""; '"/main.js"' = "`"/main.js?v=$(Get-Version 'main.js')`"" }
+
 function Save-Page([string]$html, [string]$path) {
   $html = $html.Replace("{{LOCKUP}}", $lockup)
+  foreach ($a in $assets.GetEnumerator()) { $html = $html.Replace($a.Key, $a.Value) }
   $left = [regex]::Match($html, '\{\{\w+\}\}')
   if ($left.Success) { throw "$path still has $($left.Value)" }
   New-Item -ItemType Directory -Force (Split-Path $path -Parent) | Out-Null
