@@ -1,6 +1,6 @@
 # Publishes Yata (framework-dependent, single file) and builds the Inno Setup installer into dist/.
-# Usage: ./tools/build-installer.ps1 [-Version 0.1.0]
-param([string]$Version = "0.1.0")
+# Usage: ./tools/build-installer.ps1 [-Version 0.1.1]
+param([string]$Version = "0.1.1")
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path $PSScriptRoot -Parent
