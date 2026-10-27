@@ -58,7 +58,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 ## Instalar
 
-Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~6 MB). O instalador:
+Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~3 MB). O instalador:
 
 - instala só para o seu usuário, sem pedir administrador;
 - se faltar o **.NET 10 Desktop Runtime**, baixa direto da Microsoft e instala (essa etapa pede permissão de administrador);
@@ -170,4 +170,4 @@ tests/Yata.Tests/             testes (xUnit)
 
 8. ~~Câmera/microfone em uso, vários monitores, atalho global, aviso de versão~~
 
-Próximas ideias: projeção WinRT enxuta (instalador menor), assinatura digital.
+Próximas ideias: assinatura digital (em andamento, veja [docs/code-signing.md](docs/code-signing.md)), app em inglês, winget.

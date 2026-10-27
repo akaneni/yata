@@ -68,7 +68,7 @@
   "p3.d": "Cada linha está no GitHub, sob a licença MIT. Este site também não tem rastreadores nem cookies. Os detalhes estão na <a href=\"/pt/privacy\">política de privacidade</a>.",
   "dl.eyebrow": "Download",
   "dl.title": "Baixe o Yata",
-  "dl.meta": "Grátis · Windows 10 (2004+) e 11, x64 · cerca de 6 MB",
+  "dl.meta": "Grátis · Windows 10 (2004+) e 11, x64 · cerca de 3 MB",
   "dl.l1": "Instala só para o seu usuário, sem permissão de administrador.",
   "dl.l2": "Se faltar o .NET 10 Desktop Runtime, o instalador baixa direto da Microsoft. Só essa etapa pede administrador.",
   "dl.l3": "Cada versão traz um <code>SHA256SUMS.txt</code> para você conferir o arquivo baixado.",
