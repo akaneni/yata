@@ -65,14 +65,14 @@ public sealed class TaskItem : INotifyPropertyChanged
 
     public bool HasDue => Due.HasValue;
 
-    /// <summary>"15:30", or "amanhã 09:00" when it isn't today; "hoje"/"amanhã"/"28/10" without a time.</summary>
+    /// <summary>"15:30", or "tomorrow 09:00" when it isn't today; "today"/"tomorrow"/"10/28" without a time.</summary>
     public string DueText => Due is not DateTime due ? ""
-        : DueAllDay ? (due.Date == DateTime.Today ? "hoje"
-            : due.Date == DateTime.Today.AddDays(1) ? "amanhã"
-            : due.ToString("dd/MM"))
-        : due.Date == DateTime.Today ? due.ToString("HH:mm")
-        : due.Date == DateTime.Today.AddDays(1) ? "amanhã " + due.ToString("HH:mm")
-        : due.ToString("dd/MM HH:mm");
+        : DueAllDay ? (due.Date == DateTime.Today ? Strings.Due_Today
+            : due.Date == DateTime.Today.AddDays(1) ? Strings.Due_Tomorrow
+            : due.ToString(Strings.Format_DayMonth, Lang.Culture))
+        : due.Date == DateTime.Today ? due.ToString("HH:mm", Lang.Culture)
+        : due.Date == DateTime.Today.AddDays(1) ? string.Format(Lang.Culture, Strings.Due_TomorrowAt, due)
+        : due.ToString(Strings.Format_DayMonthTime, Lang.Culture);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -92,10 +92,15 @@ public sealed class TaskItem : INotifyPropertyChanged
 /// <summary>A task as Google Tasks has it. Due is a day only: the API discards the time.</summary>
 public sealed record RemoteTask(string Id, string Title, bool Done, DateTime? DueDate);
 
-/// <summary>To-do list. A trailing time ("Reunião 15:30", "ligar às 9h00") becomes a reminder.</summary>
+/// <summary>
+/// To-do list. A trailing time becomes a reminder, in either language whatever the interface's:
+/// "Reunião 15:30", "ligar às 9h00", "Call Ana at 3pm", "Dentist 9:30 am".
+/// </summary>
 public sealed class TaskList
 {
-    private static readonly Regex TrailingTime = new(@"^(.*?)\s+(?:às\s+|as\s+)?(\d{1,2})(?::|h)(\d{2})$",
+    // Groups: 1 text, 2 hour, 3 minutes (24 h), 4 minutes and 5 a/p (12 h, minutes optional).
+    private static readonly Regex TrailingTime = new(
+        @"^(.*?)\s+(?:(?:às|as|at)\s+)?(\d{1,2})(?:(?::|h)(\d{2})|(?::(\d{2}))?\s?([ap])\.?m\.?)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private readonly AppStore _store;
@@ -153,12 +158,11 @@ public sealed class TaskList
 
         DateTime? due = null;
         var match = TrailingTime.Match(text);
-        if (match.Success && int.Parse(match.Groups[2].Value) is int hour and < 24 &&
-            int.Parse(match.Groups[3].Value) is int minute and < 60)
+        if (match.Success && TimeOfDay(match) is TimeSpan time)
         {
             text = match.Groups[1].Value.Trim();
             var now = _clock();
-            var at = now.Date.AddHours(hour).AddMinutes(minute);
+            var at = now.Date + time;
             due = at > now ? at : at.AddDays(1);
         }
 
@@ -167,6 +171,23 @@ public sealed class TaskList
         Items.Insert(index, new TaskItem { Text = text, Due = due });
         Save();
         LocalChanged?.Invoke();
+    }
+
+    /// <summary>The matched time, or null when it isn't one ("25:00", "13pm").</summary>
+    private static TimeSpan? TimeOfDay(Match match)
+    {
+        int hour = int.Parse(match.Groups[2].Value);
+        if (!match.Groups[5].Success)
+        {
+            int minute = int.Parse(match.Groups[3].Value);
+            return hour < 24 && minute < 60 ? new TimeSpan(hour, minute, 0) : null;
+        }
+
+        int minutes = match.Groups[4].Success ? int.Parse(match.Groups[4].Value) : 0;
+        if (hour is < 1 or > 12 || minutes >= 60)
+            return null;
+        bool pm = char.ToLowerInvariant(match.Groups[5].Value[0]) == 'p';
+        return new TimeSpan(hour % 12 + (pm ? 12 : 0), minutes, 0); // 12am is midnight, 12pm noon
     }
 
     public void Toggle(TaskItem item)

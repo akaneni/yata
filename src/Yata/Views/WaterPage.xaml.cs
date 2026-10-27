@@ -1,10 +1,10 @@
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Yata.Helpers;
 using Yata.Services;
 
 namespace Yata.Views;
@@ -12,7 +12,6 @@ namespace Yata.Views;
 public partial class WaterPage : UserControl
 {
     private const int ChartDays = 7;
-    private static readonly CultureInfo PtBr = new("pt-BR");
 
     private WaterTracker? _water;
 
@@ -35,8 +34,8 @@ public partial class WaterPage : UserControl
         if (_water == null)
             return;
 
-        TodayRun.Text = _water.TodayMl.ToString("N0", PtBr);
-        GoalRun.Text = $" / {_water.GoalMl.ToString("N0", PtBr)} ml";
+        TodayRun.Text = _water.TodayMl.ToString("N0", Lang.Culture);
+        GoalRun.Text = $" / {_water.GoalMl.ToString("N0", Lang.Culture)} ml";
         CupText.Text = $"+{_water.CupMl} ml";
         BarFill.Width = Math.Min(1, (double)_water.TodayMl / _water.GoalMl) * Bar.ActualWidth;
         BuildChart();
@@ -64,14 +63,14 @@ public partial class WaterPage : UserControl
                 RadiusX = 2,
                 RadiusY = 2,
                 VerticalAlignment = VerticalAlignment.Bottom,
-                ToolTip = $"{day:dd/MM}: {ml} ml",
+                ToolTip = $"{day.ToString(Strings.Format_DayMonth, Lang.Culture)}: {ml} ml",
             };
             bar.SetResourceReference(Shape.FillProperty, i == days.Count - 1 ? "WaterBrush" : "WaterPastBrush");
             cell.Children.Add(bar);
 
             var label = new TextBlock
             {
-                Text = day.ToString("ddd", PtBr)[..1].ToUpper(PtBr),
+                Text = day.ToString("ddd", Lang.Culture)[..1].ToUpper(Lang.Culture),
                 FontSize = 10,
                 Margin = new Thickness(0, 3, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center,

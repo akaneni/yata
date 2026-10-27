@@ -89,6 +89,6 @@ public partial class TasksPage : UserControl
         if (_tasks is not { } tasks || sender is not FrameworkElement { DataContext: TaskItem item })
             return;
         int index = tasks.Remove(item);
-        Undo.Show("Tarefa removida", () => tasks.Restore(item, index));
+        Undo.Show(Strings.Undo_TaskRemoved, () => tasks.Restore(item, index));
     }
 }

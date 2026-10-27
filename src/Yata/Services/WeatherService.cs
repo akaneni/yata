@@ -114,23 +114,23 @@ internal static class Weather
     /// <summary>WMO weather interpretation codes, as Open-Meteo documents them.</summary>
     public static string Describe(int code) => code switch
     {
-        0 => "Céu limpo",
-        1 => "Quase limpo",
-        2 => "Parcialmente nublado",
-        3 => "Nublado",
-        45 or 48 => "Neblina",
-        51 or 53 or 55 => "Garoa",
-        56 or 57 => "Garoa congelante",
-        61 => "Chuva fraca",
-        63 => "Chuva",
-        65 => "Chuva forte",
-        66 or 67 => "Chuva congelante",
-        71 or 73 or 75 or 77 => "Neve",
-        80 or 81 => "Pancadas de chuva",
-        82 => "Pancadas fortes",
-        85 or 86 => "Pancadas de neve",
-        95 => "Trovoada",
-        96 or 99 => "Trovoada com granizo",
+        0 => Strings.Weather_Clear,
+        1 => Strings.Weather_MostlyClear,
+        2 => Strings.Weather_PartlyCloudy,
+        3 => Strings.Weather_Cloudy,
+        45 or 48 => Strings.Weather_Fog,
+        51 or 53 or 55 => Strings.Weather_Drizzle,
+        56 or 57 => Strings.Weather_FreezingDrizzle,
+        61 => Strings.Weather_LightRain,
+        63 => Strings.Weather_Rain,
+        65 => Strings.Weather_HeavyRain,
+        66 or 67 => Strings.Weather_FreezingRain,
+        71 or 73 or 75 or 77 => Strings.Weather_Snow,
+        80 or 81 => Strings.Weather_RainShowers,
+        82 => Strings.Weather_HeavyShowers,
+        85 or 86 => Strings.Weather_SnowShowers,
+        95 => Strings.Weather_Thunderstorm,
+        96 or 99 => Strings.Weather_ThunderstormHail,
         _ => "—",
     };
 
@@ -215,7 +215,8 @@ public sealed class WeatherService
     /// <summary>City search for the settings window (Open-Meteo geocoding; sends only the typed name).</summary>
     public static async Task<List<WeatherPlace>> SearchAsync(string name, CancellationToken ct)
     {
-        string url = "https://geocoding-api.open-meteo.com/v1/search?count=6&language=pt&format=json&name=" +
+        // Place and country names come back in the interface's language.
+        string url = $"https://geocoding-api.open-meteo.com/v1/search?count=6&language={Lang.Culture.TwoLetterISOLanguageName}&format=json&name=" +
                      Uri.EscapeDataString(name.Trim());
         using var response = await Http.GetAsync(url, ct);
         response.EnsureSuccessStatusCode();
@@ -297,7 +298,7 @@ public sealed class WeatherService
             return;
 
         _lastRainNotice = DateTime.Now;
-        string when = at <= DateTime.Now ? "Pode chover a qualquer momento" : $"Chuva prevista por volta das {at:HH}h";
+        string when = at <= DateTime.Now ? Strings.Weather_RainNow : string.Format(Lang.Culture, Strings.Weather_RainExpected, at);
         Message?.Invoke(new HudMessage(Glyphs.Cloud, when, $"{report.RainChance}%", DurationMs: 5000, Important: true,
             Kind: HudKind.Weather));
     }

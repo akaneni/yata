@@ -29,7 +29,7 @@ public partial class Stepper : UserControl
     public static readonly DependencyProperty SuffixProperty = DependencyProperty.Register(
         nameof(Suffix), typeof(string), typeof(Stepper), new PropertyMetadata("", (d, _) => ((Stepper)d).Refresh()));
 
-    /// <summary>What the number is, for screen readers ("Diminuir Pausa curta, 5 min").</summary>
+    /// <summary>What the number is, for screen readers ("Decrease Short break, 5 min").</summary>
     public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
         nameof(Label), typeof(string), typeof(Stepper), new PropertyMetadata("", (d, _) => ((Stepper)d).Refresh()));
 
@@ -109,7 +109,7 @@ public partial class Stepper : UserControl
         Plus.IsEnabled = Value < Maximum;
 
         string what = Label.Length > 0 ? $"{Label}, " : "";
-        AutomationProperties.SetName(Minus, $"Diminuir {what}{ValueText.Text}");
-        AutomationProperties.SetName(Plus, $"Aumentar {what}{ValueText.Text}");
+        AutomationProperties.SetName(Minus, string.Format(Strings.Stepper_Decrease, what + ValueText.Text));
+        AutomationProperties.SetName(Plus, string.Format(Strings.Stepper_Increase, what + ValueText.Text));
     }
 }

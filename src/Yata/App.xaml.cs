@@ -101,8 +101,7 @@ public partial class App : Application
         if (_tray == null || Log.TakeUnseenCrash() is not { } crash)
             return;
         _tray.BalloonTipClicked += (_, _) => OpenInExplorer(crash);
-        _tray.ShowBalloonTip(10000, "O Yata fechou inesperadamente",
-            "Clique para ver o registro do erro. Ele fica só neste PC.", Forms.ToolTipIcon.Warning);
+        _tray.ShowBalloonTip(10000, Strings.Crash_Title, Strings.Crash_Text, Forms.ToolTipIcon.Warning);
     }
 
     private static void UpgradeAutostart()
@@ -144,10 +143,10 @@ public partial class App : Application
     private void CreateTrayIcon()
     {
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("Configurações…", null, (_, _) => _window?.OpenSettings());
-        menu.Items.Add("Demonstração do Yata", null, (_, _) => _window?.RunCompanionDemo());
+        menu.Items.Add(Strings.Tray_Settings, null, (_, _) => _window?.OpenSettings());
+        menu.Items.Add(Strings.Tray_Demo, null, (_, _) => _window?.RunCompanionDemo());
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Sair", null, (_, _) => Shutdown());
+        menu.Items.Add(Strings.Tray_Quit, null, (_, _) => Shutdown());
 
         _tray = new Forms.NotifyIcon
         {

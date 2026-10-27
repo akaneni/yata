@@ -1,14 +1,15 @@
 <UserControl x:Class="Yata.Views.UndoToast"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:y="clr-namespace:Yata"
              HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,6" Visibility="Collapsed">
-    <!-- "Tarefa removida · Desfazer", floating over the bottom of a list for a few seconds -->
+    <!-- "Task removed · Undo", floating over the bottom of a list for a few seconds -->
     <Border CornerRadius="16" Padding="14,0,3,0" Height="32" Background="{DynamicResource MenuBackground}"
             BorderBrush="{DynamicResource DividerBrush}" BorderThickness="1">
         <StackPanel Orientation="Horizontal">
             <TextBlock x:Name="Message" FontSize="12" VerticalAlignment="Center"
                        Foreground="{DynamicResource TextSecondary}"/>
-            <Button Style="{StaticResource PillButton}" Content="Desfazer" Height="24" FontSize="12" Margin="10,0,0,0"
+            <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Undo_Action}" Height="24" FontSize="12" Margin="10,0,0,0"
                     Click="OnUndo"/>
         </StackPanel>
     </Border>

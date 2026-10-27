@@ -117,7 +117,7 @@ public sealed class PresenceTracker
     {
         if (IsAway && _batteryAtAway is int before && BatteryPercent() is int after &&
             Math.Abs(after - before) >= BatteryChangeWorthReporting)
-            _items.Add(new AwayItem(after > before ? Glyphs.Charging : Glyphs.Battery, $"Bateria {before}% → {after}%", DateTime.Now));
+            _items.Add(new AwayItem(after > before ? Glyphs.Charging : Glyphs.Battery, string.Format(Strings.Away_Battery, before, after), DateTime.Now));
 
         var report = new AwayReport(duration, _items.OrderBy(i => i.At).ToList());
         _items.Clear();
