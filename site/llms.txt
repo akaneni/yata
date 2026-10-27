@@ -23,9 +23,9 @@ Yata (from Yatagarasu, the messenger crow of Japanese myth) is a desktop app for
 
 ## Install
 
-- Free. Windows 10 (version 2004 or later) and Windows 11, x64. About 6 MB.
+- Free. Windows 10 (version 2004 or later) and Windows 11, x64. About 3 MB.
 - Installs per user without admin rights. If the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft, and that step asks for admin.
-- The installer is not code-signed yet, so SmartScreen may warn on first run (More info, then Run anyway). Signing through SignPath Foundation is being set up. Each release ships SHA256SUMS.txt.
+- The installer is not code-signed yet, so SmartScreen may warn on first run (More info, then Run anyway). Each release is built by GitHub Actions from the public code and ships SHA256SUMS.txt; from v0.2.1 on it also carries a GitHub build provenance attestation.
 
 ## Links
 
@@ -33,5 +33,5 @@ Yata (from Yatagarasu, the messenger crow of Japanese myth) is a desktop app for
 - [Download the latest release](https://github.com/akaneni/yata/releases/latest)
 - [Source code on GitHub](https://github.com/akaneni/yata)
 - [Privacy policy](https://getyata.app/privacy)
-- [Code signing policy](https://getyata.app/code-signing)
+- [How to check a download](https://getyata.app/code-signing)
 - [Site in Portuguese](https://getyata.app/pt/)
