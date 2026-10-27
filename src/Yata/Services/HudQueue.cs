@@ -23,12 +23,20 @@ internal sealed class HudQueue
     /// <summary>A new notice. Returns what to show now, or null to leave the notch as it is.</summary>
     public HudMessage? Offer(HudMessage message, bool canShow)
     {
+        // Newer news about the same thing makes the older one stale ("needs your permission" after
+        // the agent already finished): it goes, whether waiting or on screen.
+        if (message.Tag != null)
+            Forget(message.Tag);
+        bool replacesCurrent = message.Tag != null && Current?.Tag == message.Tag;
+
         if (!canShow)
         {
             if (message.Important)
                 Enqueue(message, first: false);
             return null;
         }
+        if (replacesCurrent)
+            return Current = message;
         if (Current is { Important: true } current)
         {
             if (message.Important)
@@ -64,6 +72,17 @@ internal sealed class HudQueue
 
     /// <summary>The notch can show notices again. Returns the next one if none is up.</summary>
     public HudMessage? Resume() => Current == null ? Next() : null;
+
+    private void Forget(string tag)
+    {
+        for (var node = _waiting.First; node != null;)
+        {
+            var next = node.Next;
+            if (node.Value.Tag == tag)
+                _waiting.Remove(node);
+            node = next;
+        }
+    }
 
     private HudMessage? Next()
     {

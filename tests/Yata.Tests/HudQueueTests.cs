@@ -73,6 +73,20 @@ public class HudQueueTests
     }
 
     [Fact]
+    public void Newer_news_about_the_same_thing_replaces_the_older()
+    {
+        var queue = new HudQueue();
+        queue.Offer(Reminder("Water"), canShow: true);
+        queue.Offer(new HudMessage("", "Agent · needs your permission", Important: true, Tag: "claude-1"), canShow: true);
+        queue.Offer(new HudMessage("", "Agent · done", Important: true, Tag: "claude-1"), canShow: true);
+        Assert.Equal(1, queue.Waiting);
+        Assert.Equal("Agent · done", queue.Finish()?.Text);
+
+        // On screen, it's swapped at once.
+        Assert.Equal("Agent · working", queue.Offer(new HudMessage("", "Agent · working", Tag: "claude-1"), canShow: true)?.Text);
+    }
+
+    [Fact]
     public void The_same_reminder_twice_is_said_once()
     {
         var queue = new HudQueue();

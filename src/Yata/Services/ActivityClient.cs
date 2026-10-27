@@ -28,6 +28,10 @@ internal static class ActivityClient
     /// </summary>
     public static async Task<string?> SendAsync(string json, string? name = null, int timeoutMs = 2000)
     {
+        // Without Yata running, connecting would wait the whole timeout; an agent hook calls this on
+        // every tool use, so it has to give up at once. Yata holds this name while it runs.
+        if (name == null && !IsYataRunning())
+            return null;
         await using var client = new NamedPipeClientStream(".", name ?? DefaultName, PipeDirection.InOut,
             PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
         using var timeout = new CancellationTokenSource(timeoutMs);
@@ -46,6 +50,17 @@ internal static class ActivityClient
             return null;
         }
     }
+
+    private static bool IsYataRunning()
+    {
+        if (!Mutex.TryOpenExisting(SingleInstanceName, out var mutex))
+            return false;
+        mutex.Dispose();
+        return true;
+    }
+
+    /// <summary>The single-instance mutex App.xaml.cs creates.</summary>
+    public const string SingleInstanceName = "Yata.SingleInstance";
 
     /// <summary>One line, at most <paramref name="max"/> bytes; null if longer or empty.</summary>
     internal static async Task<string?> ReadLine(Stream stream, int max, CancellationToken token)

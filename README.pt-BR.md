@@ -113,6 +113,21 @@ yata-cli activity end agent
 - Códigos de saída: 0 mostrou, 1 argumentos errados (opção, ícone ou valor desconhecido), 2 o Yata não está aberto, 3 recusado pelo Yata (o motivo é impresso).
 - Como funciona: um named pipe que só o seu usuário do Windows abre e que recusa acesso pela rede. As atividades ficam só na memória; o texto delas não vai para o log.
 
+### Agentes de IA: Claude Code, Cursor e Codex
+
+O Yata pode mostrar o que o seu agente de programação está fazendo — **trabalhando**, **esperando você** (precisa de uma permissão ou da sua resposta) e **concluído** — uma bolha por sessão, com o nome do agente e da pasta do projeto ("Claude Code · yata"). Os hooks do agente chamam `yata-cli hook <agente>`; só o estado vai para o notch, nunca os seus prompts, os comandos ou as respostas do agente. Se o Yata não estiver aberto, o hook volta na hora, e ele nunca bloqueia nem muda o agente (sempre sai com 0 e só imprime a resposta neutra que alguns eventos esperam). Precisa do `yata-cli` no PATH (a opção do instalador).
+
+- **Claude Code**: instale o plugin, que traz os hooks e a skill abaixo:
+  ```
+  /plugin marketplace add akaneni/yata
+  /plugin install yata@yata
+  ```
+  Ou configure os hooks você mesmo: `yata-cli hook setup claude` imprime o trecho para o `%USERPROFILE%\.claude\settings.json`.
+- **Cursor**: `yata-cli hook setup cursor` imprime o `%USERPROFILE%\.cursor\hooks.json`. O Cursor não tem evento para "esperando sua aprovação", então mostra trabalhando e concluído. O Yata só usa os eventos do Cursor que não bloqueiam nada, nunca os que decidem permissões.
+- **Codex**: `yata-cli hook setup codex` imprime o `%USERPROFILE%\.codex\hooks.json` (revise e confie nele com `/hooks`). Codex antigo, sem hooks: `notify = ["yata-cli", "hook", "codex"]` no `config.toml` mostra quando uma rodada termina.
+
+**Skill**: para o agente pôr as tarefas longas dele (builds, testes, deploys) no notch por conta própria, `yata-cli skill install` copia um `SKILL.md` para `%USERPROFILE%\.claude\skills` (Claude Code, Cursor) e `%USERPROFILE%\.agents\skills` (Codex, Cursor). `yata-cli skill` mostra o arquivo. O plugin já inclui a skill para o Claude Code.
+
 Abrir o notch numa aba sem usar o mouse, por N segundos (prévias, capturas e testes de interface):
 
 ```powershell
@@ -173,6 +188,8 @@ src/Yata/
   Services/Activities.cs      atividades de outros programas: pedido, limpeza, o quadro
   Services/ActivityPipe.cs    o pipe local (só deste usuário); ActivityClient.cs, o lado que envia
 src/Yata.Cli/                 yata-cli.exe: o lado de console, para scripts e agentes (compila os arquivos de atividade do Yata)
+  Services/AgentHook.cs       (em src/Yata) eventos dos hooks do Claude Code, Cursor e Codex → atividades
+integrations/claude-code/     plugin do Claude Code: hooks e a skill yata-notch (listado em .claude-plugin/marketplace.json)
   Services/AppStore.cs        persistência local (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    água e lembretes

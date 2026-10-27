@@ -73,6 +73,11 @@
   <data name="Settings_RainAlerts" xml:space="preserve"><value>Warn me when rain is coming</value></data>
   <data name="Settings_RainAlertsHint" xml:space="preserve"><value>When the chance goes over 60% in the next 2 hours.</value></data>
   <data name="Settings_Notices" xml:space="preserve"><value>Notch notices</value></data>
+  <data name="Activity_Working" xml:space="preserve"><value>working</value></data>
+  <data name="Activity_Permission" xml:space="preserve"><value>needs your permission</value></data>
+  <data name="Activity_Waiting" xml:space="preserve"><value>waiting for you</value></data>
+  <data name="Activity_Done" xml:space="preserve"><value>done</value></data>
+  <data name="Activity_Failed" xml:space="preserve"><value>failed</value></data>
   <data name="Settings_Activities" xml:space="preserve"><value>Activities</value></data>
   <data name="Settings_ActivitiesEnabled" xml:space="preserve"><value>Let programs on this PC show activities</value></data>
   <data name="Settings_ActivitiesHint" xml:space="preserve"><value>Scripts, builds and AI agents can show their progress beside the notch with yata-cli. Only programs running as you on this PC; nothing goes over the network.</value></data>

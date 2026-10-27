@@ -32,7 +32,7 @@ public partial class App : Application
         // Software rendering cut Task Manager memory from ~119 MB to ~43 MB and halved CPU.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
-        _singleInstance = new Mutex(true, "Yata.SingleInstance", out bool isFirstInstance);
+        _singleInstance = new Mutex(true, Services.ActivityClient.SingleInstanceName, out bool isFirstInstance);
         if (!isFirstInstance)
         {
             Shutdown();

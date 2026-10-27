@@ -73,6 +73,11 @@
   <data name="Settings_RainAlerts" xml:space="preserve"><value>Avisar quando for chover</value></data>
   <data name="Settings_RainAlertsHint" xml:space="preserve"><value>Quando a chance passa de 60% nas próximas 2 horas.</value></data>
   <data name="Settings_Notices" xml:space="preserve"><value>Avisos no notch</value></data>
+  <data name="Activity_Working" xml:space="preserve"><value>trabalhando</value></data>
+  <data name="Activity_Permission" xml:space="preserve"><value>precisa da sua permissão</value></data>
+  <data name="Activity_Waiting" xml:space="preserve"><value>esperando você</value></data>
+  <data name="Activity_Done" xml:space="preserve"><value>concluído</value></data>
+  <data name="Activity_Failed" xml:space="preserve"><value>falhou</value></data>
   <data name="Settings_Activities" xml:space="preserve"><value>Atividades</value></data>
   <data name="Settings_ActivitiesEnabled" xml:space="preserve"><value>Permitir que programas deste PC mostrem atividades</value></data>
   <data name="Settings_ActivitiesHint" xml:space="preserve"><value>Scripts, builds e agentes de IA podem mostrar o andamento ao lado do notch com o yata-cli. Só programas rodando como você neste PC; nada passa pela rede.</value></data>
