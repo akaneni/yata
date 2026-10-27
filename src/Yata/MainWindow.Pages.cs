@@ -65,7 +65,7 @@ public partial class MainWindow
     private void MoveTabIndicator(bool animate)
     {
         double x = (int)_page * TabPitch;
-        if (!animate)
+        if (!animate || Motion.Reduced)
         {
             TabIndicatorShift.BeginAnimation(TranslateTransform.XProperty, null);
             TabIndicatorShift.X = x;
@@ -82,6 +82,12 @@ public partial class MainWindow
     {
         if (page.RenderTransform is not TranslateTransform shift)
             page.RenderTransform = shift = new TranslateTransform();
+        if (Motion.Reduced)
+        {
+            shift.BeginAnimation(TranslateTransform.XProperty, null);
+            page.BeginAnimation(OpacityProperty, null);
+            return;
+        }
 
         var duration = TimeSpan.FromMilliseconds(240);
         var ease = new CubicEase { EasingMode = EasingMode.EaseOut };

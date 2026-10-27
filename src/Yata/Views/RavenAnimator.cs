@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Threading;
+using Yata.Helpers;
 
 namespace Yata.Views;
 
@@ -144,6 +145,8 @@ public sealed class RavenAnimator
                     Advance();
                 else if (_gesturing)
                     Rest();
+                else if (Motion.Reduced)
+                    ScheduleFidget(); // Sits still; looks again later in case the setting changes.
                 else
                     Fidget();
                 break;
@@ -153,6 +156,10 @@ public sealed class RavenAnimator
                 else
                     Perch();
                 break;
+            case Mode.Asleep when Motion.Reduced:
+            case Mode.Nodding when Motion.Reduced:
+            case Mode.Flying when Motion.Reduced:
+                break; // Holds the pose it started in.
             case Mode.Asleep:
                 bool inhale = _sprite.Frame == RavenFrame.Sleep;
                 _sprite.Frame = inhale ? RavenFrame.SleepIn : RavenFrame.Sleep;

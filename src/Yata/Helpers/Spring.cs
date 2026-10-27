@@ -19,6 +19,13 @@ internal sealed class Spring
         _epsilon = epsilon;
     }
 
+    /// <summary>Jumps to the target, for when motion is reduced.</summary>
+    public void Snap()
+    {
+        Value = Target;
+        Velocity = 0;
+    }
+
     /// <summary>Advances the spring; returns false once it has settled on the target.</summary>
     public bool Step(double seconds)
     {

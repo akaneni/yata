@@ -2,14 +2,15 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              VerticalAlignment="Center">
-    <Border CornerRadius="8" Background="#14FFFFFF" Height="30">
+    <Border CornerRadius="8" Background="{DynamicResource SubtleFill}" Height="30">
         <StackPanel Orientation="Horizontal">
+            <!-- Only used in the settings window, which takes keyboard focus -->
             <Button x:Name="Minus" Style="{StaticResource IconButton}" FontFamily="{StaticResource UiFont}"
-                    Width="30" Height="30" FontSize="15" Content="−" Click="OnMinus"/>
+                    Width="30" Height="30" FontSize="15" Content="−" Focusable="True" Click="OnMinus"/>
             <TextBlock x:Name="ValueText" MinWidth="72" FontSize="13" TextAlignment="Center" VerticalAlignment="Center"
                        Typography.NumeralAlignment="Tabular"/>
             <Button x:Name="Plus" Style="{StaticResource IconButton}" FontFamily="{StaticResource UiFont}"
-                    Width="30" Height="30" FontSize="15" Content="+" Click="OnPlus"/>
+                    Width="30" Height="30" FontSize="15" Content="+" Focusable="True" Click="OnPlus"/>
         </StackPanel>
     </Border>
 </UserControl>

@@ -4,8 +4,8 @@
     <!-- Ring + details as one block, centered in the page -->
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,14">
         <Grid Width="112" Height="112">
-            <Ellipse Stroke="{StaticResource TrackBrush}" StrokeThickness="6"/>
-            <Path x:Name="ProgressArc" Stroke="{StaticResource TextPrimary}" StrokeThickness="6"
+            <Ellipse Stroke="{DynamicResource TrackBrush}" StrokeThickness="6"/>
+            <Path x:Name="ProgressArc" Stroke="{DynamicResource TextPrimary}" StrokeThickness="6"
                   StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
             <TextBlock x:Name="TimeText" FontFamily="{StaticResource DisplayFont}" FontSize="26" FontWeight="SemiBold"
                        HorizontalAlignment="Center" VerticalAlignment="Center" Typography.NumeralAlignment="Tabular"/>
@@ -14,7 +14,7 @@
         <!-- Fixed width: the block stays put when the status text or buttons change -->
         <StackPanel Margin="26,0,0,0" VerticalAlignment="Center" Width="200">
             <TextBlock x:Name="PhaseText" FontSize="16" FontWeight="SemiBold"/>
-            <TextBlock x:Name="StatusText" Margin="0,1,0,0" FontSize="12" Foreground="{StaticResource TextSecondary}"/>
+            <TextBlock x:Name="StatusText" Margin="0,1,0,0" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
             <!-- One dot per session in the cycle, built in code -->
             <StackPanel x:Name="Dots" Orientation="Horizontal" Margin="0,8,0,0"/>
 

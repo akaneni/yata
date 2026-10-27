@@ -10,16 +10,16 @@
 
         <!-- Empty state doubles as the drop hint -->
         <Grid x:Name="EmptyState">
-            <Rectangle RadiusX="14" RadiusY="14" Stroke="#33FFFFFF" StrokeThickness="1.5" StrokeDashArray="4 3"/>
+            <Rectangle RadiusX="14" RadiusY="14" Stroke="{DynamicResource OutlineBrush}" StrokeThickness="1.5" StrokeDashArray="4 3"/>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <!-- Yata eyeing the empty box -->
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <local:RavenSprite PixelSize="2" VerticalAlignment="Bottom" Margin="0,0,8,0" Opacity="0.7"/>
                     <TextBlock Text="&#xE7B8;" FontFamily="{StaticResource IconFont}" FontSize="22"
-                               VerticalAlignment="Bottom" Foreground="{StaticResource TextSecondary}"/>
+                               VerticalAlignment="Bottom" Foreground="{DynamicResource TextSecondary}"/>
                 </StackPanel>
                 <TextBlock Margin="0,6,0,0" Text="Arraste arquivos para cá" FontSize="13" HorizontalAlignment="Center"
-                           Foreground="{StaticResource TextSecondary}"/>
+                           Foreground="{DynamicResource TextSecondary}"/>
             </StackPanel>
         </Grid>
 
@@ -35,7 +35,7 @@
                         <Grid x:Name="Tile" Width="78" Height="82" Margin="0,0,2,2" Background="#00FFFFFF" Cursor="Hand"
                               ToolTip="{Binding FilePath}"
                               MouseLeftButtonDown="OnTileMouseDown" MouseMove="OnTileMouseMove">
-                            <Border x:Name="Hover" CornerRadius="12" Background="#14FFFFFF" Visibility="Hidden"/>
+                            <Border x:Name="Hover" CornerRadius="12" Background="{DynamicResource SubtleFill}" Visibility="Hidden"/>
                             <StackPanel Margin="4,8,4,4">
                                 <Grid Width="44" Height="40">
                                     <!-- Shell icons at their native size stay crisp -->
@@ -51,7 +51,7 @@
                                            TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="28"/>
                             </StackPanel>
                             <Button x:Name="RemoveButton" Style="{StaticResource IconButton}" Width="20" Height="20" FontSize="8"
-                                    Background="#CC333333" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0"
+                                    Background="{DynamicResource OverlayButtonFill}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,2,0"
                                     Content="&#xE711;" ToolTip="Tirar da prateleira" Visibility="Hidden" Click="OnRemove"/>
                         </Grid>
                         <DataTemplate.Triggers>
@@ -70,9 +70,9 @@
         </ScrollViewer>
 
         <!-- Shown while files are dragged over the notch -->
-        <Grid x:Name="DropOverlay" Grid.RowSpan="2" Visibility="Collapsed" Background="Black">
-            <Rectangle RadiusX="14" RadiusY="14" Stroke="#B3FFFFFF" StrokeThickness="2"
-                       StrokeDashArray="4 3" Fill="#0FFFFFFF"/>
+        <Grid x:Name="DropOverlay" Grid.RowSpan="2" Visibility="Collapsed" Background="{DynamicResource NotchBrush}">
+            <Rectangle RadiusX="14" RadiusY="14" Stroke="{DynamicResource OutlineStrongBrush}" StrokeThickness="2"
+                       StrokeDashArray="4 3" Fill="{DynamicResource DropFill}"/>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" FontSize="22"
                            HorizontalAlignment="Center"/>
@@ -83,7 +83,7 @@
 
         <Grid x:Name="Footer" Grid.Row="1" Margin="2,6,0,0" Visibility="Collapsed">
             <TextBlock x:Name="CountText" FontSize="11" VerticalAlignment="Center"
-                       Foreground="{StaticResource TextSecondary}"/>
+                       Foreground="{DynamicResource TextSecondary}"/>
             <Button Style="{StaticResource PillButton}" Content="Limpar" Height="24" FontSize="11"
                     HorizontalAlignment="Right" Click="OnClear"/>
         </Grid>

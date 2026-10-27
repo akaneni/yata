@@ -117,7 +117,7 @@ public partial class MainWindow
         if (text == CompactText.Text)
             return;
         CompactMarquee.Stop();
-        if (CompactView.Visibility != Visibility.Visible || string.IsNullOrEmpty(CompactText.Text))
+        if (CompactView.Visibility != Visibility.Visible || string.IsNullOrEmpty(CompactText.Text) || Motion.Reduced)
         {
             CompactText.Text = text;
             RevealOverflow(CompactMarquee);
@@ -179,7 +179,8 @@ public partial class MainWindow
 
     /// <summary>
     /// Windows' "Animation effects" switched off, or energy saver on: the bars stand still.
-    /// Both can change while Yata runs.
+    /// Both can change while Yata runs. (Energy saver stops only the bars, which never rest;
+    /// the rest of the notch moves briefly and only when something changes.)
     /// </summary>
     private static bool ReduceMotionNow()
     {
@@ -192,7 +193,7 @@ public partial class MainWindow
         {
             saver = false; // Not reported on this Windows (e.g. no battery API).
         }
-        return !SystemParameters.ClientAreaAnimation || saver;
+        return Motion.Reduced || saver;
     }
 
     private void WatchMotionPreferences()
@@ -210,7 +211,10 @@ public partial class MainWindow
     private void OnSystemParameterChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(SystemParameters.ClientAreaAnimation))
+        {
+            Motion.Refresh();
             RefreshMotion();
+        }
     }
 
     private void OnEnergySaverChanged(object? sender, object e) => Dispatcher.InvokeAsync(RefreshMotion);

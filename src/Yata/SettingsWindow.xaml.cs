@@ -7,9 +7,12 @@ using System.Windows;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Automation;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Interop;
 using Yata.Helpers;
 using Yata.Services;
@@ -49,6 +52,11 @@ public partial class SettingsWindow : Window
         // the bindings have already written the new value.
         AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler((_, _) => _store.NotifySettingsChanged()));
         SourceInitialized += (_, _) => UseDarkTitleBar();
+        KeyDown += (_, e) =>
+        {
+            if (e.Key == Key.Escape)
+                Close();
+        };
 
         _calendar.Changed += ShowGoogle;
         _googleTasks.Changed += ShowGoogle;
@@ -60,6 +68,47 @@ public partial class SettingsWindow : Window
         ShowGoogle();
         ShowWeatherPlace();
     }
+
+    // ---- Screen readers ---------------------------------------------------------------
+
+    /// <summary>
+    /// Every row is a label (maybe with a hint) and a control on the right. Left alone, a screen
+    /// reader says "on" without saying what is on: switches and steppers take the label as their
+    /// name and the hint as help; buttons keep their own text and get the label as help.
+    /// </summary>
+    private void OnRowLoaded(object sender, RoutedEventArgs e)
+    {
+        var row = (Views.SettingRow)sender;
+        var texts = row.Children.OfType<TextBlock>()
+            .Concat(row.Children.OfType<StackPanel>().SelectMany(panel => panel.Children.OfType<TextBlock>()))
+            .ToList();
+        var labelStyle = (Style)FindResource("Label");
+        var hintStyle = (Style)FindResource("Hint");
+        if (texts.FirstOrDefault(t => t.Style == labelStyle) is not { } label)
+            return;
+        var hint = texts.FirstOrDefault(t => t.Style == hintStyle);
+
+        foreach (var control in row.Children.OfType<FrameworkElement>())
+        {
+            switch (control)
+            {
+                case Views.Stepper stepper:
+                    stepper.Label = label.Text;
+                    break;
+                case CheckBox:
+                    BindText(control, AutomationProperties.NameProperty, label);
+                    if (hint != null)
+                        BindText(control, AutomationProperties.HelpTextProperty, hint);
+                    break;
+                case ButtonBase:
+                    BindText(control, AutomationProperties.HelpTextProperty, label);
+                    break;
+            }
+        }
+    }
+
+    private static void BindText(DependencyObject target, DependencyProperty property, TextBlock source) =>
+        BindingOperations.SetBinding(target, property, new Binding(nameof(TextBlock.Text)) { Source = source });
 
     // ---- Weather ----------------------------------------------------------------------
 
@@ -173,6 +222,10 @@ public partial class SettingsWindow : Window
     {
         WeatherSearchStatus.Text = text ?? "";
         WeatherSearchStatus.Visibility = text == null ? Visibility.Collapsed : Visibility.Visible;
+        // Read out "Buscando…", "Nenhuma cidade encontrada." and the like as they appear.
+        if (text != null)
+            UIElementAutomationPeer.CreatePeerForElement(WeatherSearchStatus)
+                .RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
     }
 
     private sealed record CalendarChoice(string Id, string Name, string Hint, bool Included);
