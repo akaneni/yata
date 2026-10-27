@@ -1,5 +1,7 @@
 # Builds the installer on GitHub and publishes a release whenever a version tag is pushed:
 #   git tag v0.1.0 && git push origin v0.1.0
+# Code signing (SignPath Foundation) turns on once the SIGNPATH_ORGANIZATION_ID variable and the
+# SIGNPATH_API_TOKEN secret exist; until then releases stay unsigned. See docs/code-signing.md.
 name: Release
 
 on:
@@ -8,6 +10,11 @@ on:
 
 permissions:
   contents: write
+  # SignPath downloads the unsigned artifacts with this workflow's token.
+  actions: read
+
+env:
+  SIGNING: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
 
 jobs:
   release:
@@ -29,7 +36,7 @@ jobs:
       - name: Install Inno Setup
         run: choco install innosetup --no-progress -y
 
-      - name: Build installer
+      - name: Publish Yata.exe
         shell: pwsh
         env:
           # Google OAuth client for the calendar (see docs/google-calendar.md).
@@ -40,7 +47,7 @@ jobs:
           if (-not $env:YATA_GOOGLE_CLIENT_ID -or -not $env:YATA_GOOGLE_CLIENT_SECRET) {
             throw "YATA_GOOGLE_CLIENT_ID / YATA_GOOGLE_CLIENT_SECRET secrets are missing"
           }
-          ./tools/build-installer.ps1 -Version $env:VERSION
+          ./tools/build-installer.ps1 -Version $env:VERSION -PublishOnly
 
       - name: Check the Google client is in the build
         shell: pwsh
@@ -54,6 +61,76 @@ jobs:
           }
           if (-not $text.Contains(".apps.googleusercontent.com")) { throw "Google client id not found in publish\Yata.exe" }
           "Google client embedded"
+
+      # Signed before it goes into the installer, so the installed app carries the signature too.
+      - name: Upload unsigned Yata.exe
+        id: upload-app
+        if: env.SIGNING == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          path: publish/Yata.exe
+          archive: false
+
+      - name: Sign Yata.exe
+        if: env.SIGNING == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: yata
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: app
+          github-artifact-id: ${{ steps.upload-app.outputs.artifact-id }}
+          parameters: |
+            version: ${{ toJSON(env.VERSION) }}
+          # Every release waits for a manual approval in SignPath.
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed-app
+          skip-decompress: true
+
+      - name: Use the signed Yata.exe
+        if: env.SIGNING == 'true'
+        shell: pwsh
+        run: Copy-Item signed-app\Yata.exe publish\Yata.exe -Force
+
+      - name: Build installer
+        shell: pwsh
+        run: ./tools/build-installer.ps1 -Version $env:VERSION -SkipPublish
+
+      - name: Upload unsigned installer
+        id: upload-installer
+        if: env.SIGNING == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          path: dist/Yata-Setup-${{ env.VERSION }}.exe
+          archive: false
+
+      - name: Sign installer
+        if: env.SIGNING == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: yata
+          signing-policy-slug: release-signing
+          artifact-configuration-slug: installer
+          github-artifact-id: ${{ steps.upload-installer.outputs.artifact-id }}
+          parameters: |
+            version: ${{ toJSON(env.VERSION) }}
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: signed-installer
+          skip-decompress: true
+
+      - name: Use the signed installer
+        if: env.SIGNING == 'true'
+        shell: pwsh
+        run: |
+          Copy-Item "signed-installer\Yata-Setup-$env:VERSION.exe" dist\ -Force
+          foreach ($file in "publish\Yata.exe", "dist\Yata-Setup-$env:VERSION.exe") {
+            $sig = Get-AuthenticodeSignature $file
+            if ($sig.Status -ne "Valid") { throw "$file is not validly signed: $($sig.Status)" }
+            "$file signed by $($sig.SignerCertificate.Subject)"
+          }
 
       - name: Checksums
         shell: pwsh

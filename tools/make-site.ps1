@@ -50,7 +50,7 @@ function Convert-ToPortuguese([string]$html) {
       [regex]::Replace($m.Value, "\s$($pair[1])=`"[^`"]*`"", " $($pair[1])=`"$value`"")
     })
   }
-  $html.Replace('href="/privacy"', 'href="/pt/privacy"')
+  $html.Replace('href="/privacy"', 'href="/pt/privacy"').Replace('href="/code-signing"', 'href="/pt/code-signing"')
 }
 
 function Save-Page([string]$html, [string]$path) {
@@ -67,7 +67,7 @@ Save-Page $en (Join-Path $Out "index.html")
 $ptPage = $index.Replace("{{LANG}}", "pt-BR").Replace("{{CANONICAL}}", "https://getyata.app/pt/").Replace("{{CUR_EN}}", "").Replace("{{CUR_PT}}", ' aria-current="page"')
 Save-Page (Convert-ToPortuguese $ptPage) (Join-Path $Out "pt/index.html")
 
-foreach ($page in "privacy.html", "pt/privacy.html") {
+foreach ($page in "privacy.html", "pt/privacy.html", "code-signing.html", "pt/code-signing.html") {
   Save-Page ([IO.File]::ReadAllText((Join-Path $site $page), $utf8)) (Join-Path $Out $page)
 }
 "ok: $Out"

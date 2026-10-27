@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Política de assinatura de código · Yata</title>
+<meta name="description" content="Como as versões do Yata são assinadas, por quem e como conferir a assinatura.">
+<link rel="canonical" href="https://getyata.app/pt/code-signing">
+<link rel="alternate" hreflang="en" href="https://getyata.app/code-signing">
+<link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/code-signing">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- Espelha o site/code-signing.html (inglês). Altere os dois juntos. -->
+<header>
+  <div class="wrap">
+    <a class="logo" href="/pt/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Principal">
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="lang" role="group" aria-label="Idioma">
+        <a href="/code-signing" hreflang="en" lang="en">EN</a>
+        <a href="/pt/code-signing" hreflang="pt-BR" lang="pt-BR" aria-current="page">PT</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="doc">
+    <h1>Política de assinatura de código (code signing policy)</h1>
+    <p class="updated">Última atualização: 27 de outubro de 2026</p>
+    <p>Assinatura de código gratuita fornecida por <a href="https://about.signpath.io">SignPath.io</a>, certificado da <a href="https://signpath.org">SignPath Foundation</a>.</p>
+    <p><strong>Situação:</strong> a assinatura pela SignPath Foundation está em andamento. As versões passam a sair assinadas a partir da primeira publicada depois da aprovação do projeto. Até lá o instalador não é assinado, e cada versão traz um <code>SHA256SUMS.txt</code> para você conferir o arquivo baixado.</p>
+
+    <h2>O que é assinado</h2>
+    <ul>
+      <li><code>Yata.exe</code>, o próprio app, assinado antes de entrar no instalador.</li>
+      <li><code>Yata-Setup-x.y.z.exe</code>, o instalador publicado nas <a href="https://github.com/akaneni/yata/releases">Releases do GitHub</a>.</li>
+    </ul>
+    <p>Os dois são compilados pelo GitHub Actions, em máquinas do próprio GitHub, a partir de uma tag de versão do repositório público (<a href="https://github.com/akaneni/yata/blob/main/.github/workflows/release.yml">release.yml</a>). Nada compilado num computador pessoal é assinado, e cada pedido de assinatura é aprovado manualmente. O .NET Desktop Runtime que o instalador pode baixar vem da Microsoft, com a assinatura da própria Microsoft.</p>
+
+    <h2>Papéis no time</h2>
+    <ul>
+      <li><strong>Autores e revisores:</strong> <a href="https://github.com/akaneni">akaneni</a>. Mudanças de outras pessoas são revisadas antes de entrar.</li>
+      <li><strong>Aprovadores:</strong> <a href="https://github.com/akaneni">akaneni</a> aprova cada pedido de assinatura.</li>
+    </ul>
+    <p>Todos nesses papéis usam autenticação em dois fatores no GitHub e no SignPath.</p>
+
+    <h2>Privacidade</h2>
+    <p>O Yata não tem conta, servidor nem telemetria. O que ele envia pela rede, e quando, está na <a href="/pt/privacy">política de privacidade</a>; o instalador mostra um resumo antes de instalar.</p>
+
+    <h2>Como conferir a assinatura</h2>
+    <p>Clique com o botão direito no arquivo, escolha <strong>Propriedades</strong> e depois <strong>Assinaturas Digitais</strong>. O signatário deve ser <strong>SignPath Foundation</strong>. Qualquer outro, ou a falta de assinatura numa versão indicada como assinada, não é uma versão oficial do Yata: abra uma issue, por favor.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="/pt/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Rodapé">
+      <a href="/pt/privacy">Política de privacidade</a>
+      <a href="/pt/code-signing" aria-current="page">Política de assinatura</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="mono">licença MIT · feito por akaneni</span>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>
