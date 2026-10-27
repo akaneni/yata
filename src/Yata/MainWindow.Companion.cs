@@ -147,8 +147,7 @@ public partial class MainWindow
             ? string.Format(Strings.Away_TitleCount, FormatAway(report.Duration), report.Items.Count)
             : string.Format(Strings.Away_Title, FormatAway(report.Duration));
 
-        _hudActive = false;
-        _hudTimer.Stop();
+        InterruptHud();
         _newsActive = true;
         _newsTimer.Stop();
         _newsTimer.Start();
@@ -183,6 +182,7 @@ public partial class MainWindow
         _newsRaven.Stop();
         NewsRaven.Letter = false;
         UpdateTargets();
+        ShowNextHud();
     }
 
     /// <summary>Walks through Yata's states in ~30 s instead of waiting real minutes.</summary>

@@ -55,7 +55,9 @@ Open source, no account and no telemetry.
   - **Automatic focus pause** after 5 min away (giving back the unattended time), unless media is playing.
   - **Demo** from the tray menu (or `Yata.exe --demo`) to see every state in ~30 s.
 - **Settings** (the gear in the notch, the menu or a double-click on the tray icon): language, start with Windows, hide in full screen, hover delay, album art color or black and white, lyrics on/off, each kind of notice, Pomodoro times, water goal and reminders, and Yata's behavior. Everything applies immediately.
-- Reminders that arrive while the notch is open or in full screen wait and show up afterwards instead of being lost.
+- Reminders that arrive while the notch is open or in full screen wait and show up afterwards, one at a time, instead of being lost. A status blip (volume, Caps Lock) shows at once and the reminder it interrupted comes back right after.
+- **Bubble beside the notch**: like the iPhone's island splitting in two, a second small notch carries what doesn't fit in the first — another program's activity, or the next meeting while music has the notch. Hover it to see what it is.
+- **Activities from other programs** (scripts, builds, AI agents): they can show their progress in the bubble with `Yata.exe activity`. See [Activities](#activities) below. Can be turned off in Settings.
 - **Hides in full screen** (videos, games, presentations).
 - Doesn't steal focus and doesn't show in Alt+Tab or the taskbar. Quit from the tray icon.
 
@@ -88,6 +90,25 @@ Automated tests (Pomodoro, lyrics, tasks, water, presence, player choice, versio
 ```powershell
 dotnet test
 ```
+
+### Activities
+
+Any script or program running as you on this PC can put an activity beside the notch:
+
+```powershell
+Yata.exe activity set build --title "Build" --text "compiling" --progress 40% --icon code
+Yata.exe activity set build --progress 0.8
+Yata.exe activity done build --text "ok"          # a check, then it goes away
+Yata.exe activity attention agent --title "Claude Code" --text "waiting for you" --icon agent
+Yata.exe activity end agent
+```
+
+- Actions: `set` (running), `attention` (needs you: warning color, and a notice that waits to be seen), `done`, `fail`, `end`.
+- Icons: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. A fixed set: programs can't send images or arbitrary glyphs.
+- Text is one plain line (titles up to 60 characters, text up to 120); control, invisible and direction-changing characters are removed.
+- An activity nobody updates goes away after 10 minutes (`--ttl` changes it, up to 24 h); `done` stays 12 s. At most 8 at a time, and 30 requests per 10 s.
+- Exit codes for scripts: 0 shown, 1 bad arguments, 2 Yata isn't running, 3 refused (the reason is printed when run from a console).
+- How it works: a named pipe that only your Windows user can open and that refuses network access. Activities live in memory only; their text isn't logged.
 
 Open the notch on a tab without using the mouse, for N seconds (previews, screenshots and UI tests):
 
@@ -147,6 +168,9 @@ src/Yata/
   Services/PrivacyWatcher.cs  camera and microphone in use (MicrophoneMonitor.cs: Core Audio)
   Services/UpdateChecker.cs   optional new version notice (GitHub releases)
   Services/UpdateInstaller.cs "Update and restart": download, SHA-256 check, silent setup
+  Services/HudQueue.cs        which notice shows, and reminders waiting their turn
+  Services/Activities.cs      other programs' activities: request, cleaning, the board
+  Services/ActivityPipe.cs    the local pipe (this user only) and Yata.exe activity
   Services/AppStore.cs        local storage (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    water and reminders
@@ -179,4 +203,6 @@ tests/Yata.Tests/             tests (xUnit)
 8. ~~Camera/microphone in use, multiple displays, global hotkey, version notice~~
 9. ~~English and Portuguese~~
 
-Next ideas: code signing (in progress, see [docs/code-signing.md](docs/code-signing.md)), winget.
+10. ~~Notice queue, bubble beside the notch and activities from other programs~~
+
+Next ideas: [docs/roadmap.md](docs/roadmap.md) (in Portuguese) — code signing (in progress, see [docs/code-signing.md](docs/code-signing.md)), winget, Claude Code integration, Bluetooth battery, call controls and more.

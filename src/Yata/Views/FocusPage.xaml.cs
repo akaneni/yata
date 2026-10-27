@@ -125,9 +125,8 @@ public partial class FocusPage : UserControl
     }
 
     /// <summary>Clockwise arc from 12 o'clock covering <paramref name="progress"/> of the ring.</summary>
-    private static Geometry BuildArc(double progress)
+    internal static Geometry BuildArc(double progress, double size = 112, double stroke = 6)
     {
-        const double size = 112, stroke = 6;
         double radius = (size - stroke) / 2, center = size / 2;
         progress = Math.Clamp(progress, 0, 0.9999);
         if (progress <= 0)

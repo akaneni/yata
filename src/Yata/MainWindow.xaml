@@ -12,6 +12,31 @@
     <Grid>
         <!-- Everything outside NotchHost is fully transparent, so clicks pass through to the desktop.
              The window is resized in code (FitWindow) to the notch plus room for shadow and overshoot. -->
+
+        <!-- Bubble: a second, small notch beside the first for what doesn't fit in it (another program's
+             activity, the next meeting while music plays). Outside NotchHost, so hovering it doesn't open
+             the notch; drawn first, so it slides out from under it. Placed in code (ApplyBubbleFrame). -->
+        <Grid x:Name="Bubble" HorizontalAlignment="Center" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed"
+              MouseEnter="OnBubbleMouseEnter" MouseLeftButtonUp="OnBubbleClick">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="BubbleShift"/>
+            </Grid.RenderTransform>
+            <Path x:Name="BubbleShape" Fill="{DynamicResource NotchBrush}">
+                <Path.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
+                </Path.Effect>
+            </Path>
+            <Grid Width="22" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Ellipse x:Name="BubbleTrack" Stroke="{DynamicResource TrackBrush}" StrokeThickness="2"/>
+                <Path x:Name="BubbleArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                <TextBlock x:Name="BubbleGlyph" FontFamily="{StaticResource IconFont}" FontSize="10"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                <!-- Minutes to the next meeting -->
+                <TextBlock x:Name="BubbleLabel" FontSize="10" FontWeight="SemiBold" Typography.NumeralAlignment="Tabular"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </Grid>
+
         <Grid x:Name="NotchHost" HorizontalAlignment="Center" VerticalAlignment="Top"
               MouseEnter="OnNotchMouseEnter" MouseLeave="OnNotchMouseLeave"
               MouseLeftButtonUp="OnNotchClick"

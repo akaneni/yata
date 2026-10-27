@@ -82,6 +82,10 @@ public sealed class SettingsData
     public bool HudNetwork { get; set; } = true;
     public bool HudPrivacy { get; set; } = true;
 
+    // Activities: other programs on this PC (scripts, builds, AI agents) showing progress in the
+    // notch through a local pipe (Yata.exe activity). Nothing goes over the network.
+    public bool ActivitiesEnabled { get; set; } = true;
+
     // Focus
     public int FocusMinutes { get; set; } = 25;
     public int ShortBreakMinutes { get; set; } = 5;
@@ -105,6 +109,7 @@ public sealed class SettingsData
         HudKind.KeyboardLayout => HudKeyboardLayout,
         HudKind.Network => HudNetwork,
         HudKind.Privacy => HudPrivacy,
+        HudKind.Activity => ActivitiesEnabled,
         _ => true,
     };
 }

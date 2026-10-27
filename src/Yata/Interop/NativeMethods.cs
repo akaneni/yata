@@ -40,6 +40,12 @@ internal static class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool UnregisterHotKey(IntPtr hwnd, int id);
 
+    public const int ATTACH_PARENT_PROCESS = -1;
+
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool AttachConsole(int processId);
+
     public const uint REG_NOTIFY_CHANGE_NAME = 0x1;
     public const uint REG_NOTIFY_CHANGE_LAST_SET = 0x4;
 

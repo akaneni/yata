@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using Yata.Helpers;
+using Yata.Interop;
+using Yata.Services;
 using Forms = System.Windows.Forms;
 
 namespace Yata;
@@ -31,6 +33,13 @@ public partial class App : Application
         // each frame is read back from the GPU — and the Direct3D device alone took ~75 MB.
         // Software rendering cut Task Manager memory from ~119 MB to ~43 MB and halved CPU.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+
+        // "Yata.exe activity ..." hands one activity to the running notch and leaves.
+        if (e.Args.Length > 0 && e.Args[0] == ActivityCommand.Verb)
+        {
+            Shutdown(SendActivity(e.Args[1..]));
+            return;
+        }
 
         _singleInstance = new Mutex(true, "Yata.SingleInstance", out bool isFirstInstance);
         if (!isFirstInstance)
@@ -132,6 +141,29 @@ public partial class App : Application
     {
         if (e.Mode is PowerModes.Suspend or PowerModes.Resume)
             Log.Info("app", e.Mode == PowerModes.Suspend ? "Suspendendo" : "Voltou da suspensão");
+    }
+
+    /// <summary>Exit codes as in <see cref="ActivityCommand.Usage"/>, for scripts to check.</summary>
+    private static int SendActivity(string[] args)
+    {
+        if (ActivityCommand.Build(args, out string? error) is not string json)
+            return Fail(1, $"{error}" + System.Environment.NewLine + System.Environment.NewLine + ActivityCommand.Usage);
+        // Off the UI thread: the pipe calls are async and this thread has nothing else to do.
+        string? reply = Task.Run(() => ActivityPipe.SendAsync(json)).GetAwaiter().GetResult();
+        return reply switch
+        {
+            null => Fail(2, "Yata isn't running."),
+            "ok" => 0,
+            _ => Fail(3, reply),
+        };
+
+        static int Fail(int code, string message)
+        {
+            // A Windows app has no console of its own: borrow the one it was started from, if any.
+            if (NativeMethods.AttachConsole(NativeMethods.ATTACH_PARENT_PROCESS))
+                System.Console.Error.WriteLine(message);
+            return code;
+        }
     }
 
     private static string? ArgValue(string[] args, string name)

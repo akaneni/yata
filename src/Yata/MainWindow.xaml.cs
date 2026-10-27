@@ -291,6 +291,7 @@ public partial class MainWindow : Window
         StartService("privacy", _privacy.Start);
         StartService("water", _water.Start);
         StartService("tasks", _tasks.Start);
+        StartService("activities", StartActivities);
 
         if (!StartedWithWindows)
         {
@@ -365,6 +366,7 @@ public partial class MainWindow : Window
         _weather.Stop();
         _presence.Stop();
         _newsTimer.Stop();
+        StopActivities();
         _store.SaveNow();
     }
 
@@ -440,6 +442,7 @@ public partial class MainWindow : Window
         {
             _hoverTimer.Stop();
             SetExpanded(false);
+            InterruptHud();
             Hide();
             SetEqualizer(false);
         }
@@ -447,7 +450,7 @@ public partial class MainWindow : Window
         {
             Show();
             UpdateEqualizer();
-            ShowPendingHud();
+            ShowNextHud();
         }
         UpdateLyricsTimer();
     }
@@ -478,6 +481,7 @@ public partial class MainWindow : Window
         _focus.ApplySettings();
         _water.ApplySettings();
         _weather.ApplySettings();
+        ApplyActivitySettings();
 
         if (!Settings.LyricsEnabled && _lyrics != null)
         {
@@ -637,9 +641,7 @@ public partial class MainWindow : Window
         {
             StartupTimings.Mark("expand");
             _markExpandFrame = true;
-            _hudActive = false;
-            _hudTimer.Stop();
-            StopHudRaven();
+            InterruptHud();
             HideNews();
             // Wait for the page to fade in before scrolling a long title.
             _titleReveal.Stop();
@@ -657,7 +659,7 @@ public partial class MainWindow : Window
         UpdateTasksShown();
         RefreshProgress();
         if (!expanded)
-            ShowPendingHud();
+            ShowNextHud();
         UpdateEqualizer();
     }
 
@@ -709,6 +711,7 @@ public partial class MainWindow : Window
         _expand.Target = _expanded ? 1 : 0;
         _hud.Target = showHud || showNews ? 1 : 0;
         _ambient.Target = ambient ? 1 : 0;
+        _bubble.Target = BubbleShown ? 1 : 0;
 
         ExpandedView.Width = expanded.Width;
         ExpandedView.Height = expanded.Height;
@@ -747,8 +750,10 @@ public partial class MainWindow : Window
         const double sideRoom = 40;   // shadow blur sideways + overshoot
         const double bottomRoom = 48; // shadow below
         const double overshoot = 1.06;
+        // The bubble beside the notch; the window stays centered on the notch, so room on both sides.
+        double bubbleRoom = BubbleShown || _bubble.Value > 0.001 ? 2 * (BubbleGap + BubbleSize + Ear) : 0;
 
-        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom;
+        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom + bubbleRoom;
         double height = Math.Max(_height.Value, _height.Target) * overshoot + bottomRoom;
         width = Math.Ceiling(width / 2) * 2; // Even, so centering doesn't shift the notch by half a pixel.
         height = Math.Ceiling(height);
@@ -803,9 +808,10 @@ public partial class MainWindow : Window
             _expand.Snap();
             _hud.Snap();
             _ambient.Snap();
+            _bubble.Snap();
         }
         bool moving = _width.Step(dt) | _height.Step(dt) | _radius.Step(dt) | _expand.Step(dt) | _hud.Step(dt) |
-                      _ambient.Step(dt);
+                      _ambient.Step(dt) | _bubble.Step(dt);
         ApplyFrame();
 
         if (!moving)
@@ -844,6 +850,7 @@ public partial class MainWindow : Window
         ExpandedView.Opacity = expandedOpacity;
         ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
         ExpandedView.IsHitTestVisible = progress > 0.7;
+        ApplyBubbleFrame(width, compactOpacity);
     }
 
     /// <summary>Flat top flush with the screen edge, concave ears, rounded bottom corners.</summary>
@@ -904,9 +911,9 @@ public partial class MainWindow : Window
         var now = DateTime.Now;
         string time = now.ToString("HH:mm", Lang.Culture);
 
+        _upcomingEvent = Settings.CalendarInCompact ? CalendarReminders.NextWithin(_calendar.Events, now, UpcomingWindow) : null;
         string? upcoming = null;
-        if (_state == null && Settings.CalendarInCompact &&
-            CalendarReminders.NextWithin(_calendar.Events, now, UpcomingWindow) is CalendarEvent next)
+        if (_state == null && _upcomingEvent is CalendarEvent next)
             upcoming = $"{next.Title} {CalendarReminders.Until(next.Start, now)}";
         if ((upcoming == null) != (_upcomingText == null))
         {
@@ -921,5 +928,6 @@ public partial class MainWindow : Window
         IdleClock.Text = time;
         string date = now.ToString(Strings.Format_LongDate, Lang.Culture);
         HeaderDate.Text = char.ToUpper(date[0], Lang.Culture) + date[1..];
+        UpdateBubble(); // While media plays, the next event moves to the bubble.
     }
 }
