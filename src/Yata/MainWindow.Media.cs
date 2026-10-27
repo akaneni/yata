@@ -147,13 +147,16 @@ public partial class MainWindow
     private void RevealOverflow(MarqueeText marquee) =>
         Dispatcher.InvokeAsync(marquee.Run, DispatcherPriority.Loaded);
 
-    /// <summary>While a focus session is active its countdown takes the equalizer's slot.</summary>
+    /// <summary>
+    /// A focus session's countdown sits beside the clock (or the next event) in the closed notch.
+    /// With media playing it moves to the bubble, and the notch keeps the equalizer.
+    /// </summary>
     private void UpdateCompactTimer()
     {
         bool active = _focus.IsActive;
-        CompactTimer.Visibility = active ? Visibility.Visible : Visibility.Collapsed;
+        CompactTimer.Visibility = active && _state == null ? Visibility.Visible : Visibility.Collapsed;
         bool nodding = MusicRaven.Visibility == Visibility.Visible;
-        Equalizer.Visibility = _state != null && !active && !nodding ? Visibility.Visible : Visibility.Collapsed;
+        Equalizer.Visibility = _state != null && !nodding ? Visibility.Visible : Visibility.Collapsed;
 
         var remaining = _focus.Remaining;
         CompactTimerText.Text = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
@@ -167,6 +170,7 @@ public partial class MainWindow
             UpdateTargets(); // The idle notch widens to fit the countdown.
         }
         UpdateEqualizer();
+        UpdateBubble();
     }
 
     /// <summary>
@@ -301,7 +305,7 @@ public partial class MainWindow
             {
                 Width = 3,
                 Height = 14,
-                Margin = new Thickness(0, 0, 2, 0),
+                Margin = new Thickness(0, 0, Equalizer.Children.Count < EqualizerSteps.Length - 1 ? 2 : 0, 0),
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Fill = _accent,
                 RenderTransformOrigin = new Point(0.5, 1),

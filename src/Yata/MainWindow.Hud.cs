@@ -29,8 +29,12 @@ namespace Yata;
 public partial class MainWindow
 {
     private readonly DispatcherTimer _hudRavenLand = new() { Interval = TimeSpan.FromMilliseconds(1100) };
-    // A reminder that arrived while the notch was open or hidden; shown once it can be seen.
-    private HudMessage? _pendingHud;
+    private readonly HudQueue _hudQueue = new();
+    // The notice's content plus padding: a long text with a bar needs more than the usual width.
+    private double _hudWidth;
+
+    // Not while open, hidden (full screen) or busy with the "while you were away" news.
+    private bool CanShowHud => IsVisible && !_expanded && !_newsActive;
 
     private void ShowHud(HudMessage message)
     {
@@ -38,14 +42,12 @@ public partial class MainWindow
             return;
         _presence.NoteIfUnseen(message);
 
-        if (!IsVisible || _expanded)
-        {
-            // Reminders wait until the notch closes or a full-screen app exits; status blips are dropped.
-            if (message.Important)
-                _pendingHud = message;
-            return;
-        }
+        if (_hudQueue.Offer(message, CanShowHud) is HudMessage now)
+            DisplayHud(now);
+    }
 
+    private void DisplayHud(HudMessage message)
+    {
         _hudTimer.Interval = TimeSpan.FromMilliseconds(message.DurationMs);
 
         HudIcon.Text = message.Glyph;
@@ -88,26 +90,57 @@ public partial class MainWindow
                 new DoubleAnimation(Math.Clamp(level, 0, 1) * HudBar.Width, TimeSpan.FromMilliseconds(120)));
         }
 
+        _hudWidth = MeasureHud() + 2 * HudPadding;
         _hudActive = true;
         _hudTimer.Stop();
         _hudTimer.Start();
         UpdateTargets();
     }
 
-    private void ShowPendingHud()
+    /// <summary>
+    /// Width of what the notice shows. Measured part by part: the panel itself is collapsed while
+    /// faded out, and a collapsed element measures as nothing.
+    /// </summary>
+    private double MeasureHud()
     {
-        if (_pendingHud is not HudMessage message)
-            return;
-        _pendingHud = null;
-        ShowHud(message);
+        double width = 0;
+        foreach (UIElement part in HudView.Children)
+        {
+            if (part.Visibility == Visibility.Collapsed)
+                continue;
+            part.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            width += part.DesiredSize.Width;
+        }
+        return width;
+    }
+
+    /// <summary>The notch can show notices again: the reminders that waited come one at a time.</summary>
+    private void ShowNextHud()
+    {
+        if (CanShowHud && _hudQueue.Resume() is HudMessage next)
+            DisplayHud(next);
     }
 
     private void HideHud()
     {
         _hudTimer.Stop();
+        if (_hudQueue.Finish() is HudMessage next)
+        {
+            DisplayHud(next);
+            return;
+        }
         _hudActive = false;
         StopHudRaven();
         UpdateTargets();
+    }
+
+    /// <summary>Something covers the notice (the notch opened, the news came): a reminder waits for later.</summary>
+    private void InterruptHud()
+    {
+        _hudQueue.Interrupt();
+        _hudTimer.Stop();
+        _hudActive = false;
+        StopHudRaven();
     }
 
     private void StopHudRaven()

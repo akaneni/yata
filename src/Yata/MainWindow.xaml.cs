@@ -37,7 +37,8 @@ public partial class MainWindow : Window
     private static readonly Size CompactIdleWeather = new(220, 32);
     private static readonly Size CompactMedia = new(260, 32);
     private static readonly Size CompactLyrics = new(380, 32);
-    // The next calendar event takes the clock's place in the minutes before it.
+    // The next calendar event takes the clock's place in the minutes before it. These are the widest
+    // the notch gets for it; a short name gets less (EventCompact).
     private static readonly Size CompactEvent = new(300, 32);
     private static readonly Size CompactEventTimer = new(380, 32);
     // Expanded heights include the 42px header with the page tabs.
@@ -57,6 +58,8 @@ public partial class MainWindow : Window
     private const double NewsWidth = 460;
     private const int NewsMaxItems = 4;
     private const double HudMinWidth = 340;
+    // Room on each side of the notice's content, inside the notch.
+    private const double HudPadding = 22;
     private const double HudHeight = 36;
     private const double CompactRadius = 12;
     private const double ExpandedRadius = 30;
@@ -230,6 +233,7 @@ public partial class MainWindow : Window
         WatchMotionPreferences();
         DpiChanged += OnDpiChanged;
 
+        CompactView.LayoutUpdated += (_, _) => BalanceCompact();
         UpdateClock();
         UpdateTargets();
         ApplyFrame();
@@ -291,6 +295,7 @@ public partial class MainWindow : Window
         StartService("privacy", _privacy.Start);
         StartService("water", _water.Start);
         StartService("tasks", _tasks.Start);
+        StartService("activities", StartActivities);
 
         if (!StartedWithWindows)
         {
@@ -365,6 +370,7 @@ public partial class MainWindow : Window
         _weather.Stop();
         _presence.Stop();
         _newsTimer.Stop();
+        StopActivities();
         _store.SaveNow();
     }
 
@@ -440,6 +446,7 @@ public partial class MainWindow : Window
         {
             _hoverTimer.Stop();
             SetExpanded(false);
+            InterruptHud();
             Hide();
             SetEqualizer(false);
         }
@@ -447,7 +454,7 @@ public partial class MainWindow : Window
         {
             Show();
             UpdateEqualizer();
-            ShowPendingHud();
+            ShowNextHud();
         }
         UpdateLyricsTimer();
     }
@@ -478,6 +485,7 @@ public partial class MainWindow : Window
         _focus.ApplySettings();
         _water.ApplySettings();
         _weather.ApplySettings();
+        ApplyActivitySettings();
 
         if (!Settings.LyricsEnabled && _lyrics != null)
         {
@@ -637,9 +645,7 @@ public partial class MainWindow : Window
         {
             StartupTimings.Mark("expand");
             _markExpandFrame = true;
-            _hudActive = false;
-            _hudTimer.Stop();
-            StopHudRaven();
+            InterruptHud();
             HideNews();
             // Wait for the page to fade in before scrolling a long title.
             _titleReveal.Stop();
@@ -657,7 +663,7 @@ public partial class MainWindow : Window
         UpdateTasksShown();
         RefreshProgress();
         if (!expanded)
-            ShowPendingHud();
+            ShowNextHud();
         UpdateEqualizer();
     }
 
@@ -674,7 +680,7 @@ public partial class MainWindow : Window
         Size compact = hasLyrics ? CompactLyrics
                      : hasMedia ? CompactMedia
                      : ambient ? CompactAmbient
-                     : _upcomingText != null ? (_focus.IsActive ? CompactEventTimer : CompactEvent)
+                     : _upcomingText != null ? EventCompact()
                      : _focus.IsActive ? CompactIdleTimer
                      : compactWeather ? CompactIdleWeather
                      : CompactIdle;
@@ -699,7 +705,7 @@ public partial class MainWindow : Window
 
         Size target = _expanded ? expanded
                     : showNews ? new Size(NewsWidth, 50 + 22 * _newsCount)
-                    : showHud ? new Size(Math.Max(compact.Width, HudMinWidth), HudHeight)
+                    : showHud ? new Size(Math.Max(compact.Width, Math.Max(HudMinWidth, _hudWidth)), HudHeight)
                     : _peeking ? new Size(compact.Width + PeekWidth, compact.Height + PeekHeight)
                     : compact;
 
@@ -709,6 +715,7 @@ public partial class MainWindow : Window
         _expand.Target = _expanded ? 1 : 0;
         _hud.Target = showHud || showNews ? 1 : 0;
         _ambient.Target = ambient ? 1 : 0;
+        _bubble.Target = BubbleShown ? 1 : 0;
 
         ExpandedView.Width = expanded.Width;
         ExpandedView.Height = expanded.Height;
@@ -737,6 +744,54 @@ public partial class MainWindow : Window
     }
 
     /// <summary>
+    /// The closed notch's text stays centered on the notch: whatever sits at one end (the album art,
+    /// or the countdown, weather and equalizer at the other) gets the same room reserved at the
+    /// opposite end. Measured from the content, not the columns, which the reservation itself widens.
+    /// </summary>
+    private void BalanceCompact()
+    {
+        double left = CompactArt.Visibility == Visibility.Visible ? CompactArt.Width : 0;
+        double right = 0;
+        foreach (var part in new FrameworkElement[] { CompactTimer, CompactWeather, MusicRaven, Equalizer })
+        {
+            if (part.Visibility == Visibility.Visible)
+                right = Math.Max(right, part.DesiredSize.Width + part.Margin.Left + part.Margin.Right);
+        }
+        double side = Math.Max(left, right);
+        var columns = CompactView.ColumnDefinitions;
+        if (columns[0].MinWidth != side)
+            columns[0].MinWidth = side;
+        if (columns[2].MinWidth != side)
+            columns[2].MinWidth = side;
+        // A gap only where something sits beside the text, so both ends are 12 px from the edge.
+        var margin = new Thickness(side > 0 ? 8 : 0, 0, side > 0 ? 8 : 0, 0);
+        if (CompactMarquee.Margin != margin)
+            CompactMarquee.Margin = margin;
+    }
+
+    /// <summary>The next event's name decides the closed notch's width, within the old fixed sizes.</summary>
+    private Size EventCompact()
+    {
+        double timer = 0;
+        if (_focus.IsActive)
+        {
+            foreach (var part in new FrameworkElement[] { CompactTimerGlyph, CompactTimerText })
+            {
+                part.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                timer += part.DesiredSize.Width + part.Margin.Left + part.Margin.Right;
+            }
+            timer += 8; // The gap beside the text, reserved on both sides (BalanceCompact).
+        }
+        var text = new FormattedText(_upcomingText ?? "", Lang.Culture, FlowDirection.LeftToRight,
+            new Typeface(CompactText.FontFamily, CompactText.FontStyle, CompactText.FontWeight, CompactText.FontStretch),
+            CompactText.FontSize, Brushes.White, VisualTreeHelper.GetDpi(this).PixelsPerDip);
+        double width = Math.Ceiling(24 + text.WidthIncludingTrailingWhitespace + 2 * timer);
+        return _focus.IsActive
+            ? new Size(Math.Clamp(width, CompactIdleTimer.Width, CompactEventTimer.Width), CompactEvent.Height)
+            : new Size(Math.Clamp(width, CompactIdle.Width, CompactEvent.Width), CompactEvent.Height);
+    }
+
+    /// <summary>
     /// Keeps the transparent window just big enough for the notch, its shadow and the spring's
     /// overshoot. Every animation frame repaints the whole window, so a window sized for the
     /// largest state (1040×340) cost several times more than the ~300×80 a closed notch needs.
@@ -747,8 +802,10 @@ public partial class MainWindow : Window
         const double sideRoom = 40;   // shadow blur sideways + overshoot
         const double bottomRoom = 48; // shadow below
         const double overshoot = 1.06;
+        // The bubble beside the notch; the window stays centered on the notch, so room on both sides.
+        double bubbleRoom = BubbleShown || _bubble.Value > 0.001 ? 2 * (BubbleGap + BubbleSize + Ear) : 0;
 
-        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom;
+        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom + bubbleRoom;
         double height = Math.Max(_height.Value, _height.Target) * overshoot + bottomRoom;
         width = Math.Ceiling(width / 2) * 2; // Even, so centering doesn't shift the notch by half a pixel.
         height = Math.Ceiling(height);
@@ -803,9 +860,10 @@ public partial class MainWindow : Window
             _expand.Snap();
             _hud.Snap();
             _ambient.Snap();
+            _bubble.Snap();
         }
         bool moving = _width.Step(dt) | _height.Step(dt) | _radius.Step(dt) | _expand.Step(dt) | _hud.Step(dt) |
-                      _ambient.Step(dt);
+                      _ambient.Step(dt) | _bubble.Step(dt);
         ApplyFrame();
 
         if (!moving)
@@ -844,6 +902,7 @@ public partial class MainWindow : Window
         ExpandedView.Opacity = expandedOpacity;
         ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
         ExpandedView.IsHitTestVisible = progress > 0.7;
+        ApplyBubbleFrame(width, compactOpacity);
     }
 
     /// <summary>Flat top flush with the screen edge, concave ears, rounded bottom corners.</summary>
@@ -904,14 +963,14 @@ public partial class MainWindow : Window
         var now = DateTime.Now;
         string time = now.ToString("HH:mm", Lang.Culture);
 
+        _upcomingEvent = Settings.CalendarInCompact ? CalendarReminders.NextWithin(_calendar.Events, now, UpcomingWindow) : null;
         string? upcoming = null;
-        if (_state == null && Settings.CalendarInCompact &&
-            CalendarReminders.NextWithin(_calendar.Events, now, UpcomingWindow) is CalendarEvent next)
+        if (_state == null && _upcomingEvent is CalendarEvent next)
             upcoming = $"{next.Title} {CalendarReminders.Until(next.Start, now)}";
-        if ((upcoming == null) != (_upcomingText == null))
+        if (upcoming != _upcomingText)
         {
             _upcomingText = upcoming;
-            UpdateTargets(); // The notch widens for the event's name.
+            UpdateTargets(); // The notch fits the event's name.
         }
         _upcomingText = upcoming;
 
@@ -921,5 +980,6 @@ public partial class MainWindow : Window
         IdleClock.Text = time;
         string date = now.ToString(Strings.Format_LongDate, Lang.Culture);
         HeaderDate.Text = char.ToUpper(date[0], Lang.Culture) + date[1..];
+        UpdateBubble(); // While media plays, the next event moves to the bubble.
     }
 }

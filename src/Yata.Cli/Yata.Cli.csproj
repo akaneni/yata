@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- yata-cli.exe: the console side of Yata, for scripts and AI agents. Yata.exe is a Windows app, so a
+       console doesn't wait for it or show what it prints; this one does, and hands the activity to the
+       running notch through the same pipe. Compiles Yata's own activity files (no copy of the logic). -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>yata-cli</AssemblyName>
+    <RootNamespace>Yata</RootNamespace>
+    <!-- No version of its own: releases pass the same -p:Version as Yata (tools/build-installer.ps1). -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <ApplicationIcon>..\Yata\Assets\yata.ico</ApplicationIcon>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Yata\Services\Activities.cs" Link="Shared\Activities.cs" />
+    <Compile Include="..\Yata\Services\ActivityClient.cs" Link="Shared\ActivityClient.cs" />
+    <Compile Include="..\Yata\Services\ActivityCommand.cs" Link="Shared\ActivityCommand.cs" />
+  </ItemGroup>
+
+</Project>

@@ -1,4 +1,4 @@
-# Publishes Yata (framework-dependent, single file) and builds the Inno Setup installer into dist/.
+# Publishes Yata and yata-cli (framework-dependent, single file) and builds the Inno Setup installer into dist/.
 # Usage: ./tools/build-installer.ps1 [-Version 0.2.1]
 # The release workflow runs it in two steps so publish\Yata.exe can be code-signed in between:
 #   -PublishOnly, then -SkipPublish.
@@ -12,6 +12,10 @@ if (-not $SkipPublish) {
     dotnet publish (Join-Path $root "src\Yata\Yata.csproj") -c Release -r win-x64 --self-contained false `
         -p:PublishSingleFile=true -p:DebugType=none -p:Version=$Version -o $publish
     if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+    # yata-cli.exe, the console side for scripts and agents, goes next to it.
+    dotnet publish (Join-Path $root "src\Yata.Cli\Yata.Cli.csproj") -c Release -r win-x64 --self-contained false `
+        -p:PublishSingleFile=true -p:DebugType=none -p:Version=$Version -o $publish
+    if ($LASTEXITCODE -ne 0) { throw "dotnet publish (yata-cli) failed" }
     if ($PublishOnly) { return }
 }
 

@@ -73,6 +73,9 @@
   <data name="Settings_RainAlerts" xml:space="preserve"><value>Warn me when rain is coming</value></data>
   <data name="Settings_RainAlertsHint" xml:space="preserve"><value>When the chance goes over 60% in the next 2 hours.</value></data>
   <data name="Settings_Notices" xml:space="preserve"><value>Notch notices</value></data>
+  <data name="Settings_Activities" xml:space="preserve"><value>Activities</value></data>
+  <data name="Settings_ActivitiesEnabled" xml:space="preserve"><value>Let programs on this PC show activities</value></data>
+  <data name="Settings_ActivitiesHint" xml:space="preserve"><value>Scripts, builds and AI agents can show their progress beside the notch with yata-cli. Only programs running as you on this PC; nothing goes over the network.</value></data>
   <data name="Settings_HudVolume" xml:space="preserve"><value>Volume</value></data>
   <data name="Settings_HudBrightness" xml:space="preserve"><value>Brightness</value></data>
   <data name="Settings_HudPower" xml:space="preserve"><value>Charger and low battery</value></data>

@@ -532,6 +532,20 @@
                 </StackPanel>
             </Border>
 
+            <!-- Activities: other programs on this PC, through a local pipe -->
+            <TextBlock Text="{x:Static y:Strings.Settings_Activities}" Style="{StaticResource Section}"/>
+            <Border Style="{StaticResource Card}">
+                <views:SettingRow Style="{StaticResource Row}">
+                    <StackPanel VerticalAlignment="Center" Margin="0,8">
+                        <TextBlock Text="{x:Static y:Strings.Settings_ActivitiesEnabled}" Style="{StaticResource Label}"/>
+                        <TextBlock Style="{StaticResource Hint}"
+                                   Text="{x:Static y:Strings.Settings_ActivitiesHint}"/>
+                    </StackPanel>
+                    <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                              IsChecked="{Binding Settings.ActivitiesEnabled}"/>
+                </views:SettingRow>
+            </Border>
+
             <!-- Focus -->
             <TextBlock Text="{x:Static y:Strings.Settings_Focus}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">

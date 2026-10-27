@@ -55,7 +55,9 @@ Projeto de código aberto, sem conta e sem telemetria.
   - **Pausa automática do foco** após 5 min longe (devolvendo o tempo não acompanhado), exceto se houver mídia tocando.
   - **Demonstração** pelo menu da bandeja (ou `Yata.exe --demo`) para ver todos os estados em ~30 s.
 - **Configurações** (engrenagem no notch, menu ou clique duplo na bandeja): iniciar com o Windows, esconder em tela cheia, demora para abrir, cor da capa ou preto e branco, letras liga/desliga, cada tipo de aviso, tempos do Pomodoro, meta e lembretes de água, e o comportamento do Yata. Tudo aplica na hora.
-- Lembretes que chegam com o notch aberto ou em tela cheia esperam e aparecem depois, em vez de serem perdidos.
+- Lembretes que chegam com o notch aberto ou em tela cheia esperam e aparecem depois, um de cada vez, em vez de serem perdidos. Um aviso rápido (volume, Caps Lock) aparece na hora, e o lembrete que ele interrompeu volta logo em seguida.
+- **Bolha ao lado do notch**: como a ilha do iPhone se dividindo em duas, um segundo notch pequeno leva o que não cabe no primeiro: enquanto a música ocupa o notch, a contagem do foco (um anel esvaziando em volta dos minutos que faltam) e a próxima reunião vão para lá, assim como as atividades de outros programas. Uma de cada vez, por prioridade (o que precisa de você, a reunião, o foco, as atividades); passe o mouse para ver o que é e quantas outras estão esperando.
+- **Atividades de outros programas** (scripts, builds, agentes de IA): podem mostrar o andamento na bolha com o `yata-cli`. Veja [Atividades](#atividades) abaixo. Pode ser desligado nas Configurações.
 - **Some em tela cheia** (vídeos, jogos, apresentações).
 - Não rouba o foco, não aparece no Alt+Tab nem na barra de tarefas. Sair pelo ícone na bandeja.
 
@@ -88,6 +90,28 @@ Testes automáticos (Pomodoro, letras, tarefas, água, presença, escolha do pla
 ```powershell
 dotnet test
 ```
+
+### Atividades
+
+Qualquer script ou programa rodando como você neste PC pode pôr uma atividade ao lado do notch com o `yata-cli.exe`, instalado ao lado do `Yata.exe` (`%LOCALAPPDATA%\Programs\Yata`). O instalador pode pôr essa pasta no seu PATH (uma opção, desligada por padrão), para o `yata-cli` funcionar em qualquer terminal:
+
+```powershell
+yata-cli activity set build --title "Build" --text "compilando" --progress 40% --icon code
+yata-cli activity set build --title "Build" --progress 0.8
+yata-cli activity done build --title "Build" --text "ok"     # um ✓, e depois some
+yata-cli activity attention agent --title "Claude Code" --text "esperando você" --icon agent
+yata-cli activity end agent
+```
+
+É um programa de console: PowerShell, cmd, bash e agentes de IA esperam por ele e recebem o código de saída e as mensagens de erro. O próprio `Yata.exe` não recebe comandos. `yata-cli --help` lista tudo.
+
+- Ações: `set` (em andamento), `attention` (precisa de você: cor de alerta e um aviso que espera ser visto), `done`, `fail` (falhou: cor de alerta), `end`.
+- **Mande o `--title` sempre.** Uma atividade em andamento que ninguém atualiza some depois de 10 minutos (`--ttl` muda isso, até 24 h), e um id que sumiu precisa do título para voltar. `attention` e `fail` ficam até um `end` (no máximo 1 h); `done` fica 12 s. `end` num id que já sumiu não dá erro.
+- Ícones: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. Um conjunto fixo: programas não mandam imagens nem glifos quaisquer.
+- O texto é uma linha simples (títulos até 60 caracteres, texto até 120); caracteres de controle, invisíveis e de mudança de direção são removidos.
+- No máximo 8 atividades ao mesmo tempo, e 30 pedidos a cada 10 s. Nada é impresso quando dá certo.
+- Códigos de saída: 0 mostrou, 1 argumentos errados (opção, ícone ou valor desconhecido), 2 o Yata não está aberto, 3 recusado pelo Yata (o motivo é impresso).
+- Como funciona: um named pipe que só o seu usuário do Windows abre e que recusa acesso pela rede. As atividades ficam só na memória; o texto delas não vai para o log.
 
 Abrir o notch numa aba sem usar o mouse, por N segundos (prévias, capturas e testes de interface):
 
@@ -145,6 +169,10 @@ src/Yata/
   Services/PrivacyWatcher.cs  câmera e microfone em uso (MicrophoneMonitor.cs: Core Audio)
   Services/UpdateChecker.cs   aviso opcional de versão nova (releases do GitHub)
   Services/UpdateInstaller.cs "Atualizar e reiniciar": download, conferência do SHA-256, instalação silenciosa
+  Services/HudQueue.cs        qual aviso aparece, e os lembretes esperando a vez
+  Services/Activities.cs      atividades de outros programas: pedido, limpeza, o quadro
+  Services/ActivityPipe.cs    o pipe local (só deste usuário); ActivityClient.cs, o lado que envia
+src/Yata.Cli/                 yata-cli.exe: o lado de console, para scripts e agentes (compila os arquivos de atividade do Yata)
   Services/AppStore.cs        persistência local (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    água e lembretes
@@ -178,4 +206,6 @@ tests/Yata.Tests/             testes (xUnit)
 8. ~~Câmera/microfone em uso, vários monitores, atalho global, aviso de versão~~
 9. ~~Inglês e português~~
 
-Próximas ideias: assinatura digital (em andamento, veja [docs/code-signing.md](docs/code-signing.md)), winget.
+10. ~~Fila de avisos, bolha ao lado do notch e atividades de outros programas~~
+
+Próximas ideias: [docs/roadmap.md](docs/roadmap.md) — assinatura digital (em andamento, veja [docs/code-signing.md](docs/code-signing.md)), winget, integração com o Claude Code, bateria Bluetooth, controles de chamada e mais.
