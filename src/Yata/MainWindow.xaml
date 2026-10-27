@@ -191,11 +191,23 @@
 
                     <!-- Header: date + page tabs -->
                     <Grid Margin="24,10,16,0">
-                        <TextBlock x:Name="HeaderDate" FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource TextSecondary}"/>
-                        <!-- Takes the date's place while the camera or microphone is in use -->
-                        <TextBlock x:Name="PrivacyText" FontSize="12" VerticalAlignment="Center" MaxWidth="260"
-                                   TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" Visibility="Collapsed"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                            <TextBlock x:Name="HeaderDate" FontSize="12" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextSecondary}"/>
+                            <!-- Takes the date's place while the camera or microphone is in use -->
+                            <TextBlock x:Name="PrivacyText" FontSize="12" VerticalAlignment="Center" MaxWidth="260"
+                                       TextTrimming="CharacterEllipsis" Visibility="Collapsed"/>
+                            <!-- Agenda and Tasks: read Google now (MainWindow.Refresh.cs); spins while it does -->
+                            <Button x:Name="RefreshButton" Style="{StaticResource IconButton}" Width="26" Height="26" FontSize="12"
+                                    Margin="6,0,0,0" Foreground="{DynamicResource TextSecondary}" Content="&#xE72C;"
+                                    ToolTip="{x:Static y:Strings.Settings_SyncNow}"
+                                    AutomationProperties.Name="{x:Static y:Strings.Settings_SyncNow}"
+                                    RenderTransformOrigin="0.5,0.5" Visibility="Collapsed" Click="OnRefreshClick">
+                                <Button.RenderTransform>
+                                    <RotateTransform x:Name="RefreshSpin"/>
+                                </Button.RenderTransform>
+                            </Button>
+                        </StackPanel>
                         <Grid x:Name="TabStrip" HorizontalAlignment="Right">
                         <!-- Selection pill that glides to the chosen tab -->
                         <Border x:Name="TabIndicator" Width="32" Height="26" Margin="2,0,0,0" CornerRadius="8" Background="{DynamicResource SelectedFill}"

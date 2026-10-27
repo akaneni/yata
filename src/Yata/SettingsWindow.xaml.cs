@@ -32,18 +32,26 @@ public partial class SettingsWindow : Window
     private readonly GoogleAccount _google;
     private readonly GoogleCalendar _calendar;
     private readonly GoogleTasks _googleTasks;
+    private readonly UpdateChecker _updates;
+    private readonly WeatherService _weather;
+    // What the last "Check now" found, shown until the window closes; null shows the last check time.
+    private string? _checkResult;
 
-    public SettingsWindow(AppStore store, GoogleAccount google, GoogleCalendar calendar, GoogleTasks googleTasks)
+    public SettingsWindow(AppStore store, GoogleAccount google, GoogleCalendar calendar, GoogleTasks googleTasks,
+        UpdateChecker updates, WeatherService weather)
     {
         _store = store;
         _google = google;
         _calendar = calendar;
         _googleTasks = googleTasks;
+        _updates = updates;
+        _weather = weather;
         InitializeComponent();
         DataContext = store.Data;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         VersionText.Text = string.Format(Strings.Settings_Version, version?.ToString(3));
+        ThisVersionText.Text = string.Format(Strings.Settings_ThisVersion, version?.ToString(3));
         StartupSwitch.IsChecked = Autostart.IsEnabled;
         ShowLanguage();
         ShowMonitor();
@@ -61,14 +69,28 @@ public partial class SettingsWindow : Window
         };
 
         _calendar.Changed += ShowGoogle;
+        _calendar.BusyChanged += ShowGoogle;
         _googleTasks.Changed += ShowGoogle;
+        _googleTasks.BusyChanged += ShowGoogle;
+        _updates.BusyChanged += ShowUpdate;
+        _weather.Changed += ShowForecast;
+        _weather.BusyChanged += ShowForecast;
         Closed += (_, _) =>
         {
             _calendar.Changed -= ShowGoogle;
+            _calendar.BusyChanged -= ShowGoogle;
             _googleTasks.Changed -= ShowGoogle;
+            _googleTasks.BusyChanged -= ShowGoogle;
+            _updates.BusyChanged -= ShowUpdate;
+            _weather.Changed -= ShowForecast;
+            _weather.BusyChanged -= ShowForecast;
         };
+        // Weather switched on or off, a city picked: the forecast row follows.
+        _store.SettingsChanged += ShowForecast;
+        Closed += (_, _) => _store.SettingsChanged -= ShowForecast;
         ShowGoogle();
         ShowWeatherPlace();
+        ShowForecast();
         BuildSectionNav();
     }
 
@@ -341,6 +363,8 @@ public partial class SettingsWindow : Window
         TasksOptions.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
         TasksListButton.Content = _store.Settings.TasksListName ?? Strings.Common_Loading;
         TasksListButton.IsEnabled = _googleTasks.Lists.Count > 1;
+
+        ShowSync();
     }
 
     private void OnGoogleButton(object sender, RoutedEventArgs e)
@@ -466,10 +490,67 @@ public partial class SettingsWindow : Window
     private void ShowUpdate()
     {
         string? latest = _store.Data.Updates.Latest;
-        bool newer = _store.Settings.UpdateCheckEnabled && UpdateChecker.IsNewer(latest, UpdateChecker.Current);
+        // Known from the daily check or from "Check now", which works with the daily check off too.
+        bool newer = UpdateChecker.IsNewer(latest, UpdateChecker.Current);
         UpdateRow.Visibility = newer ? Visibility.Visible : Visibility.Collapsed;
         UpdateText.Text = string.Format(Strings.Settings_UpdateAvailable, latest);
+
+        CheckNowButton.IsEnabled = !_updates.IsChecking;
+        CheckStatus.Text = _updates.IsChecking ? Strings.Settings_Checking
+            : _checkResult
+            ?? (_updates.LastCheck is DateTime last
+                ? string.Format(Strings.Settings_LastChecked, Lang.When(last, DateTime.Now))
+                : Strings.Settings_NeverChecked);
     }
+
+    private async void OnCheckNow(object sender, RoutedEventArgs e)
+    {
+        var result = await _updates.CheckNowAsync();
+        _checkResult = result switch
+        {
+            UpdateCheckResult.Failed => Strings.Settings_CheckFailed,
+            UpdateCheckResult.UpToDate => Strings.Update_UpToDate,
+            _ => null, // The update row below says which version, with the button to install it.
+        };
+        ShowUpdate();
+    }
+
+    // ---- Doing it now: sync and forecast ---------------------------------------------------
+
+    private void ShowSync()
+    {
+        bool calendar = _calendar.Status == CalendarStatus.Connected, tasks = _googleTasks.IsOn;
+        SyncOptions.Visibility = calendar || tasks ? Visibility.Visible : Visibility.Collapsed;
+        bool busy = _calendar.IsFetching || _googleTasks.IsSyncing;
+        SyncNowButton.IsEnabled = !busy;
+        // The older of the two, so "last synced" is true of both.
+        var times = new List<DateTime?>();
+        if (calendar)
+            times.Add(_calendar.LastFetched);
+        if (tasks)
+            times.Add(_googleTasks.LastSynced);
+        SyncStatus.Text = busy ? Strings.Settings_Syncing
+            : times.Count > 0 && times.All(t => t != null)
+                ? string.Format(Strings.Settings_LastSynced, Lang.When(times.Min()!.Value, DateTime.Now))
+                : Strings.Settings_NotSynced;
+    }
+
+    private void OnSyncNow(object sender, RoutedEventArgs e)
+    {
+        _ = _calendar.RefreshNowAsync();
+        _ = _googleTasks.SyncNowAsync();
+    }
+
+    private void ShowForecast()
+    {
+        ForecastOptions.Visibility = _weather.IsActive ? Visibility.Visible : Visibility.Collapsed;
+        RefreshForecastButton.IsEnabled = !_weather.IsFetching;
+        ForecastStatus.Text = _weather.IsFetching ? Strings.Settings_Refreshing
+            : _weather.LastFetched is DateTime at ? string.Format(Strings.Settings_ForecastFrom, Lang.When(at, DateTime.Now))
+            : Strings.Settings_NoForecast;
+    }
+
+    private void OnRefreshForecast(object sender, RoutedEventArgs e) => _ = _weather.RefreshNowAsync();
 
     private async void OnUpdateNow(object sender, RoutedEventArgs e)
     {

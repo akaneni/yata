@@ -203,6 +203,7 @@ public partial class MainWindow : Window
         _weather = new WeatherService(_store);
         _weather.Message += ShowHud;
         _weather.Changed += UpdateWeather;
+        WatchRefreshes();
         StartupTimings.Mark("services");
         TasksPage.KeyboardRequested += EnterKeyboardMode;
         TasksPage.KeyboardReleased += ExitKeyboardMode;
@@ -468,7 +469,7 @@ public partial class MainWindow : Window
         SetExpanded(false);
         if (_settingsWindow == null)
         {
-            _settingsWindow = new SettingsWindow(_store, _google, _calendar, _googleTasks);
+            _settingsWindow = new SettingsWindow(_store, _google, _calendar, _googleTasks, _updates, _weather);
             _settingsWindow.Closed += (_, _) => _settingsWindow = null;
             _settingsWindow.Show();
         }
@@ -716,6 +717,7 @@ public partial class MainWindow : Window
         _hud.Target = showHud || showNews ? 1 : 0;
         _ambient.Target = ambient ? 1 : 0;
         _bubble.Target = BubbleShown ? 1 : 0;
+        UpdateRefreshButton();
 
         ExpandedView.Width = expanded.Width;
         ExpandedView.Height = expanded.Height;

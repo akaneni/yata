@@ -64,7 +64,7 @@
   "t.r3": "Google Agenda e Tasks",
   "t.r3s": "Vai direto entre o seu PC e o Google. O acesso fica cifrado no disco com o DPAPI do Windows.",
   "t.r4": "Aviso de versão nova",
-  "t.r4s": "Nada. Lê a página pública de versões uma vez por dia e só baixa o instalador quando você clica em Atualizar.",
+  "t.r4s": "Nada. Lê a página pública de versões uma vez por dia (ou quando você clica em Procurar agora) e só baixa o instalador quando você clica em Atualizar.",
   "t.r6": "Atividades dos seus scripts e agentes",
   "t.r6s": "Nada. Elas chegam ao Yata por um canal local que só o seu usuário do Windows abre, e ficam na memória.",
   "t.r5": "Todo o resto",

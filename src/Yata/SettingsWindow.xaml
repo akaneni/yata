@@ -261,6 +261,18 @@
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.UpdateCheckEnabled}"/>
                     </views:SettingRow>
+                    <!-- Asking now, whether or not the daily check is on -->
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock x:Name="ThisVersionText" Style="{StaticResource Label}"/>
+                            <!-- When GitHub last answered, or what "Check now" found -->
+                            <TextBlock x:Name="CheckStatus" Style="{StaticResource Hint}"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
+                        <Button x:Name="CheckNowButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Content="{x:Static y:Strings.Settings_CheckNow}" Click="OnCheckNow"/>
+                    </views:SettingRow>
                     <!-- Shown when the last check found a newer version -->
                     <views:SettingRow x:Name="UpdateRow" Style="{StaticResource Row}" Visibility="Collapsed">
                         <StackPanel VerticalAlignment="Center" Margin="0,8">
@@ -379,6 +391,20 @@
                                     VerticalAlignment="Center" MaxWidth="180" Click="OnTasksList"/>
                         </views:SettingRow>
                     </StackPanel>
+
+                    <!-- Calendar and tasks read from Google now, instead of at the next round -->
+                    <StackPanel x:Name="SyncOptions">
+                        <Border Style="{StaticResource Divider}"/>
+                        <views:SettingRow Style="{StaticResource Row}">
+                            <StackPanel VerticalAlignment="Center" Margin="0,8">
+                                <TextBlock Text="{x:Static y:Strings.Settings_SyncLabel}" Style="{StaticResource Label}"/>
+                                <TextBlock x:Name="SyncStatus" Style="{StaticResource Hint}"
+                                           AutomationProperties.LiveSetting="Polite"/>
+                            </StackPanel>
+                            <Button x:Name="SyncNowButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" Content="{x:Static y:Strings.Settings_SyncNow}" Click="OnSyncNow"/>
+                        </views:SettingRow>
+                    </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -396,6 +422,19 @@
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.WeatherEnabled}"/>
                     </views:SettingRow>
+                    <!-- With weather on and a city: when the forecast came, and fetching it again now -->
+                    <StackPanel x:Name="ForecastOptions">
+                        <Border Style="{StaticResource Divider}"/>
+                        <views:SettingRow Style="{StaticResource Row}">
+                            <StackPanel VerticalAlignment="Center" Margin="0,8">
+                                <TextBlock Text="{x:Static y:Strings.Settings_Forecast}" Style="{StaticResource Label}"/>
+                                <TextBlock x:Name="ForecastStatus" Style="{StaticResource Hint}"
+                                           AutomationProperties.LiveSetting="Polite"/>
+                            </StackPanel>
+                            <Button x:Name="RefreshForecastButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                    VerticalAlignment="Center" Content="{x:Static y:Strings.Settings_RefreshNow}" Click="OnRefreshForecast"/>
+                        </views:SettingRow>
+                    </StackPanel>
                     <Border Style="{StaticResource Divider}"/>
                     <StackPanel Margin="0,12,0,12">
                         <views:SettingRow>

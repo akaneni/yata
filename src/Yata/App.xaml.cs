@@ -144,6 +144,7 @@ public partial class App : Application
     {
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add(Strings.Tray_Settings, null, (_, _) => _window?.OpenSettings());
+        menu.Items.Add(Strings.Tray_CheckUpdates, null, (_, _) => _window?.CheckForUpdatesNow());
         menu.Items.Add(Strings.Tray_Demo, null, (_, _) => _window?.RunCompanionDemo());
         menu.Items.Add(new Forms.ToolStripSeparator());
         menu.Items.Add(Strings.Tray_Quit, null, (_, _) => Shutdown());

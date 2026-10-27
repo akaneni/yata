@@ -180,6 +180,26 @@ public sealed class WeatherService
 
     public event Action? Changed;
     public event Action<HudMessage>? Message;
+    /// <summary>A forecast request started or ended.</summary>
+    public event Action? BusyChanged;
+
+    private readonly ManualGate _manual = new();
+
+    /// <summary>When the forecast on screen was fetched, or null without one.</summary>
+    public DateTime? LastFetched => _report?.FetchedAt;
+
+    public bool IsFetching => _fetching;
+
+    public bool IsActive => Settings.WeatherEnabled && Settings.WeatherLatitude.HasValue && Settings.WeatherLongitude.HasValue;
+
+    /// <summary>"Refresh now" in the settings: fetches at once, unless it just did.</summary>
+    public Task RefreshNowAsync()
+    {
+        if (!IsActive || _fetching || !_manual.TryPass())
+            return Task.CompletedTask;
+        _nextFetch = DateTime.MinValue;
+        return RefreshIfDueAsync();
+    }
 
     public WeatherService(AppStore store)
     {
@@ -188,8 +208,6 @@ public sealed class WeatherService
     }
 
     private SettingsData Settings => _store.Settings;
-
-    private bool IsActive => Settings.WeatherEnabled && Settings.WeatherLatitude.HasValue && Settings.WeatherLongitude.HasValue;
 
     public void Start()
     {
@@ -258,6 +276,7 @@ public sealed class WeatherService
 
         _fetching = true;
         _nextFetch = DateTime.Now + RetryAfter;
+        BusyChanged?.Invoke();
         string place = $"{Settings.WeatherLatitude}|{Settings.WeatherLongitude}";
         try
         {
@@ -288,6 +307,7 @@ public sealed class WeatherService
         finally
         {
             _fetching = false;
+            BusyChanged?.Invoke();
         }
     }
 

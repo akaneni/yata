@@ -8,10 +8,13 @@ using Yata.Helpers;
 
 namespace Yata.Services;
 
+/// <summary>What "Check now" found.</summary>
+public enum UpdateCheckResult { UpToDate, Available, Failed }
+
 /// <summary>
 /// Opt-in check for a newer release: at most once a day, one anonymous request to GitHub's
-/// public releases API. Nothing about the PC or its use is sent. Installing happens only when the user
-/// clicks "Update and restart" (UpdateInstaller).
+/// public releases API, plus "Check now" when the user asks. Nothing about the PC or its use is
+/// sent. Installing happens only when the user clicks "Update and restart" (UpdateInstaller).
 /// </summary>
 public sealed class UpdateChecker
 {
@@ -22,6 +25,9 @@ public sealed class UpdateChecker
 
     private readonly AppStore _store;
     private readonly Func<DateTime> _clock;
+    private readonly Func<Task<string?>> _fetch;
+    private readonly ManualGate _manual;
+    private UpdateCheckResult? _lastManual;
     // First look a minute after startup, then hourly to see whether a day has passed.
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromMinutes(1) };
     private bool _checking;
@@ -29,11 +35,15 @@ public sealed class UpdateChecker
     public event Action<HudMessage>? Message;
     /// <summary>A newer version became known (or stopped being newer).</summary>
     public event Action? Changed;
+    /// <summary>"Check now" started or ended.</summary>
+    public event Action? BusyChanged;
 
-    public UpdateChecker(AppStore store, Func<DateTime>? clock = null)
+    public UpdateChecker(AppStore store, Func<DateTime>? clock = null, Func<Task<string?>>? fetch = null)
     {
         _store = store;
         _clock = clock ?? (() => DateTime.Now);
+        _fetch = fetch ?? FetchLatestAsync;
+        _manual = new ManualGate(_clock);
         _timer.Tick += async (_, _) =>
         {
             _timer.Interval = TimeSpan.FromHours(1);
@@ -48,6 +58,11 @@ public sealed class UpdateChecker
     public string? Available => IsNewer(Data.Latest, Current) ? Data.Latest : null;
 
     private UpdateData Data => _store.Data.Updates;
+
+    /// <summary>When GitHub last answered, to the daily check or to "Check now".</summary>
+    public DateTime? LastCheck => Data.LastCheck;
+
+    public bool IsChecking => _checking;
 
     public void Start() => _timer.Start();
 
@@ -73,7 +88,7 @@ public sealed class UpdateChecker
         _checking = true;
         try
         {
-            string? latest = await FetchLatestAsync();
+            string? latest = await _fetch();
             Data.LastCheck = now;
             if (latest != null)
                 Data.Latest = latest.Trim().TrimStart('v', 'V');
@@ -84,6 +99,38 @@ public sealed class UpdateChecker
         finally
         {
             _checking = false;
+        }
+    }
+
+    /// <summary>
+    /// "Check now": the user asked, so it runs even with the daily check switched off, and whoever
+    /// asked shows the answer (a new version found here isn't announced again later). Clicking again
+    /// within a few seconds gets the same answer without asking GitHub again.
+    /// </summary>
+    public async Task<UpdateCheckResult> CheckNowAsync()
+    {
+        if (_checking || !_manual.TryPass())
+            return _lastManual ?? (Available != null ? UpdateCheckResult.Available : UpdateCheckResult.UpToDate);
+
+        _checking = true;
+        BusyChanged?.Invoke();
+        try
+        {
+            string? latest = await _fetch();
+            if (latest == null)
+                return (_lastManual = UpdateCheckResult.Failed).Value;
+            Data.LastCheck = _clock();
+            Data.Latest = latest.Trim().TrimStart('v', 'V');
+            if (Available is string version)
+                Data.Announced = version;
+            _store.SaveSoon();
+            return (_lastManual = Available != null ? UpdateCheckResult.Available : UpdateCheckResult.UpToDate).Value;
+        }
+        finally
+        {
+            _checking = false;
+            BusyChanged?.Invoke();
+            Changed?.Invoke();
         }
     }
 
