@@ -1,0 +1,37 @@
+# Yata
+
+> Yata is a free, open-source notch app for Windows 10 and 11, in the style of the Dynamic Island: a black pill at the top of the screen, just below the camera, that shows what's playing, your next meeting and your reminders, then gets out of the way. MIT license, no account, no telemetry.
+
+Yata (from Yatagarasu, the messenger crow of Japanese myth) is a desktop app for Windows written in WPF on .NET 10. Closed, the notch shows the time; hover it and it opens into tabs. It hides when an app goes full screen. A hand-drawn 16 × 14 pixel raven lives in the notch and reacts to your day.
+
+## Features
+
+- Now playing from any app that uses Windows media controls (Spotify, YouTube in the browser and others): cover, progress, controls and synced lyrics from LRCLIB.
+- Next meeting from Google Calendar (read-only), shown in the closed notch, with a Join button for Meet, Zoom or Teams.
+- Pomodoro timer (25 minutes of focus, 5 of rest, a long break every four) that pauses when you walk away.
+- Daily water goal with nudges, and a task list where "Call Ana 15:30" becomes a reminder, with optional two-way sync to Google Tasks.
+- A shelf: drop files on the notch and drag them out later. Only the path is kept.
+- System indicators: volume, brightness, battery, audio output, Caps Lock, keyboard layout, network, and a dot when an app is using the microphone.
+- Ctrl+Alt+Y toggles the notch from anywhere. Works with multiple monitors and per-monitor scaling.
+
+## Privacy
+
+- Lyrics lookup sends artist, title and song length to LRCLIB (on by default, can be turned off).
+- Weather sends the chosen city, rounded to about 1 km, to Open-Meteo (off by default). Never IP location.
+- Google Calendar and Tasks talk directly between the PC and Google (off by default). Access is encrypted on disk with Windows DPAPI.
+- No keyboard hook: Caps Lock and layout are read from key state. The diagnostic log stays on the PC for 7 days.
+
+## Install
+
+- Free. Windows 10 (version 2004 or later) and Windows 11, x64. About 6 MB.
+- Installs per user without admin rights. If the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft, and that step asks for admin.
+- The installer is not code-signed yet, so SmartScreen may warn on first run (More info, then Run anyway). Signing through SignPath Foundation is being set up. Each release ships SHA256SUMS.txt.
+
+## Links
+
+- [Website](https://getyata.app/): overview and download
+- [Download the latest release](https://github.com/akaneni/yata/releases/latest)
+- [Source code on GitHub](https://github.com/akaneni/yata)
+- [Privacy policy](https://getyata.app/privacy)
+- [Code signing policy](https://getyata.app/code-signing)
+- [Site in Portuguese](https://getyata.app/pt/)

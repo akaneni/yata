@@ -3,17 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title data-i18n="meta.title">Yata · A notch for Windows</title>
-<meta name="description" content="Yata is a living notch for Windows: what's playing, your next meeting and your reminders, just below your camera. Open source, no account, no telemetry." data-i18n-content="meta.description">
+<title data-i18n="meta.title">Yata · A Dynamic Island-style notch for Windows</title>
+<meta name="description" content="Yata is a free, Dynamic Island-style notch for Windows: what's playing, your next meeting and your reminders, below your camera. Open source, no telemetry." data-i18n-content="meta.description">
 <link rel="canonical" href="{{CANONICAL}}">
 <link rel="alternate" hreflang="en" href="https://getyata.app/">
 <link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/">
+<link rel="alternate" hreflang="x-default" href="https://getyata.app/">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Yata">
-<meta property="og:description" content="Yata is a living notch for Windows: what's playing, your next meeting and your reminders, just below your camera. Open source, no account, no telemetry." data-i18n-content="meta.description">
+<meta property="og:site_name" content="Yata">
+<meta property="og:locale" content="{{OG_LOCALE}}">
+<meta property="og:locale:alternate" content="{{OG_LOCALE_ALT}}">
+<meta property="og:title" content="Yata · A Dynamic Island-style notch for Windows" data-i18n-content="meta.title">
+<meta property="og:description" content="Yata is a free, Dynamic Island-style notch for Windows: what's playing, your next meeting and your reminders, below your camera. Open source, no telemetry." data-i18n-content="meta.description">
 <meta property="og:url" content="{{CANONICAL}}">
 <meta property="og:image" content="https://getyata.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Yata logo: a pixel raven next to the word yata, white on black" data-i18n-content="meta.ogalt">
 <meta name="twitter:card" content="summary_large_image">
+{{JSONLD}}
+{{FAQ_JSONLD}}
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -29,6 +38,7 @@
     <nav aria-label="Main" data-i18n-label="aria.main">
       <a class="hide-sm" href="#features" data-i18n="nav.features">Features</a>
       <a class="hide-sm" href="#privacy" data-i18n="nav.privacy">Privacy</a>
+      <a class="hide-sm" href="#faq" data-i18n="nav.faq">FAQ</a>
       <a href="https://github.com/akaneni/yata">GitHub</a>
       <span class="lang" role="group" aria-label="Language" data-i18n-label="aria.language">
         <a href="/" hreflang="en" lang="en"{{CUR_EN}}>EN</a>
@@ -41,8 +51,7 @@
 <main id="top">
   <div class="wrap hero">
     <div class="hero-copy">
-      <span class="label" data-i18n="hero.eyebrow">A notch for Windows</span>
-      <h1 data-i18n="hero.title">A quiet messenger at the top of your screen.</h1>
+      <h1 data-i18n-html="hero.title"><span class="label">A Dynamic Island-style notch for Windows</span> A quiet messenger at the top of your screen.</h1>
       <p class="lede" data-i18n-html="hero.lede">Yata sits just below your camera. It shows <strong>what's playing</strong>, <strong>your next meeting</strong> and <strong>your reminders</strong>, then gets out of the way.</p>
       <div class="cta">
         <a class="btn btn-primary" href="https://github.com/akaneni/yata/releases/latest">
@@ -126,6 +135,25 @@
     </div>
   </section>
 
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="label" data-i18n="faq.eyebrow">Questions</span>
+        <h2 data-i18n="faq.title">Before you install</h2>
+      </div>
+      <div class="faq">
+        <details class="faq-item"><summary data-i18n="q1.q">Is Yata free?</summary><p data-i18n-html="q1.a">Yes. It's free and open source under the MIT license, with no account and no ads.</p></details>
+        <details class="faq-item"><summary data-i18n="q2.q">Does it work on Windows 10?</summary><p data-i18n-html="q2.a">Yes. It runs on Windows 10 version 2004 or later and on Windows 11, on x64 PCs.</p></details>
+        <details class="faq-item"><summary data-i18n="q3.q">Do I need a laptop with a notch?</summary><p data-i18n-html="q3.a">No. Yata draws its own notch at the top of any screen, and with more than one monitor you choose which one it lives on.</p></details>
+        <details class="faq-item"><summary data-i18n="q4.q">Does it need admin rights?</summary><p data-i18n-html="q4.a">No. It installs for your user only. The one exception: if the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft, and that step asks for admin.</p></details>
+        <details class="faq-item"><summary data-i18n="q5.q">Why does SmartScreen warn about the installer?</summary><p data-i18n-html="q5.a">The installer isn't code-signed yet, so Windows doesn't recognize it. Choose <strong>More info</strong>, then <strong>Run anyway</strong>, and compare the file with the <code>SHA256SUMS.txt</code> in the release. Signing is on the way: see the <a href="/code-signing">code signing policy</a>.</p></details>
+        <details class="faq-item"><summary data-i18n="q6.q">Can Yata see what I type?</summary><p data-i18n-html="q6.a">No. Caps Lock and keyboard layout are read by checking key state, and there's no keyboard hook. Every line of the code is on GitHub if you want to check.</p></details>
+        <details class="faq-item"><summary data-i18n="q7.q">Will it get in the way of games and videos?</summary><p data-i18n-html="q7.a">No. It hides when an app goes full screen, and <strong>Ctrl+Alt+Y</strong> opens or closes it from anywhere.</p></details>
+        <details class="faq-item"><summary data-i18n="q8.q">Which music apps does it work with?</summary><p data-i18n-html="q8.a">Any app that uses Windows media controls: Spotify, YouTube and other sites in the browser, and more. Synced lyrics come from LRCLIB and can be turned off.</p></details>
+      </div>
+    </div>
+  </section>
+
   <section id="download">
     <div class="wrap download">
       <div class="go">
@@ -134,13 +162,13 @@
         <a class="btn btn-primary" href="https://github.com/akaneni/yata/releases/latest">
           <svg viewBox="0 0 16 16" class="pix" aria-hidden="true"><path d="M7 1h2v8h2v-2h2v2h-1v1h-1v1h-1v1H8v-1H7v-1H6V9H5V8H3V7h2v2h2zM2 13h12v2H2z"/></svg>
           <span data-i18n="cta.download">Download for Windows</span></a>
-        <span class="mono" style="color: var(--dim)" data-i18n="dl.meta">Free · Windows 10 (2004+) and 11, x64 · about 6 MB</span>
+        <span class="mono" style="color: var(--dim)" data-i18n="dl.meta">Free · Windows 10 (2004+) and 11, x64 · about 3 MB</span>
       </div>
       <ul>
         <li><span data-i18n="dl.l1">Installs for your user only, without admin rights.</span></li>
         <li><span data-i18n="dl.l2">If the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft. That one step asks for admin.</span></li>
         <li><span data-i18n-html="dl.l3">Each release ships a <code>SHA256SUMS.txt</code> so you can check the file you got.</span></li>
-        <li><span data-i18n-html="dl.l4">The installer isn't code-signed yet, so SmartScreen may warn on first run. Choose <strong>More info</strong>, then <strong>Run anyway</strong>.</span></li>
+        <li><span data-i18n-html="dl.l4">The installer isn't code-signed yet, so SmartScreen may warn on first run. Choose <strong>More info</strong>, then <strong>Run anyway</strong>. Releases will be signed by the SignPath Foundation: see the <a href="/code-signing">code signing policy</a>.</span></li>
         <li><span data-i18n="dl.l5">Uninstalling keeps your data, in case you come back.</span></li>
       </ul>
     </div>
@@ -152,6 +180,7 @@
     <a class="logo" href="#top" aria-label="Yata">{{LOCKUP}}</a>
     <nav aria-label="Footer" data-i18n-label="aria.footer">
       <a href="/privacy" data-i18n="footer.privacy">Privacy policy</a>
+      <a href="/code-signing" data-i18n="footer.signing">Code signing policy</a>
       <a href="https://github.com/akaneni/yata">GitHub</a>
       <span class="mono" data-i18n="footer.made">MIT license · made by akaneni</span>
     </nav>

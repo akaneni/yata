@@ -5,6 +5,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using Yata.Helpers;
 using Yata.Services;
 
 namespace Yata.Views;
@@ -15,8 +16,6 @@ public partial class FocusPage : UserControl
     private const string PauseGlyph = "";
     private const string StopGlyph = "";
     private const string SkipGlyph = "";
-
-    private static readonly Brush DotOff = (Brush)Application.Current.FindResource("TrackBrush");
 
     private FocusTimer? _timer;
     private bool _blinking;
@@ -96,7 +95,8 @@ public partial class FocusPage : UserControl
         while (Dots.Children.Count > _timer.SessionsPerCycle)
             Dots.Children.RemoveAt(Dots.Children.Count - 1);
         for (int i = 0; i < Dots.Children.Count; i++)
-            ((Ellipse)Dots.Children[i]).Fill = i < _timer.CompletedSessions ? Brushes.White : DotOff;
+            ((Ellipse)Dots.Children[i]).SetResourceReference(Shape.FillProperty,
+                i < _timer.CompletedSessions ? "TextPrimary" : "TrackBrush");
     }
 
     private static void SetButton(Button button, TextBlock glyph, TextBlock label, string icon, string text)
@@ -112,7 +112,9 @@ public partial class FocusPage : UserControl
         if (on == _blinking)
             return;
         _blinking = on;
-        TimeText.BeginAnimation(OpacityProperty, on
+        // With motion reduced the paused time just stays dim.
+        TimeText.Opacity = on && Motion.Reduced ? 0.6 : 1;
+        TimeText.BeginAnimation(OpacityProperty, on && !Motion.Reduced
             ? MainWindow.Ambient(new DoubleAnimation(1, 0.35, TimeSpan.FromMilliseconds(900))
             {
                 AutoReverse = true,

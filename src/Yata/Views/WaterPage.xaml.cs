@@ -12,8 +12,6 @@ namespace Yata.Views;
 public partial class WaterPage : UserControl
 {
     private const int ChartDays = 7;
-    private static readonly Brush WaterBrush = Frozen(Color.FromRgb(0x5A, 0xB8, 0xFF));
-    private static readonly Brush PastBrush = Frozen(Color.FromArgb(0x59, 0x5A, 0xB8, 0xFF));
 
     private WaterTracker? _water;
 
@@ -59,15 +57,16 @@ public partial class WaterPage : UserControl
             cell.RowDefinitions.Add(new RowDefinition());
             cell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-            cell.Children.Add(new Rectangle
+            var bar = new Rectangle
             {
                 Height = Math.Max(3, 30 * ml / max),
                 RadiusX = 2,
                 RadiusY = 2,
                 VerticalAlignment = VerticalAlignment.Bottom,
-                Fill = i == days.Count - 1 ? WaterBrush : PastBrush,
                 ToolTip = $"{day.ToString(Strings.Format_DayMonth, Lang.Culture)}: {ml} ml",
-            });
+            };
+            bar.SetResourceReference(Shape.FillProperty, i == days.Count - 1 ? "WaterBrush" : "WaterPastBrush");
+            cell.Children.Add(bar);
 
             var label = new TextBlock
             {
@@ -75,8 +74,8 @@ public partial class WaterPage : UserControl
                 FontSize = 10,
                 Margin = new Thickness(0, 3, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Center,
-                Foreground = (Brush)FindResource("TextSecondary"),
             };
+            label.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondary");
             Grid.SetRow(label, 1);
             cell.Children.Add(label);
 
@@ -88,11 +87,4 @@ public partial class WaterPage : UserControl
     private void OnDrink(object sender, RoutedEventArgs e) => _water?.Drink();
 
     private void OnUndo(object sender, RoutedEventArgs e) => _water?.Undo();
-
-    private static Brush Frozen(Color color)
-    {
-        var brush = new SolidColorBrush(color);
-        brush.Freeze();
-        return brush;
-    }
 }

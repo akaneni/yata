@@ -15,6 +15,9 @@
     <AssemblyName>Yata</AssemblyName>
     <RootNamespace>Yata</RootNamespace>
     <Version>0.1.1</Version>
+    <!-- Keep ProductVersion exactly the version ("0.1.1", not "0.1.1+commit"): code signing (SignPath)
+         checks it against the release tag. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- DPI awareness lives in app.manifest for WPF; the WinForms analyzer doesn't apply. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>
@@ -22,6 +25,40 @@
   <ItemGroup>
     <PackageReference Include="System.Management" Version="10.0.14" />
   </ItemGroup>
+
+  <!-- Lean WinRT projection: only the namespaces Yata uses, instead of the whole Windows SDK projection
+       (Microsoft.Windows.SDK.NET.dll, ~25 MB). The metadata comes from NuGet, so no Windows SDK install
+       is needed to build. -->
+  <PropertyGroup>
+    <CsWinRTIncludes>
+      Windows.Foundation;
+      Windows.Media.Control;Windows.Media.MediaPlaybackAutoRepeatMode;Windows.Media.MediaPlaybackType;
+      Windows.Storage.Streams;
+      Windows.Networking.Connectivity;Windows.Networking.HostName;Windows.Networking.IHostName;Windows.Networking.EndpointPair;Windows.Networking.IEndpointPair;Windows.Networking.DomainNameType;
+      Windows.System.Power;Windows.System.SystemManagementContract;
+      Windows.Devices.Geolocation
+    </CsWinRTIncludes>
+    <!-- Parts of those namespaces Yata doesn't use and that would drag in Windows.Storage. -->
+    <CsWinRTExcludes>
+      Windows.Foundation.Diagnostics;
+      Windows.Storage.Streams.FileRandomAccessStream;Windows.Storage.Streams.IFileRandomAccessStreamStatics;
+      Windows.Storage.Streams.FileInputStream;Windows.Storage.Streams.FileOutputStream;
+      Windows.Storage.Streams.RandomAccessStreamReference;Windows.Storage.Streams.IRandomAccessStreamReferenceStatics
+    </CsWinRTExcludes>
+    <IncludeWindowsSDKRefFrameworkReferences>false</IncludeWindowsSDKRefFrameworkReferences>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Windows.SDK.Contracts" Version="10.0.28000.2705" ExcludeAssets="all" GeneratePathProperty="true" />
+    <CsWinRTInputs Include="$(PkgMicrosoft_Windows_SDK_Contracts)\ref\netstandard2.0\*.winmd" />
+  </ItemGroup>
+  <!-- Left empty, CsWinRT falls back to the installed Windows SDK; the contract .winmd files above
+       already carry that metadata. -->
+  <Target Name="YataWinRTMetadataFromNuGet" BeforeTargets="CsWinRTGenerateProjection">
+    <PropertyGroup>
+      <CsWinRTWindowsMetadata></CsWinRTWindowsMetadata>
+    </PropertyGroup>
+  </Target>
 
   <ItemGroup>
     <Resource Include="Assets\yata.ico" />

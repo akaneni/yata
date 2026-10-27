@@ -7,7 +7,7 @@
         Width="300" Height="80"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         ResizeMode="NoResize" ShowInTaskbar="False" Topmost="True" ShowActivated="False"
-        FontFamily="{StaticResource UiFont}" Foreground="{StaticResource TextPrimary}"
+        FontFamily="{StaticResource UiFont}" Foreground="{DynamicResource TextPrimary}"
         UseLayoutRounding="True">
     <Grid>
         <!-- Everything outside NotchHost is fully transparent, so clicks pass through to the desktop.
@@ -18,7 +18,7 @@
               AllowDrop="True" DragEnter="OnNotchDragOver" DragOver="OnNotchDragOver"
               DragLeave="OnNotchDragLeave" Drop="OnNotchDrop">
 
-            <Path x:Name="NotchShape" Fill="Black">
+            <Path x:Name="NotchShape" Fill="{DynamicResource NotchBrush}">
                 <Path.Effect>
                     <DropShadowEffect BlurRadius="28" ShadowDepth="6" Direction="270" Opacity="0.45" Color="Black"/>
                 </Path.Effect>
@@ -81,8 +81,8 @@
                 <!-- Camera (green) / microphone (orange) in use; the expanded header names the apps -->
                 <StackPanel x:Name="PrivacyDots" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top"
                             Margin="14,13,0,0" Visibility="Collapsed" IsHitTestVisible="False">
-                    <Ellipse x:Name="CameraDot" Width="6" Height="6" Fill="{StaticResource CameraBrush}"/>
-                    <Ellipse x:Name="MicrophoneDot" Width="6" Height="6" Fill="{StaticResource MicrophoneBrush}"/>
+                    <Ellipse x:Name="CameraDot" Width="6" Height="6" Fill="{DynamicResource CameraBrush}"/>
+                    <Ellipse x:Name="MicrophoneDot" Width="6" Height="6" Fill="{DynamicResource MicrophoneBrush}"/>
                 </StackPanel>
 
                 <!-- Ambient: Yata perched on the notch while the PC sits idle -->
@@ -95,7 +95,7 @@
                     </views:RavenSprite>
                     <TextBlock x:Name="Zzz" Text="z" FontSize="10" FontWeight="SemiBold" Visibility="Collapsed"
                                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="36,3,0,0"
-                               Foreground="{StaticResource TextSecondary}">
+                               Foreground="{DynamicResource TextSecondary}">
                         <TextBlock.RenderTransform>
                             <TranslateTransform x:Name="ZzzShift"/>
                         </TextBlock.RenderTransform>
@@ -114,7 +114,7 @@
                         </views:RavenSprite.RenderTransform>
                     </views:RavenSprite>
                     <StackPanel x:Name="NewsBody" Grid.Column="1">
-                        <TextBlock x:Name="NewsTitle" FontSize="12" Margin="0,0,0,4" Foreground="{StaticResource TextSecondary}"/>
+                        <TextBlock x:Name="NewsTitle" FontSize="12" Margin="0,0,0,4" Foreground="{DynamicResource TextSecondary}"/>
                         <ItemsControl x:Name="NewsList" Focusable="False">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -130,7 +130,7 @@
                                                    TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Grid.Column="2" Text="{Binding At, StringFormat=HH:mm}" FontSize="11"
                                                    Margin="10,0,0,0" VerticalAlignment="Center"
-                                                   Foreground="{StaticResource TextSecondary}"/>
+                                                   Foreground="{DynamicResource TextSecondary}"/>
                                     </Grid>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -148,11 +148,11 @@
                     <TextBlock x:Name="HudText" Margin="10,0,0,0" MaxWidth="240" FontSize="13" FontWeight="SemiBold"
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     <Grid x:Name="HudBar" Width="96" Height="4" Margin="14,0,0,0" VerticalAlignment="Center">
-                        <Border CornerRadius="2" Background="{StaticResource TrackBrush}"/>
-                        <Border x:Name="HudBarFill" CornerRadius="2" Background="White" HorizontalAlignment="Left" Width="0"/>
+                        <Border CornerRadius="2" Background="{DynamicResource TrackBrush}"/>
+                        <Border x:Name="HudBarFill" CornerRadius="2" Background="{DynamicResource TextPrimary}" HorizontalAlignment="Left" Width="0"/>
                     </Grid>
                     <TextBlock x:Name="HudValue" Margin="10,0,0,0" FontSize="12" MinWidth="22" TextAlignment="Right"
-                               VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"
+                               VerticalAlignment="Center" Foreground="{DynamicResource TextSecondary}"
                                Typography.NumeralAlignment="Tabular"/>
                 </StackPanel>
 
@@ -167,13 +167,13 @@
                     <!-- Header: date + page tabs -->
                     <Grid Margin="24,10,16,0">
                         <TextBlock x:Name="HeaderDate" FontSize="12" VerticalAlignment="Center"
-                                   Foreground="{StaticResource TextSecondary}"/>
+                                   Foreground="{DynamicResource TextSecondary}"/>
                         <!-- Takes the date's place while the camera or microphone is in use -->
                         <TextBlock x:Name="PrivacyText" FontSize="12" VerticalAlignment="Center" MaxWidth="260"
                                    TextTrimming="CharacterEllipsis" HorizontalAlignment="Left" Visibility="Collapsed"/>
                         <Grid x:Name="TabStrip" HorizontalAlignment="Right">
                         <!-- Selection pill that glides to the chosen tab -->
-                        <Border x:Name="TabIndicator" Width="32" Height="26" Margin="2,0,0,0" CornerRadius="8" Background="#26FFFFFF"
+                        <Border x:Name="TabIndicator" Width="32" Height="26" Margin="2,0,0,0" CornerRadius="8" Background="{DynamicResource SelectedFill}"
                                 HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False">
                             <Border.RenderTransform>
                                 <TranslateTransform x:Name="TabIndicatorShift"/>
@@ -193,13 +193,19 @@
                             <RadioButton x:Name="TabShelf" Style="{StaticResource TabButton}" GroupName="Pages"
                                          Content="&#xE7B8;" ToolTip="{x:Static y:Strings.Tab_Shelf}" Checked="OnTabChecked"/>
                             <Button Style="{StaticResource IconButton}" Width="28" Height="26" FontSize="13" Margin="6,0,0,0"
-                                    Foreground="{StaticResource TextSecondary}" Content="&#xE713;" ToolTip="{x:Static y:Strings.Tab_Settings}"
+                                    Foreground="{DynamicResource TextSecondary}" Content="&#xE713;" ToolTip="{x:Static y:Strings.Tab_Settings}"
                                     Click="OnSettingsClick"/>
                         </StackPanel>
                         </Grid>
                     </Grid>
 
+                    <!-- Player | divider | lyrics: the lyrics column only shows while the notch is split -->
                     <Grid x:Name="MediaPage" Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
                     <Grid x:Name="MediaPanel" Width="476" HorizontalAlignment="Left" Margin="22,0,22,18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -207,9 +213,9 @@
                         </Grid.ColumnDefinitions>
 
                         <Grid Width="108" Height="108" VerticalAlignment="Center">
-                            <Border CornerRadius="16" Background="{StaticResource SurfaceBrush}">
+                            <Border CornerRadius="16" Background="{DynamicResource SurfaceBrush}">
                                 <TextBlock Text="&#xE8D6;" FontFamily="{StaticResource IconFont}" FontSize="32"
-                                           Foreground="#66FFFFFF" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                           Foreground="{DynamicResource TextPlaceholder}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <Border CornerRadius="16">
                                 <Border.Background>
@@ -232,7 +238,7 @@
                                            TextTrimming="CharacterEllipsis"/>
                             </views:MarqueeText>
                             <TextBlock x:Name="ArtistText" Grid.Row="1" Margin="0,1,0,0" FontSize="13"
-                                       Foreground="{StaticResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
+                                       Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
 
                             <Grid x:Name="ProgressRow" Grid.Row="3" Margin="0,6,0,0">
                                 <Grid.ColumnDefinitions>
@@ -242,17 +248,17 @@
                                 </Grid.ColumnDefinitions>
 
                                 <TextBlock x:Name="ElapsedText" FontSize="11" VerticalAlignment="Center"
-                                           Foreground="{StaticResource TextSecondary}" Typography.NumeralAlignment="Tabular"/>
+                                           Foreground="{DynamicResource TextSecondary}" Typography.NumeralAlignment="Tabular"/>
 
                                 <Grid x:Name="ProgressTrack" Grid.Column="1" Height="14" Background="Transparent" Cursor="Hand"
                                       MouseLeftButtonDown="OnTrackMouseDown" MouseMove="OnTrackMouseMove"
                                       MouseLeftButtonUp="OnTrackMouseUp" LostMouseCapture="OnTrackLostCapture"
                                       SizeChanged="OnTrackSizeChanged">
                                     <!-- Thickens and shows a handle under the mouse or while dragging -->
-                                    <Border Style="{StaticResource ProgressBarPart}" Background="{StaticResource TrackBrush}"/>
+                                    <Border Style="{StaticResource ProgressBarPart}" Background="{DynamicResource TrackBrush}"/>
                                     <Border x:Name="ProgressFill" Style="{StaticResource ProgressBarPart}" Width="0"
                                             HorizontalAlignment="Left" Background="{DynamicResource AccentBrush}"/>
-                                    <Ellipse x:Name="ProgressThumb" Width="12" Height="12" Fill="White"
+                                    <Ellipse x:Name="ProgressThumb" Width="12" Height="12" Fill="{DynamicResource TextPrimary}"
                                              HorizontalAlignment="Left" IsHitTestVisible="False">
                                         <Ellipse.Style>
                                             <Style TargetType="Ellipse">
@@ -271,7 +277,7 @@
                                 </Grid>
 
                                 <TextBlock x:Name="DurationText" Grid.Column="2" FontSize="11" VerticalAlignment="Center"
-                                           TextAlignment="Right" Foreground="{StaticResource TextSecondary}"
+                                           TextAlignment="Right" Foreground="{DynamicResource TextSecondary}"
                                            Typography.NumeralAlignment="Tabular"/>
                             </Grid>
 
@@ -287,9 +293,9 @@
                     </Grid>
 
                     <!-- Lyrics: right half of the split notch, current line kept centered -->
-                    <Border x:Name="LyricsDivider" Width="1" HorizontalAlignment="Left" Margin="519,6,0,24"
-                            Background="#1AFFFFFF" Visibility="Collapsed"/>
-                    <Grid x:Name="LyricsPanel" Margin="544,0,24,14" ClipToBounds="True" Visibility="Collapsed"
+                    <Border x:Name="LyricsDivider" Grid.Column="1" Width="1" Margin="-1,6,0,24"
+                            Background="{DynamicResource DividerBrush}" Visibility="Collapsed"/>
+                    <Grid x:Name="LyricsPanel" Grid.Column="2" Margin="24,0,24,14" ClipToBounds="True" Visibility="Collapsed"
                           SizeChanged="OnLyricsLayoutChanged">
                         <Grid.OpacityMask>
                             <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
@@ -310,7 +316,8 @@
                         </Canvas>
                     </Grid>
 
-                    <StackPanel x:Name="IdlePanel" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,14">
+                    <StackPanel x:Name="IdlePanel" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Margin="0,0,0,14">
                         <!-- Yata keeps the clock company while nothing plays -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock x:Name="IdleClock" FontFamily="{StaticResource DisplayFont}" FontSize="36"
@@ -318,12 +325,12 @@
                             <views:RavenSprite x:Name="IdleRaven" PixelSize="2" VerticalAlignment="Bottom" Margin="10,0,0,10"/>
                         </StackPanel>
                         <TextBlock Text="{x:Static y:Strings.Media_NothingPlaying}" FontSize="13" HorizontalAlignment="Center"
-                                   Foreground="{StaticResource TextSecondary}"/>
+                                   Foreground="{DynamicResource TextSecondary}"/>
                         <StackPanel x:Name="IdleWeather" Orientation="Horizontal" HorizontalAlignment="Center"
                                     Margin="0,8,0,0" Visibility="Collapsed">
                             <views:WeatherSprite x:Name="IdleWeatherIcon" PixelSize="1.5" VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBlock x:Name="IdleWeatherText" FontSize="12" VerticalAlignment="Center"
-                                       Foreground="{StaticResource TextSecondary}"/>
+                                       Foreground="{DynamicResource TextSecondary}"/>
                         </StackPanel>
                     </StackPanel>
                     </Grid>

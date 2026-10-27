@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
+using Yata.Helpers;
 
 namespace Yata.Views;
 
@@ -33,7 +34,7 @@ public sealed class MarqueeText : Decorator
     public void Run()
     {
         Stop();
-        if (Child == null || !IsVisible || ActualWidth <= 0)
+        if (Child == null || !IsVisible || ActualWidth <= 0 || Motion.Reduced)
             return;
 
         Child.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));

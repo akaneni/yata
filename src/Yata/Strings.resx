@@ -244,4 +244,10 @@
   <data name="Tasks_AskPermission" xml:space="preserve"><value>Check the tasks permission so Yata can sync.</value></data>
   <data name="Tasks_ApiDisabled" xml:space="preserve"><value>The Google Tasks API isn't enabled in the Google Cloud project.</value></data>
   <data name="Tasks_NoConnection" xml:space="preserve"><value>No connection to Google Tasks.</value></data>
+  <data name="Settings_CitySearchName" xml:space="preserve"><value>Search for a city</value></data>
+  <data name="Agenda_JoinCall" xml:space="preserve"><value>Join the call</value></data>
+  <data name="Tasks_Complete" xml:space="preserve"><value>Complete</value></data>
+  <data name="Water_AddCup" xml:space="preserve"><value>Log a cup</value></data>
+  <data name="Stepper_Decrease" xml:space="preserve"><value>Decrease {0}</value></data>
+  <data name="Stepper_Increase" xml:space="preserve"><value>Increase {0}</value></data>
 </root>

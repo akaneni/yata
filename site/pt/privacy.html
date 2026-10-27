@@ -8,6 +8,19 @@
 <link rel="canonical" href="https://getyata.app/pt/privacy">
 <link rel="alternate" hreflang="en" href="https://getyata.app/privacy">
 <link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/privacy">
+<link rel="alternate" hreflang="x-default" href="https://getyata.app/privacy">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Yata">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:locale:alternate" content="en_US">
+<meta property="og:title" content="Política de privacidade · Yata">
+<meta property="og:description" content="Quais dados o Yata usa e para onde eles vão. Sem conta, sem servidor e sem telemetria.">
+<meta property="og:url" content="https://getyata.app/pt/privacy">
+<meta property="og:image" content="https://getyata.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="O logotipo do Yata: um corvo em pixel art ao lado da palavra yata, branco sobre preto">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -46,6 +59,7 @@
     <ul>
       <li><strong>LRCLIB</strong> (lrclib.net), para buscar letras de músicas: envia artista, título e duração da faixa que está tocando. Pode ser desligado nas Configurações.</li>
       <li><strong>Open-Meteo</strong> (open-meteo.com), para o tempo, somente se você ligar: envia a latitude e a longitude da cidade escolhida, arredondadas para cerca de 1 km. Ao buscar a cidade, envia o nome digitado. Se você clicar em "Usar minha localização", o Yata pede ao Windows a posição uma única vez, arredonda para cerca de 1 km na hora e descarta o valor preciso. Ele não acompanha a localização depois disso e nunca descobre onde você está pelo IP. Guarda nas configurações só o nome escolhido e as coordenadas arredondadas.</li>
+      <li><strong>GitHub</strong> (api.github.com), para o aviso de versão nova, somente se você ligar (vem desligado): uma vez por dia, pergunta qual é a versão mais recente do Yata. O pedido leva só o nome e a versão do Yata.</li>
       <li><strong>Google Agenda</strong> e <strong>Google Tasks</strong>, somente se você conectar sua conta e liberar cada um (veja abaixo).</li>
     </ul>
 
@@ -96,6 +110,7 @@
     <a class="logo" href="/pt/" aria-label="Yata">{{LOCKUP}}</a>
     <nav aria-label="Rodapé">
       <a href="/pt/privacy" aria-current="page">Política de privacidade</a>
+      <a href="/pt/code-signing">Política de assinatura</a>
       <a href="https://github.com/akaneni/yata">GitHub</a>
       <span class="mono">licença MIT · feito por akaneni</span>
     </nav>

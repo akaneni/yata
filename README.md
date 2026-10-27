@@ -61,14 +61,14 @@ Open source, no account and no telemetry.
 
 ## Install
 
-Download `Yata-Setup-x.y.z.exe` from [Releases](https://github.com/akaneni/yata/releases) (~6 MB). The installer:
+Download `Yata-Setup-x.y.z.exe` from [Releases](https://github.com/akaneni/yata/releases) (~3 MB). The installer:
 
 - installs for your user only, without asking for administrator rights;
 - if the **.NET 10 Desktop Runtime** is missing, downloads it straight from Microsoft and installs it (that step asks for administrator rights);
 - offers to start with Windows and a desktop shortcut;
 - on uninstall, removes the app and the automatic start but **keeps your data** in `%LOCALAPPDATA%\Yata`.
 
-Each release comes with a `SHA256SUMS.txt` to check the downloaded file. The installer isn't digitally signed yet, so Windows SmartScreen may warn on the first run.
+Each release comes with a `SHA256SUMS.txt` to check the downloaded file. The installer isn't digitally signed yet, so Windows SmartScreen may warn on the first run. Free signing through the SignPath Foundation is in progress: see the [code signing policy](https://getyata.app/code-signing) and [docs/code-signing.md](docs/code-signing.md) (in Portuguese).
 
 ## Requirements
 
@@ -158,7 +158,8 @@ src/Yata/
   SettingsWindow.xaml(.cs)    settings window
   Strings.resx                interface text in English (Strings.pt-BR.resx: Portuguese)
 installer/yata.iss            installer (Inno Setup) and its images (wizard-*.png)
-docs/                         README images
+docs/                         README images, Google registration and code signing
+.signpath/                    SignPath artifact configurations (a copy of what's in the project there)
 tools/                        icon, art (PhotoCraft), GIF (EffectCraft), installer and measurement
 tests/Yata.Tests/             tests (xUnit)
 .github/workflows/ci.yml      build and tests on every push
@@ -177,4 +178,4 @@ tests/Yata.Tests/             tests (xUnit)
 8. ~~Camera/microphone in use, multiple displays, global hotkey, version notice~~
 9. ~~English and Portuguese~~
 
-Next ideas: a lean WinRT projection (smaller installer), code signing.
+Next ideas: code signing (in progress, see [docs/code-signing.md](docs/code-signing.md)), winget.

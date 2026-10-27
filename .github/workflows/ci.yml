@@ -24,3 +24,15 @@ jobs:
 
       - name: Tests
         run: dotnet test -c Release --no-build --nologo
+
+      # Catches a missing translation or leftover {{token}} before it reaches the Pages deploy.
+      - name: Site
+        shell: pwsh
+        run: ./tools/make-site.ps1
+
+      # The built site, to look at a PR's changes before they deploy.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site
+          path: _site
+          retention-days: 7

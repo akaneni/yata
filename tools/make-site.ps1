@@ -1,7 +1,9 @@
 # Builds getyata.app into _site/ (deployed to GitHub Pages by .github/workflows/pages.yml):
 #   site/index.html is the English page; site/pt.json translates every data-i18n,
 #   data-i18n-html, data-i18n-label (aria-label) and data-i18n-content (meta content) into
-#   pt/index.html. {{LOCKUP}} becomes the inline lockup from docs/brand (run make-brand.ps1
+#   pt/index.html, and {{JSONLD}} and {{FAQ_JSONLD}} become the schema.org data in each
+#   language (the FAQ one is read from the page's <details class="faq-item">). robots.txt,
+#   sitemap.xml and llms.txt are copied as they are. {{LOCKUP}} becomes the inline lockup from docs/brand (run make-brand.ps1
 #   after redrawing the raven). Fails on a missing translation or a leftover {{token}}.
 # Runs on Windows PowerShell 5.1 and on pwsh (the Pages workflow uses Linux).
 param([string]$Out = (Join-Path $PSScriptRoot "../_site"))
@@ -50,7 +52,46 @@ function Convert-ToPortuguese([string]$html) {
       [regex]::Replace($m.Value, "\s$($pair[1])=`"[^`"]*`"", " $($pair[1])=`"$value`"")
     })
   }
-  $html.Replace('href="/privacy"', 'href="/pt/privacy"')
+  $html.Replace('href="/privacy"', 'href="/pt/privacy"').Replace('href="/code-signing"', 'href="/pt/code-signing"')
+}
+
+# schema.org data for search engines and AI assistants, in the page's language.
+function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
+  $app = [ordered]@{
+    "@context" = "https://schema.org"
+    "@type" = "SoftwareApplication"
+    name = "Yata"
+    alternateName = "Yata for Windows"
+    url = $url
+    inLanguage = $lang
+    description = $description
+    applicationCategory = "UtilitiesApplication"
+    operatingSystem = "Windows 10, Windows 11"
+    downloadUrl = "https://github.com/akaneni/yata/releases/latest"
+    fileSize = "6MB"
+    image = "https://getyata.app/og.png"
+    license = "https://opensource.org/licenses/MIT"
+    isAccessibleForFree = $true
+    offers = [ordered]@{ "@type" = "Offer"; price = "0"; priceCurrency = "USD" }
+    author = [ordered]@{ "@type" = "Person"; name = "akaneni"; url = "https://github.com/akaneni" }
+    sameAs = @("https://github.com/akaneni/yata")
+  }
+  "<script type=`"application/ld+json`">$(ConvertTo-Json $app -Depth 4 -Compress)</script>"
+}
+
+# FAQPage data read back from the finished page, so the questions live only in the HTML.
+function Add-FaqJsonLd([string]$html) {
+  $plain = { param($s) [Net.WebUtility]::HtmlDecode(([regex]::Replace($s, '<[^>]+>', ''))) }
+  $questions = @([regex]::Matches($html, '(?s)<details class="faq-item"><summary[^>]*>(.*?)</summary><p[^>]*>(.*?)</p></details>') | ForEach-Object {
+    [ordered]@{
+      "@type" = "Question"
+      name = & $plain $_.Groups[1].Value
+      acceptedAnswer = [ordered]@{ "@type" = "Answer"; text = & $plain $_.Groups[2].Value }
+    }
+  })
+  if ($questions.Count -eq 0) { throw "index.html has {{FAQ_JSONLD}} but no FAQ items" }
+  $faq = [ordered]@{ "@context" = "https://schema.org"; "@type" = "FAQPage"; mainEntity = $questions }
+  $html.Replace("{{FAQ_JSONLD}}", "<script type=`"application/ld+json`">$(ConvertTo-Json $faq -Depth 5 -Compress)</script>")
 }
 
 function Save-Page([string]$html, [string]$path) {
@@ -62,12 +103,15 @@ function Save-Page([string]$html, [string]$path) {
 }
 
 $index = [IO.File]::ReadAllText((Join-Path $site "index.html"), $utf8)
+$enDescription = [regex]::Match($index, '<meta name="description" content="([^"]+)"').Groups[1].Value
 $en = $index.Replace("{{LANG}}", "en").Replace("{{CANONICAL}}", "https://getyata.app/").Replace("{{CUR_EN}}", ' aria-current="page"').Replace("{{CUR_PT}}", "")
-Save-Page $en (Join-Path $Out "index.html")
+$en = $en.Replace("{{OG_LOCALE}}", "en_US").Replace("{{OG_LOCALE_ALT}}", "pt_BR").Replace("{{JSONLD}}", (Get-JsonLd "en" "https://getyata.app/" $enDescription))
+Save-Page (Add-FaqJsonLd $en) (Join-Path $Out "index.html")
 $ptPage = $index.Replace("{{LANG}}", "pt-BR").Replace("{{CANONICAL}}", "https://getyata.app/pt/").Replace("{{CUR_EN}}", "").Replace("{{CUR_PT}}", ' aria-current="page"')
-Save-Page (Convert-ToPortuguese $ptPage) (Join-Path $Out "pt/index.html")
+$ptPage = $ptPage.Replace("{{OG_LOCALE}}", "pt_BR").Replace("{{OG_LOCALE_ALT}}", "en_US").Replace("{{JSONLD}}", (Get-JsonLd "pt-BR" "https://getyata.app/pt/" (Get-Pt "meta.description")))
+Save-Page (Add-FaqJsonLd (Convert-ToPortuguese $ptPage)) (Join-Path $Out "pt/index.html")
 
-foreach ($page in "privacy.html", "pt/privacy.html") {
+foreach ($page in "privacy.html", "pt/privacy.html", "code-signing.html", "pt/code-signing.html", "404.html") {
   Save-Page ([IO.File]::ReadAllText((Join-Path $site $page), $utf8)) (Join-Path $Out $page)
 }
 "ok: $Out"

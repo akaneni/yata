@@ -8,6 +8,19 @@
 <link rel="canonical" href="https://getyata.app/privacy">
 <link rel="alternate" hreflang="en" href="https://getyata.app/privacy">
 <link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/privacy">
+<link rel="alternate" hreflang="x-default" href="https://getyata.app/privacy">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Yata">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="pt_BR">
+<meta property="og:title" content="Privacy policy · Yata">
+<meta property="og:description" content="What data Yata uses and where it goes. No account, no server, no telemetry.">
+<meta property="og:url" content="https://getyata.app/privacy">
+<meta property="og:image" content="https://getyata.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Yata logo: a pixel raven next to the word yata, white on black">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="any">
@@ -46,6 +59,7 @@
     <ul>
       <li><strong>LRCLIB</strong> (lrclib.net), to look up song lyrics: sends the artist, title and length of the track that is playing. Can be turned off in Settings.</li>
       <li><strong>Open-Meteo</strong> (open-meteo.com), for the weather, only if you turn it on: sends the latitude and longitude of the chosen city, rounded to about 1 km. When you search for a city, it sends the name you typed. If you click "Use my location", Yata asks Windows for your position once, rounds it to about 1 km right away and discards the precise value. It does not track your location after that and never works out where you are from your IP. Settings keep only the chosen name and the rounded coordinates.</li>
+      <li><strong>GitHub</strong> (api.github.com), for the new-version notice, only if you turn it on (it starts off): once a day, it asks which Yata version is the latest. The request carries only the name and version of Yata.</li>
       <li><strong>Google Calendar</strong> and <strong>Google Tasks</strong>, only if you connect your account and enable each one (see below).</li>
     </ul>
 
@@ -96,6 +110,7 @@
     <a class="logo" href="/" aria-label="Yata">{{LOCKUP}}</a>
     <nav aria-label="Footer">
       <a href="/privacy" aria-current="page">Privacy policy</a>
+      <a href="/code-signing">Code signing policy</a>
       <a href="https://github.com/akaneni/yata">GitHub</a>
       <span class="mono">MIT license · made by akaneni</span>
     </nav>

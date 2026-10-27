@@ -61,14 +61,14 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 ## Instalar
 
-Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~6 MB). O instalador:
+Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~3 MB). O instalador:
 
 - instala só para o seu usuário, sem pedir administrador;
 - se faltar o **.NET 10 Desktop Runtime**, baixa direto da Microsoft e instala (essa etapa pede permissão de administrador);
 - oferece iniciar com o Windows e atalho na área de trabalho;
 - na desinstalação, remove o app e a inicialização automática, mas **mantém seus dados** em `%LOCALAPPDATA%\Yata`.
 
-Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução.
+Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução. A assinatura gratuita pela SignPath Foundation está em andamento: veja a [política de assinatura de código](https://getyata.app/code-signing) e [docs/code-signing.md](docs/code-signing.md).
 
 ## Requisitos
 
@@ -156,7 +156,8 @@ src/Yata/
   SettingsWindow.xaml(.cs)    janela de configurações
   Strings.resx                textos da interface em inglês (Strings.pt-BR.resx: português; Helpers/Lang.cs escolhe o idioma)
 installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
-docs/                         imagens do README
+docs/                         imagens do README, cadastro no Google e assinatura de código
+.signpath/                    configurações de artefato do SignPath (cópia do que está no projeto de lá)
 tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft), instalador e medição
 tests/Yata.Tests/             testes (xUnit)
 .github/workflows/ci.yml      build e testes a cada push
@@ -176,4 +177,4 @@ tests/Yata.Tests/             testes (xUnit)
 8. ~~Câmera/microfone em uso, vários monitores, atalho global, aviso de versão~~
 9. ~~Inglês e português~~
 
-Próximas ideias: projeção WinRT enxuta (instalador menor), assinatura digital.
+Próximas ideias: assinatura digital (em andamento, veja [docs/code-signing.md](docs/code-signing.md)), winget.

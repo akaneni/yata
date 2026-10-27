@@ -28,8 +28,6 @@ namespace Yata;
 // Transient status notices in the closed notch.
 public partial class MainWindow
 {
-    private static readonly Brush WarningBrush = Freeze(new SolidColorBrush(Color.FromRgb(0xFF, 0x6B, 0x6B)));
-
     private readonly DispatcherTimer _hudRavenLand = new() { Interval = TimeSpan.FromMilliseconds(1100) };
     // A reminder that arrived while the notch was open or hidden; shown once it can be seen.
     private HudMessage? _pendingHud;
@@ -51,9 +49,10 @@ public partial class MainWindow
         _hudTimer.Interval = TimeSpan.FromMilliseconds(message.DurationMs);
 
         HudIcon.Text = message.Glyph;
-        HudIcon.Foreground = message.Warning ? WarningBrush
-                           : message.Kind == HudKind.Privacy ? (Brush)FindResource(message.Glyph == Glyphs.Camera ? "CameraBrush" : "MicrophoneBrush")
-                           : Brushes.White;
+        HudIcon.SetResourceReference(TextBlock.ForegroundProperty,
+            message.Warning ? "WarningBrush"
+            : message.Kind == HudKind.Privacy ? (message.Glyph == Glyphs.Camera ? "CameraBrush" : "MicrophoneBrush")
+            : "TextPrimary");
         // Yata delivers reminders himself (he is a messenger, after all) and celebrates small wins;
         // routine status blips keep their plain icon.
         bool caw = message.Important && !message.Celebrate && message.Kind == HudKind.Reminder;
@@ -109,12 +108,6 @@ public partial class MainWindow
         _hudActive = false;
         StopHudRaven();
         UpdateTargets();
-    }
-
-    private static Brush Freeze(Brush brush)
-    {
-        brush.Freeze();
-        return brush;
     }
 
     private void StopHudRaven()
