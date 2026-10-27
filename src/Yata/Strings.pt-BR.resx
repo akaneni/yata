@@ -22,7 +22,7 @@
   <data name="Settings_LanguageAuto" xml:space="preserve"><value>Igual ao Windows ({0})</value></data>
   <data name="Settings_StartWithWindows" xml:space="preserve"><value>Iniciar com o Windows</value></data>
   <data name="Settings_Display" xml:space="preserve"><value>Tela do notch</value></data>
-  <data name="Settings_DisplayTip" xml:space="preserve"><value>Clique para trocar de tela</value></data>
+  <data name="Settings_DisplayTip" xml:space="preserve"><value>Escolher a tela</value></data>
   <data name="Settings_Hotkey" xml:space="preserve"><value>Abrir e fechar com Ctrl+Alt+Y</value></data>
   <data name="Settings_HotkeyHint" xml:space="preserve"><value>O Windows avisa só essa combinação; nada mais do que você digita é lido.</value></data>
   <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Esconder em apps de tela cheia</value></data>
@@ -45,7 +45,7 @@
   <data name="Settings_NextEventCompactHint" xml:space="preserve"><value>Nos 15 minutos antes, no lugar do relógio.</value></data>
   <data name="Settings_Tasks" xml:space="preserve"><value>Tarefas</value></data>
   <data name="Settings_TaskList" xml:space="preserve"><value>Lista</value></data>
-  <data name="Settings_TaskListHint" xml:space="preserve"><value>Clique para trocar. A aba Tarefas mostra esta lista.</value></data>
+  <data name="Settings_TaskListHint" xml:space="preserve"><value>A aba Tarefas mostra esta lista.</value></data>
   <data name="Settings_Weather" xml:space="preserve"><value>Tempo</value></data>
   <data name="Settings_ShowWeather" xml:space="preserve"><value>Mostrar o tempo</value></data>
   <data name="Settings_ShowWeatherHint" xml:space="preserve"><value>Dados do Open-Meteo (open-meteo.com), sem conta. Envia só as coordenadas da cidade, arredondadas (~1 km).</value></data>
@@ -250,4 +250,8 @@
   <data name="Water_AddCup" xml:space="preserve"><value>Registrar um copo</value></data>
   <data name="Stepper_Decrease" xml:space="preserve"><value>Diminuir {0}</value></data>
   <data name="Stepper_Increase" xml:space="preserve"><value>Aumentar {0}</value></data>
+  <data name="Tasks_Reopen" xml:space="preserve"><value>Reabrir</value></data>
+  <data name="Undo_Action" xml:space="preserve"><value>Desfazer</value></data>
+  <data name="Undo_TaskRemoved" xml:space="preserve"><value>Tarefa removida</value></data>
+  <data name="Undo_ShelfCleared" xml:space="preserve"><value>Prateleira limpa</value></data>
 </root>

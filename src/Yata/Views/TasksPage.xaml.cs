@@ -86,7 +86,9 @@ public partial class TasksPage : UserControl
 
     private void OnRemove(object sender, RoutedEventArgs e)
     {
-        if (sender is FrameworkElement { DataContext: TaskItem item })
-            _tasks?.Remove(item);
+        if (_tasks is not { } tasks || sender is not FrameworkElement { DataContext: TaskItem item })
+            return;
+        int index = tasks.Remove(item);
+        Undo.Show(Strings.Undo_TaskRemoved, () => tasks.Restore(item, index));
     }
 }

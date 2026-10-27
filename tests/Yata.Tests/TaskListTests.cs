@@ -121,4 +121,52 @@ public class TaskListTests
 
         Assert.Empty(_messages);
     }
+
+    [Fact]
+    public void Undoing_a_removal_puts_the_task_back_where_it_was()
+    {
+        var list = NewList();
+        list.Add("Um");
+        list.Add("Dois");
+        list.Add("Três");
+        var middle = list.Items[1];
+
+        int index = list.Remove(middle);
+        list.Restore(middle, index);
+
+        Assert.Same(middle, list.Items[1]);
+        Assert.Equal(3, list.Items.Count);
+    }
+
+    [Fact]
+    public void Undoing_before_the_sync_calls_off_the_deletion_in_Google()
+    {
+        var list = NewList();
+        list.Add("Sincronizada");
+        var task = list.Items[0];
+        task.GoogleId = "g1";
+
+        int index = list.Remove(task);
+        Assert.Equal(new[] { "g1" }, list.PendingDeletes);
+        list.Restore(task, index);
+
+        Assert.Empty(list.PendingDeletes);
+        Assert.Equal("g1", task.GoogleId);
+    }
+
+    [Fact]
+    public void Undoing_after_Google_deleted_it_sends_the_task_again_as_new()
+    {
+        var list = NewList();
+        list.Add("Sincronizada");
+        var task = list.Items[0];
+        task.GoogleId = "g1";
+
+        int index = list.Remove(task);
+        list.PendingDeletes.Clear(); // The sync went out meanwhile.
+        list.Restore(task, index);
+
+        Assert.Null(task.GoogleId);
+        Assert.Empty(list.PendingDeletes);
+    }
 }

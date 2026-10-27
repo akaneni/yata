@@ -193,7 +193,11 @@ public partial class MainWindow
         }
     }
 
-    private void OnLyricsLayoutChanged(object sender, SizeChangedEventArgs e) => ScrollLyrics(animate: false);
+    private void OnLyricsLayoutChanged(object sender, SizeChangedEventArgs e)
+    {
+        LyricsFade.EndPoint = new Point(0, LyricsPanel.ActualHeight);
+        ScrollLyrics(animate: false);
+    }
 
     private void OnLyricClick(object sender, MouseButtonEventArgs e)
     {

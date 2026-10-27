@@ -16,7 +16,7 @@
                        Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
         </StackPanel>
 
-        <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False">
+        <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False" local:ScrollFade.IsEnabled="True">
             <ItemsControl x:Name="List" Focusable="False">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -46,7 +46,7 @@
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding Done}" Value="True">
                                 <Setter TargetName="Check" Property="Content" Value="&#xE73A;"/>
-                                <Setter TargetName="Check" Property="ToolTip" Value="Reabrir"/>
+                                <Setter TargetName="Check" Property="ToolTip" Value="{x:Static y:Strings.Tasks_Reopen}"/>
                                 <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource TextSecondary}"/>
                                 <Setter TargetName="Label" Property="TextDecorations" Value="Strikethrough"/>
                             </DataTrigger>
@@ -62,6 +62,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <local:UndoToast x:Name="Undo"/>
 
         <Border Grid.Row="1" Height="34" Margin="0,8,0,0" CornerRadius="10" Background="{DynamicResource SubtleFill}">
             <Grid>

@@ -8,15 +8,17 @@
     <SolidColorBrush x:Key="TextSecondary" Color="#99FFFFFF"/>
     <!-- Section titles and hints in the settings window -->
     <SolidColorBrush x:Key="TextHint" Color="#FF8C8C8C"/>
-    <SolidColorBrush x:Key="TextPlaceholder" Color="#66FFFFFF"/>
+    <SolidColorBrush x:Key="TextPlaceholder" Color="#80FFFFFF"/>
     <SolidColorBrush x:Key="PillForeground" Color="#CCFFFFFF"/>
-    <SolidColorBrush x:Key="LyricDimBrush" Color="#59FFFFFF"/>
+    <SolidColorBrush x:Key="LyricDimBrush" Color="#80FFFFFF"/>
     <SolidColorBrush x:Key="SelectionHighlight" Color="#66FFFFFF"/>
 
     <!-- Surfaces -->
     <SolidColorBrush x:Key="NotchBrush" Color="#FF000000"/>
     <SolidColorBrush x:Key="WindowBackground" Color="#FF0E0E0E"/>
     <SolidColorBrush x:Key="CardBackground" Color="#FF161616"/>
+    <!-- Menus open over the cards, so a step lighter -->
+    <SolidColorBrush x:Key="MenuBackground" Color="#FF232323"/>
     <SolidColorBrush x:Key="SurfaceBrush" Color="#1FFFFFFF"/>
     <!-- Inputs, list rows on hover, the row that's on now -->
     <SolidColorBrush x:Key="SubtleFill" Color="#14FFFFFF"/>

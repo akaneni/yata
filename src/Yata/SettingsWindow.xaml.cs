@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -311,15 +312,9 @@ public partial class SettingsWindow : Window
             _googleTasks.Disable();
     }
 
-    /// <summary>Next list, wrapping around, like the display picker.</summary>
-    private void OnTasksList(object sender, RoutedEventArgs e)
-    {
-        var lists = _googleTasks.Lists;
-        if (lists.Count < 2)
-            return;
-        int index = lists.ToList().FindIndex(l => l.Id == _store.Settings.TasksListId);
-        _googleTasks.SetList(lists[(index + 1) % lists.Count]);
-    }
+    private void OnTasksList(object sender, RoutedEventArgs e) =>
+        ShowChoices(TasksListButton, _googleTasks.Lists, l => l.Name, l => l.Id == _store.Settings.TasksListId,
+            _googleTasks.SetList);
 
     private void OnCalendarToggle(object sender, RoutedEventArgs e)
     {
@@ -341,29 +336,55 @@ public partial class SettingsWindow : Window
         StartupSwitch.IsChecked = Autostart.IsEnabled;
     }
 
-    /// <summary>Next language, then back to following Windows; it takes effect at the next start.</summary>
-    private void OnLanguageClick(object sender, RoutedEventArgs e)
-    {
-        var choices = new string?[] { null }.Concat(Lang.Supported).ToList();
-        _store.Settings.Language = choices[(choices.IndexOf(_store.Settings.Language) + 1) % choices.Count];
-        ShowLanguage();
-    }
+    /// <summary>Following Windows or a language of its own; it takes effect at the next start.</summary>
+    private void OnLanguageClick(object sender, RoutedEventArgs e) =>
+        ShowChoices(LanguageButton, new string?[] { null }.Concat(Lang.Supported), LanguageLabel,
+            language => language == _store.Settings.Language, chosen =>
+            {
+                _store.Settings.Language = chosen;
+                ShowLanguage();
+            });
 
-    private void ShowLanguage() =>
-        LanguageButton.Content = _store.Settings.Language is { } language
-            ? Lang.Name(language)
-            : string.Format(Strings.Settings_LanguageAuto, Lang.Name(Lang.FromWindows));
+    private void ShowLanguage() => LanguageButton.Content = LanguageLabel(_store.Settings.Language);
 
-    /// <summary>Next display, wrapping around; the window-level Click handler then applies it.</summary>
+    private static string LanguageLabel(string? language) =>
+        language != null ? Lang.Name(language) : string.Format(Strings.Settings_LanguageAuto, Lang.Name(Lang.FromWindows));
+
     private void OnMonitorClick(object sender, RoutedEventArgs e)
     {
-        var all = Monitors.All();
         var current = Monitors.Resolve(_store.Settings.Monitor);
-        int index = all.ToList().FindIndex(m => m.DeviceName == current.DeviceName);
-        var next = all[(index + 1) % all.Count];
-        // The primary display is stored as "no choice", so it keeps following the primary if that changes.
-        _store.Settings.Monitor = next.IsPrimary ? null : next.DeviceName;
-        ShowMonitor();
+        ShowChoices(MonitorButton, Monitors.All(), m => m.Label, m => m.DeviceName == current.DeviceName, chosen =>
+        {
+            // The primary display is stored as "no choice", so it keeps following the primary if that changes.
+            _store.Settings.Monitor = chosen.IsPrimary ? null : chosen.DeviceName;
+            ShowMonitor();
+        });
+    }
+
+    /// <summary>
+    /// The options under a pill button, the current one checked; arrows and Enter pick, Esc closes.
+    /// Picking one applies and saves it like any other setting.
+    /// </summary>
+    private void ShowChoices<T>(Button anchor, IEnumerable<T> options, Func<T, string> label, Func<T, bool> isCurrent,
+        Action<T> choose)
+    {
+        var menu = new ContextMenu
+        {
+            Style = (Style)FindResource("ChoiceMenu"),
+            PlacementTarget = anchor,
+            MinWidth = anchor.ActualWidth,
+        };
+        foreach (var option in options)
+        {
+            var item = new MenuItem { Header = label(option), IsChecked = isCurrent(option) };
+            item.Click += (_, _) =>
+            {
+                choose(option);
+                _store.NotifySettingsChanged();
+            };
+            menu.Items.Add(item);
+        }
+        menu.IsOpen = true;
     }
 
     private void ShowMonitor()

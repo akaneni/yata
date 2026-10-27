@@ -22,7 +22,7 @@
   <data name="Settings_LanguageAuto" xml:space="preserve"><value>Same as Windows ({0})</value></data>
   <data name="Settings_StartWithWindows" xml:space="preserve"><value>Start with Windows</value></data>
   <data name="Settings_Display" xml:space="preserve"><value>Notch display</value></data>
-  <data name="Settings_DisplayTip" xml:space="preserve"><value>Click to switch displays</value></data>
+  <data name="Settings_DisplayTip" xml:space="preserve"><value>Choose the display</value></data>
   <data name="Settings_Hotkey" xml:space="preserve"><value>Open and close with Ctrl+Alt+Y</value></data>
   <data name="Settings_HotkeyHint" xml:space="preserve"><value>Windows reports only this combination; nothing else you type is read.</value></data>
   <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Hide in full-screen apps</value></data>
@@ -45,7 +45,7 @@
   <data name="Settings_NextEventCompactHint" xml:space="preserve"><value>In the 15 minutes before, in place of the clock.</value></data>
   <data name="Settings_Tasks" xml:space="preserve"><value>Tasks</value></data>
   <data name="Settings_TaskList" xml:space="preserve"><value>List</value></data>
-  <data name="Settings_TaskListHint" xml:space="preserve"><value>Click to switch. The Tasks tab shows this list.</value></data>
+  <data name="Settings_TaskListHint" xml:space="preserve"><value>The Tasks tab shows this list.</value></data>
   <data name="Settings_Weather" xml:space="preserve"><value>Weather</value></data>
   <data name="Settings_ShowWeather" xml:space="preserve"><value>Show the weather</value></data>
   <data name="Settings_ShowWeatherHint" xml:space="preserve"><value>Data from Open-Meteo (open-meteo.com), no account. Sends only the city's coordinates, rounded (~1 km).</value></data>
@@ -250,4 +250,8 @@
   <data name="Water_AddCup" xml:space="preserve"><value>Log a cup</value></data>
   <data name="Stepper_Decrease" xml:space="preserve"><value>Decrease {0}</value></data>
   <data name="Stepper_Increase" xml:space="preserve"><value>Increase {0}</value></data>
+  <data name="Tasks_Reopen" xml:space="preserve"><value>Reopen</value></data>
+  <data name="Undo_Action" xml:space="preserve"><value>Undo</value></data>
+  <data name="Undo_TaskRemoved" xml:space="preserve"><value>Task removed</value></data>
+  <data name="Undo_ShelfCleared" xml:space="preserve"><value>Shelf cleared</value></data>
 </root>
