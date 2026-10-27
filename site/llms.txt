@@ -2,7 +2,7 @@
 
 > Yata is a free, open-source notch app for Windows 10 and 11, in the style of the Dynamic Island: a black pill at the top of the screen, just below the camera, that shows what's playing, your next meeting and your reminders, then gets out of the way. MIT license, no account, no telemetry.
 
-Yata (from Yatagarasu, the messenger crow of Japanese myth) is a desktop app for Windows written in WPF on .NET 10. Closed, the notch shows the time; hover it and it opens into tabs. It hides when an app goes full screen. A hand-drawn 16 × 14 pixel raven lives in the notch and reacts to your day.
+Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese myth), is a desktop app for Windows written in WPF on .NET 10. Closed, the notch shows the time; hover it and it opens into tabs. It hides when an app goes full screen. A hand-drawn 16 × 14 pixel raven lives in the notch and reacts to your day.
 
 ## Features
 
@@ -32,6 +32,7 @@ Yata (from Yatagarasu, the messenger crow of Japanese myth) is a desktop app for
 - [Website](https://getyata.app/): overview and download
 - [Download the latest release](https://github.com/akaneni/yata/releases/latest)
 - [Source code on GitHub](https://github.com/akaneni/yata)
+- [Yata Notch on AlternativeTo](https://alternativeto.net/software/yata-notch/about/): alternatives and reviews
 - [Privacy policy](https://getyata.app/privacy)
 - [How to check a download](https://getyata.app/code-signing)
 - [Site in Portuguese](https://getyata.app/pt/)

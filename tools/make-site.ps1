@@ -62,7 +62,7 @@ function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
     "@context" = "https://schema.org"
     "@type" = "SoftwareApplication"
     name = "Yata"
-    alternateName = "Yata for Windows"
+    alternateName = @("Yata Notch", "Yata for Windows")
     url = $url
     inLanguage = $lang
     description = $description
@@ -76,7 +76,7 @@ function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
     isAccessibleForFree = $true
     offers = [ordered]@{ "@type" = "Offer"; price = "0"; priceCurrency = "USD" }
     author = [ordered]@{ "@type" = "Person"; name = "akaneni"; url = "https://github.com/akaneni" }
-    sameAs = @("https://github.com/akaneni/yata")
+    sameAs = @("https://github.com/akaneni/yata", "https://alternativeto.net/software/yata-notch/about/")
   }
   "<script type=`"application/ld+json`">$(ConvertTo-Json $app -Depth 4 -Compress)</script>"
 }
