@@ -654,6 +654,7 @@ public partial class MainWindow : Window
         }
         ScheduleClock();
         UpdateTargets();
+        UpdateTasksShown();
         RefreshProgress();
         if (!expanded)
             ShowPendingHud();
