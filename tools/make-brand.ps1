@@ -5,6 +5,7 @@
 #   yata-lockup.svg        raven perched on the wordmark's baseline
 #   yata-favicon.svg       the site's favicon, styled like the app icon
 #   yata-og.png            the site's link preview
+#   yata-google-logo.png   the logo on Google's consent screen (120x120)
 # The four marks come in -white and -black, plus an unsuffixed one that follows the viewer's light or
 # dark theme (for the README). One <rect> per horizontal run, crispEdges, no anti-aliasing.
 param([string]$Out = (Join-Path $PSScriptRoot "..\docs\brand"))
@@ -97,4 +98,14 @@ $p = 16; $ox = [int]((1200 - $lockW * $p) / 2); $oy = [int]((630 - $lockH * $p) 
 for ($y = 0; $y -lt $lockH; $y++) { for ($x = 0; $x -lt $lockW; $x++) {
   if ($lockup[$y][$x] -eq '#') { $g.FillRectangle($brush, $ox + $x * $p, $oy + $y * $p, $p, $p) } } }
 $bmp.Save((Join-Path $Out "yata-og.png"), [System.Drawing.Imaging.ImageFormat]::Png); $g.Dispose(); $bmp.Dispose()
+
+# Logo for Google's OAuth consent screen: a 120x120 square, the app icon's look. The raven is kept
+# well inside the square (5 px per pixel), so it survives being shown in a circle.
+$bmp = New-Object System.Drawing.Bitmap 120, 120
+$g = [System.Drawing.Graphics]::FromImage($bmp)
+$g.Clear([System.Drawing.Color]::FromArgb(255, 10, 10, 10))
+$p = 5; $ox = [int]((120 - 16 * $p) / 2); $oy = [int]((120 - $perch.Count * $p) / 2)
+for ($y = 0; $y -lt $perch.Count; $y++) { for ($x = 0; $x -lt 16; $x++) {
+  if ($perch[$y][$x] -eq '#') { $g.FillRectangle($brush, $ox + $x * $p, $oy + $y * $p, $p, $p) } } }
+$bmp.Save((Join-Path $Out "yata-google-logo.png"), [System.Drawing.Imaging.ImageFormat]::Png); $g.Dispose(); $bmp.Dispose()
 "ok: $Out"

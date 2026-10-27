@@ -148,12 +148,19 @@ O arquivo `google-client.json` tem prioridade sobre o que foi compilado. Sem nen
 
 ## 10. Site e domínio (exigidos na verificação)
 
-O Google exige página inicial e política de privacidade **num domínio verificado por você** no [Search Console](https://search.google.com/search-console). Duas opções simples:
+O Google exige página inicial e política de privacidade **num domínio verificado por você** no [Search Console](https://search.google.com/search-console). O Yata usa o próprio site, publicado pelo GitHub Pages a partir de `site/`:
 
-- **GitHub Pages** (`akaneni.github.io/yata`): verifique `akaneni.github.io` no Search Console com a meta tag ou o arquivo HTML e publique a página inicial e o `PRIVACY.md`.
-- Um domínio próprio, verificado por DNS.
+| Campo em *Google Auth Platform → Branding* | Valor |
+|---|---|
+| Nome do app | `Yata` |
+| Logotipo | `docs/brand/yata-google-logo.png` (120×120, gerado por `tools/make-brand.ps1`) |
+| Página inicial | `https://getyata.app` |
+| Política de privacidade | `https://getyata.app/privacy.html` (em português: `/pt/privacy.html`) |
+| Domínios autorizados | `getyata.app`, verificado no Search Console por DNS (registro TXT) com a mesma conta Google do projeto |
 
-A página inicial precisa explicar o que o app faz e por que ele pede acesso à agenda e às tarefas, e precisa ter um link para a política.
+A página inicial explica o que o app faz e por que ele pede acesso à agenda e às tarefas, e tem um link para a política. As duas páginas precisam abrir por HTTPS: o domínio `.app` só funciona com HTTPS nos navegadores.
+
+Quem publica um fork usa o próprio domínio: o GitHub Pages padrão (`<usuário>.github.io`) também serve, verificado no Search Console pela meta tag ou pelo arquivo HTML.
 
 ## 11. Teste → Produção → Verificação
 
