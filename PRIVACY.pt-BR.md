@@ -57,7 +57,7 @@ O uso e a transferência, pelo Yata, de informações recebidas das APIs do Goog
 
 ## Este site
 
-O [getyata.app](https://getyata.app) é uma página estática hospedada no GitHub Pages e entregue pelo Cloudflare. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes vêm do Google Fonts. O GitHub e o Cloudflare, como hospedagem e entrega, podem manter registros comuns de servidor. A mesma política está no site em [inglês](https://getyata.app/privacy) e [português](https://getyata.app/pt/privacy).
+O [getyata.app](https://getyata.app) é uma página estática hospedada no GitHub Pages e entregue pelo Cloudflare. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes são servidas pelo próprio site, sem requisições a terceiros. O GitHub e o Cloudflare, como hospedagem e entrega, podem manter registros comuns de servidor. A mesma política está no site em [inglês](https://getyata.app/privacy) e [português](https://getyata.app/pt/privacy).
 
 ## Contato
 
