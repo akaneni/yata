@@ -58,7 +58,7 @@ public class ManualActionsTests
     {
         var store = AppStore.InMemory();
         string? answer = "v0.0.1";
-        var checker = new UpdateChecker(store, () => _now, () => Task.FromResult(answer));
+        var checker = new UpdateChecker(store, () => _now, () => Task.FromResult<string?>(answer));
         Assert.Equal(UpdateCheckResult.UpToDate, await checker.CheckNowAsync());
 
         answer = null; // Offline, rate-limited, no release yet.
