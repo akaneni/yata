@@ -1,14 +1,19 @@
 # Publishes Yata (framework-dependent, single file) and builds the Inno Setup installer into dist/.
 # Usage: ./tools/build-installer.ps1 [-Version 0.1.1]
-param([string]$Version = "0.1.1")
+# The release workflow runs it in two steps so publish\Yata.exe can be code-signed in between:
+#   -PublishOnly, then -SkipPublish.
+param([string]$Version = "0.1.1", [switch]$PublishOnly, [switch]$SkipPublish)
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path $PSScriptRoot -Parent
 $publish = Join-Path $root "publish"
 
-dotnet publish (Join-Path $root "src\Yata\Yata.csproj") -c Release -r win-x64 --self-contained false `
-    -p:PublishSingleFile=true -p:DebugType=none -p:Version=$Version -o $publish
-if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+if (-not $SkipPublish) {
+    dotnet publish (Join-Path $root "src\Yata\Yata.csproj") -c Release -r win-x64 --self-contained false `
+        -p:PublishSingleFile=true -p:DebugType=none -p:Version=$Version -o $publish
+    if ($LASTEXITCODE -ne 0) { throw "dotnet publish failed" }
+    if ($PublishOnly) { return }
+}
 
 $iscc = @(
     (Join-Path $env:LOCALAPPDATA "Programs\Inno Setup 6\ISCC.exe"),

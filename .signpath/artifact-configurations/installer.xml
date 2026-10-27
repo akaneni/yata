@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SignPath artifact configuration "installer": the Inno Setup installer, built around the signed Yata.exe.
+     Copy of what is set in the SignPath project (slug "installer"); keep both the same. -->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <parameters>
+    <parameter name="version" required="true" />
+  </parameters>
+  <pe-file path="Yata-Setup-${version}.exe" product-name="Yata" product-version="${version}">
+    <authenticode-sign />
+  </pe-file>
+</artifact-configuration>
