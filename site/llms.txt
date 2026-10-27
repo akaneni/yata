@@ -12,6 +12,7 @@ Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese
 - Daily water goal with nudges, and a task list where "Call Ana 15:30" becomes a reminder, with optional two-way sync to Google Tasks.
 - A shelf: drop files on the notch and drag them out later. Only the path is kept.
 - System indicators: volume, brightness, battery, audio output, Caps Lock, keyboard layout, network, and a dot when an app is using the microphone.
+- Activities: scripts, builds and AI agents on the PC can show their progress in a bubble beside the notch with `yata-cli activity set|attention|done|fail|end` (a console tool installed next to Yata, optionally on PATH). Exit codes: 0 shown, 1 bad arguments, 2 Yata isn't running, 3 refused.
 - Ctrl+Alt+Y toggles the notch from anywhere. Works with multiple monitors and per-monitor scaling.
 
 ## Privacy
@@ -19,6 +20,7 @@ Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese
 - Lyrics lookup sends artist, title and song length to LRCLIB (on by default, can be turned off).
 - Weather sends the chosen city, rounded to about 1 km, to Open-Meteo (off by default). Never IP location.
 - Google Calendar and Tasks talk directly between the PC and Google (off by default). Access is encrypted on disk with Windows DPAPI.
+- Activities from other programs arrive through a local named pipe only the current Windows user can open (network refused), and stay in memory only.
 - No keyboard hook: Caps Lock and layout are read from key state. The diagnostic log stays on the PC for 7 days.
 
 ## Install
