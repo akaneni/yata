@@ -57,7 +57,7 @@ Yata's use and transfer of information received from Google APIs adheres to the 
 
 ## This website
 
-[getyata.app](https://getyata.app) is a static page hosted on GitHub Pages and served through Cloudflare. It sets no cookies and runs no analytics or trackers. Fonts load from Google Fonts. GitHub and Cloudflare, as host and delivery network, may keep standard server logs. The same policy is on the website in [English](https://getyata.app/privacy) and [Portuguese](https://getyata.app/pt/privacy).
+[getyata.app](https://getyata.app) is a static page hosted on GitHub Pages and served through Cloudflare. It sets no cookies and runs no analytics or trackers. Fonts are served from the site itself, with no third-party requests. GitHub and Cloudflare, as host and delivery network, may keep standard server logs. The same policy is on the website in [English](https://getyata.app/privacy) and [Portuguese](https://getyata.app/pt/privacy).
 
 ## Contact
 

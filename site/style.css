@@ -1,6 +1,11 @@
 /* getyata.app. The page hangs from a screen edge, like the notch: one left-weighted column of
    reading text, with the demos (the live notch, the raven) at full width. 1-bit throughout;
    the only colour on the site is the album cover inside the demo. */
+/* Fonts are self-hosted: Latin subsets (DotGothic16 also keeps 八咫烏) cut from google/fonts with
+   fontTools (subset, varLib.instancer for the weights below). SIL OFL 1.1, see fonts/OFL-*.txt. */
+@font-face { font-family: "DotGothic16"; src: url("/fonts/dotgothic16.woff2") format("woff2"); font-weight: 400; font-display: swap }
+@font-face { font-family: "Geist"; src: url("/fonts/geist.woff2") format("woff2"); font-weight: 400 600; font-display: swap }
+@font-face { font-family: "Geist Mono"; src: url("/fonts/geist-mono.woff2") format("woff2"); font-weight: 400 500; font-display: swap }
 :root {
   --bg: #0a0a0a;          /* the notch's black */
   --fg: #f2f2ef;          /* the raven's white, a touch off */
