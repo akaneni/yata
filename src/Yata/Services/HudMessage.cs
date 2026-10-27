@@ -12,6 +12,8 @@ public enum HudKind { Reminder, Volume, Brightness, Power, AudioDevice, CapsLock
 /// <param name="DurationMs">How long the message stays up.</param>
 /// <param name="Important">Reminders: held back while the notch is open or hidden, instead of dropped.</param>
 /// <param name="Celebrate">A small win (session done, water goal): Yata flaps in place of the icon.</param>
+/// <param name="Tag">What the notice is about (an activity's id): a newer notice about the same
+/// thing replaces it instead of queueing behind it.</param>
 public sealed record HudMessage(
     string Glyph,
     string Text,
@@ -21,7 +23,8 @@ public sealed record HudMessage(
     int DurationMs = 1800,
     bool Important = false,
     HudKind Kind = HudKind.Reminder,
-    bool Celebrate = false);
+    bool Celebrate = false,
+    string? Tag = null);
 
 internal static class Glyphs
 {

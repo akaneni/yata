@@ -75,8 +75,15 @@ internal sealed record ActivityRequest(
     double? Progress = null,
     ActivityState State = ActivityState.Running,
     string? Icon = null,
-    TimeSpan? Ttl = null)
+    TimeSpan? Ttl = null,
+    string? Phrase = null)
 {
+    /// <summary>
+    /// Stock texts Yata words in its own language, for callers that don't know it (the agent
+    /// hooks): used when no text is given.
+    /// </summary>
+    public static readonly string[] Phrases = { "working", "permission", "waiting", "done", "failed" };
+
     public const int MaxBytes = 4096;
     public const int MaxTitle = 60;
     public const int MaxText = 120;
@@ -147,8 +154,12 @@ internal sealed record ActivityRequest(
                 ttl = TimeSpan.FromSeconds(seconds);
             }
 
+            string? phrase = String(root, "phrase");
+            if (phrase != null && Array.IndexOf(Phrases, phrase) < 0)
+                return Fail("phrase must be one of: " + string.Join(", ", Phrases), out error);
+
             return new ActivityRequest(ActivityOp.Set, id, Clean(String(root, "title"), MaxTitle),
-                Clean(String(root, "text"), MaxText), progress, state.Value, icon, ttl);
+                Clean(String(root, "text"), MaxText), progress, state.Value, icon, ttl, phrase);
         }
         catch (JsonException)
         {

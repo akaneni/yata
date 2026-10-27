@@ -113,6 +113,21 @@ It's a console program, so PowerShell, cmd, bash and AI agents wait for it and g
 - Exit codes: 0 shown, 1 bad arguments (unknown option, icon or value), 2 Yata isn't running, 3 refused by Yata (the reason is printed).
 - How it works: a named pipe that only your Windows user can open and that refuses network access. Activities live in memory only; their text isn't logged.
 
+### AI agents: Claude Code, Cursor and Codex
+
+Yata can show what your coding agent is doing — **working**, **waiting for you** (needs a permission, or your answer) and **done** — one bubble per session, titled with the agent and the project folder ("Claude Code · yata"). The agent's hooks call `yata-cli hook <agent>`; only the state goes to the notch, never your prompts, commands or the agent's answers. If Yata isn't running, the hook returns at once, and it never blocks or changes the agent (it always exits 0 and prints only the neutral answer some events expect). These need `yata-cli` on PATH (the installer option).
+
+- **Claude Code**: install the plugin, which brings the hooks and the skill below:
+  ```
+  /plugin marketplace add akaneni/yata
+  /plugin install yata@yata
+  ```
+  Or add the hooks yourself: `yata-cli hook setup claude` prints them for `%USERPROFILE%\.claude\settings.json`.
+- **Cursor**: `yata-cli hook setup cursor` prints `%USERPROFILE%\.cursor\hooks.json`. Cursor has no event for "waiting for your approval", so it shows working and done. Yata only uses Cursor's fail-open events, never the ones that decide permissions.
+- **Codex**: `yata-cli hook setup codex` prints `%USERPROFILE%\.codex\hooks.json` (review and trust it with `/hooks`). Older Codex without hooks: `notify = ["yata-cli", "hook", "codex"]` in `config.toml` shows when a turn is done.
+
+**Skill**: so the agent puts its long tasks (builds, tests, deploys) in the notch on its own, `yata-cli skill install` copies a `SKILL.md` to `%USERPROFILE%\.claude\skills` (Claude Code, Cursor) and `%USERPROFILE%\.agents\skills` (Codex, Cursor). `yata-cli skill` prints it. The plugin already includes it for Claude Code.
+
 Open the notch on a tab without using the mouse, for N seconds (previews, screenshots and UI tests):
 
 ```powershell
@@ -175,6 +190,8 @@ src/Yata/
   Services/Activities.cs      other programs' activities: request, cleaning, the board
   Services/ActivityPipe.cs    the local pipe (this user only); ActivityClient.cs, the sending side
 src/Yata.Cli/                 yata-cli.exe: console side for scripts and agents (compiles Yata's activity files)
+  Services/AgentHook.cs       (in src/Yata) Claude Code, Cursor and Codex hook events → activities
+integrations/claude-code/     Claude Code plugin: hooks and the yata-notch skill (.claude-plugin/marketplace.json lists it)
   Services/AppStore.cs        local storage (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    water and reminders

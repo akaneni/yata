@@ -10,8 +10,8 @@ Registro das melhorias levantadas na análise de outubro de 2026 (código do Yat
 
 ## Próximos passos
 
-### Integração com o Claude Code
-Os hooks do Claude Code (`Notification`, `Stop`, etc.) já podem chamar `yata-cli activity attention|done` hoje. O passo seguinte é **aprovar ou negar permissões pelo notch**: um pedido que espera resposta pelo pipe (uma operação nova, como `ask`, com botões na bolha e tempo-limite). Nenhum app de Windows faz isso direito; no Mac há mais de 8.
+### Aprovar ou negar pelo notch
+O estado dos agentes (Claude Code, Cursor e Codex) já aparece no notch pelos hooks (`yata-cli hook`), e uma skill ensina o agente a usar o `yata-cli`. O passo seguinte é **aprovar ou negar permissões pelo notch**: o hook `PermissionRequest` do Claude Code e do Codex pode devolver a decisão, então seria um pedido que espera resposta pelo pipe (uma operação nova, como `ask`, com botões na bolha e tempo-limite, que na dúvida deixa o agente perguntar normalmente). Nenhum app de Windows faz isso; no Mac há mais de 8.
 
 ### Prova pública de desempenho
 Publicar no site, a cada versão, a CPU e a memória medidas pelo `tools/measure.ps1` (parado, música, aberto, foco). Ataca a queixa nº 1 do mercado e dá prova ao "o notch em que você pode confiar".

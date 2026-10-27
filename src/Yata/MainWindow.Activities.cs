@@ -24,7 +24,8 @@ public partial class MainWindow
     // Close enough for the two shapes' ears to meet at the screen edge, as if one split from the other.
     private const double BubbleGap = 6;
     // A runaway script can't flood the notch: past this, requests are refused for a moment.
-    private const int ActivityRateLimit = 30;
+    // Agent hooks report every tool call, and a busy agent makes several a second.
+    private const int ActivityRateLimit = 60;
     private static readonly TimeSpan ActivityRateWindow = TimeSpan.FromSeconds(10);
 
     private readonly ActivityBoard _activities = new();
@@ -99,6 +100,8 @@ public partial class MainWindow
 
         if (ActivityRequest.Parse(line, out string? error) is not ActivityRequest request)
             return "error: " + error;
+        if (request.Text == null && request.Phrase != null)
+            request = request with { Text = PhraseText(request.Phrase) };
 
         var (change, activity) = _activities.Apply(request, now);
         switch (change)
@@ -134,8 +137,17 @@ public partial class MainWindow
     {
         string? value = activity.Progress is double p ? Percent(p) : null;
         return new HudMessage(activity.Glyph, activity.Line, value, activity.Progress, activity.Warning,
-            DurationMs: important ? 4500 : 2500, Important: important, Kind: HudKind.Activity);
+            DurationMs: important ? 4500 : 2500, Important: important, Kind: HudKind.Activity, Tag: activity.Id);
     }
+
+    private static string PhraseText(string phrase) => phrase switch
+    {
+        "permission" => Strings.Activity_Permission,
+        "waiting" => Strings.Activity_Waiting,
+        "done" => Strings.Activity_Done,
+        "failed" => Strings.Activity_Failed,
+        _ => Strings.Activity_Working,
+    };
 
     private static string Percent(double progress) =>
         (progress * 100).ToString("0", CultureInfo.InvariantCulture) + "%";

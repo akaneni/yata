@@ -1,0 +1,17 @@
+{
+  "name": "yata",
+  "owner": {
+    "name": "akaneni",
+    "url": "https://github.com/akaneni"
+  },
+  "metadata": {
+    "description": "Yata, the open-source notch for Windows: AI agents' state and long tasks in the notch."
+  },
+  "plugins": [
+    {
+      "name": "yata",
+      "source": "./integrations/claude-code",
+      "description": "Claude Code's state in the Yata notch on Windows, and a skill for long tasks. Needs Yata with yata-cli on PATH."
+    }
+  ]
+}

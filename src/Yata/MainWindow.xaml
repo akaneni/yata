@@ -170,7 +170,7 @@
                                VerticalAlignment="Center"/>
                     <!-- Takes the icon's place for small wins -->
                     <views:RavenSprite x:Name="HudRaven" PixelSize="1.5" VerticalAlignment="Center" Visibility="Collapsed"/>
-                    <TextBlock x:Name="HudText" Margin="10,0,0,0" MaxWidth="240" FontSize="13" FontWeight="SemiBold"
+                    <TextBlock x:Name="HudText" Margin="10,0,0,0" MaxWidth="320" FontSize="13" FontWeight="SemiBold"
                                VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     <Grid x:Name="HudBar" Width="96" Height="4" Margin="14,0,0,0" VerticalAlignment="Center">
                         <Border CornerRadius="2" Background="{DynamicResource TrackBrush}"/>

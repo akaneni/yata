@@ -1,0 +1,9 @@
+{
+  "name": "yata",
+  "version": "0.3.0",
+  "description": "Shows Claude Code's state in the Yata notch on Windows (working, waiting for you, done), and teaches Claude to put long tasks there with yata-cli.",
+  "author": { "name": "akaneni", "url": "https://github.com/akaneni" },
+  "homepage": "https://getyata.app",
+  "repository": "https://github.com/akaneni/yata",
+  "license": "MIT"
+}
