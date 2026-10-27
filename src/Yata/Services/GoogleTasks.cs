@@ -16,12 +16,14 @@ public sealed record TaskListInfo(string Id, string Name);
 
 /// <summary>
 /// Two-way sync between the Tasks tab and one Google Tasks list. Changes made here go out a moment
-/// later; Google's side is read every couple of minutes. Local-only tasks stay local when it's off.
+/// later; Google's side is read every couple of minutes, and every few seconds while the Tasks tab is
+/// on screen (the API has no push for tasks). Local-only tasks stay local when it's off.
 /// </summary>
 public sealed class GoogleTasks
 {
     private const string Api = "https://tasks.googleapis.com/tasks/v1/";
     private static readonly TimeSpan SyncEvery = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan SyncWhileShown = TimeSpan.FromSeconds(15);
     private static readonly TimeSpan AfterLocalChange = TimeSpan.FromSeconds(2);
     private static readonly TimeSpan RetryAfter = TimeSpan.FromMinutes(1);
 
@@ -30,7 +32,9 @@ public sealed class GoogleTasks
     private readonly TaskList _tasks;
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(2) };
     private DateTime _nextSync = DateTime.MinValue;
+    private DateTime _lastSync = DateTime.MinValue;
     private bool _syncing;
+    private bool _shown;
 
     public IReadOnlyList<TaskListInfo> Lists { get; private set; } = Array.Empty<TaskListInfo>();
     /// <summary>Last problem worth showing (offline, API off, ...), or null.</summary>
@@ -62,6 +66,22 @@ public sealed class GoogleTasks
     }
 
     public void Stop() => _timer.Stop();
+
+    /// <summary>
+    /// The Tasks tab is on screen: a task added in Google's apps should show up while you look, not
+    /// minutes later. Reads Google now unless it just did, and keeps reading often until it's hidden.
+    /// </summary>
+    public void SetShown(bool shown)
+    {
+        if (_shown == shown)
+            return;
+        _shown = shown;
+        if (shown)
+        {
+            _nextSync = Min(_nextSync, _lastSync + SyncWhileShown);
+            Tick();
+        }
+    }
 
     /// <summary>Turns sync on, asking Google for the tasks permission first if needed.</summary>
     public async Task EnableAsync()
@@ -143,10 +163,11 @@ public sealed class GoogleTasks
             if (!IsOn || list != Settings.TasksListId)
                 return; // Turned off or switched lists meanwhile.
             _tasks.ApplyRemote(remote);
+            _lastSync = DateTime.Now;
             // Changes made while this ran go out in a moment; otherwise wait for the next round.
             _nextSync = _tasks.Items.Any(t => t.Dirty || (t.GoogleId == null && !t.Done)) || _tasks.PendingDeletes.Count > 0
                 ? DateTime.Now + AfterLocalChange
-                : DateTime.Now + SyncEvery;
+                : DateTime.Now + (_shown ? SyncWhileShown : SyncEvery);
             Error = null;
         }
         catch (GoogleAuthException ex)

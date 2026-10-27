@@ -44,12 +44,17 @@ public partial class MainWindow
               : NotchPage.Media;
         TasksPage.EndTyping();
         UpdateTargets();
+        UpdateTasksShown();
 
         bool animate = ExpandedView.Visibility == Visibility.Visible && previous != _page;
         MoveTabIndicator(animate);
         if (animate)
             SlideInPage(PageElement(_page), _page > previous ? 1 : -1);
     }
+
+    // Google Tasks is read often only while the tasks are in view: it costs API quota.
+    // Null while the XAML loads and checks the default tab.
+    private void UpdateTasksShown() => _googleTasks?.SetShown(_expanded && _page == NotchPage.Tasks);
 
     private FrameworkElement PageElement(NotchPage page) => page switch
     {
