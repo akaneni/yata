@@ -14,7 +14,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 **Acesso à rede:** só o que você liga, e nada sobre o PC é enviado:
 - busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`. Pode ser desligada nas configurações.
-- aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. A instalação continua manual.
+- aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. Atualizar leva um clique (**Atualizar e reiniciar** nas Configurações): o instalador vem do GitHub e é conferido com o SHA-256 publicado antes de rodar.
 - **tempo** no [Open-Meteo](https://open-meteo.com) (aberto, sem conta nem chave), só se você ligar: envia as coordenadas da cidade escolhida, arredondadas para ~1 km. A busca da cidade envia só o nome digitado.
 - **Google Agenda e Google Tasks**, só se você conectar sua conta e liberar cada um: leitura das agendas e dos eventos de hoje e amanhã, e sincronização de uma lista de tarefas, direto entre o PC e o Google. O acesso fica cifrado com DPAPI em `%LOCALAPPDATA%\Yata\google.dat` e os eventos ficam só na memória. Detalhes em [PRIVACY.pt-BR.md](PRIVACY.pt-BR.md).
 
@@ -144,6 +144,7 @@ src/Yata/
   Services/FullscreenWatcher.cs  detecta app em tela cheia e mantém o notch no topo
   Services/PrivacyWatcher.cs  câmera e microfone em uso (MicrophoneMonitor.cs: Core Audio)
   Services/UpdateChecker.cs   aviso opcional de versão nova (releases do GitHub)
+  Services/UpdateInstaller.cs "Atualizar e reiniciar": download, conferência do SHA-256, instalação silenciosa
   Services/AppStore.cs        persistência local (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    água e lembretes

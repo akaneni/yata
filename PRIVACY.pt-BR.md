@@ -18,7 +18,7 @@ O Yata só acessa a internet nestes casos:
 
 - **LRCLIB** (lrclib.net), para buscar letras de músicas: envia artista, título e duração da faixa que está tocando. Pode ser desligado nas Configurações.
 - **Open-Meteo** (open-meteo.com), para o tempo, somente se você ligar: envia a latitude e a longitude da cidade escolhida, arredondadas para cerca de 1 km. Ao buscar a cidade, envia o nome digitado. Se você clicar em "Usar minha localização", o Yata pede ao Windows a posição uma única vez, arredonda para cerca de 1 km na hora e descarta o valor preciso. Ele não acompanha a localização depois disso e nunca descobre onde você está pelo IP. Guarda nas configurações só o nome escolhido e as coordenadas arredondadas.
-- **GitHub** (api.github.com), para o aviso de versão nova, somente se você ligar (vem desligado): uma vez por dia, pergunta qual é a versão mais recente do Yata. O pedido leva só o nome e a versão do Yata.
+- **GitHub** (api.github.com), para o aviso de versão nova, somente se você ligar (vem desligado): uma vez por dia, pergunta qual é a versão mais recente do Yata. O pedido leva só o nome e a versão do Yata. Se você clicar em **Atualizar e reiniciar** nas Configurações, o Yata baixa o novo instalador do GitHub, confere com o SHA-256 que o GitHub publica para ele e o executa; nada é enviado além do pedido de download.
 - **Google Agenda** e **Google Tasks**, somente se você conectar sua conta e liberar cada um (veja abaixo).
 
 ## Google Agenda

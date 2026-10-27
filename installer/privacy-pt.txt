@@ -6,7 +6,7 @@ O Yata só acessa a internet nestes casos:
 
 - LRCLIB (lrclib.net), para as letras das músicas: envia artista, título e duração da faixa que está tocando. Vem ligado e pode ser desligado nas Configurações.
 - Open-Meteo (open-meteo.com), para o tempo, só se você ligar: envia as coordenadas da cidade escolhida, arredondadas para cerca de 1 km.
-- GitHub (api.github.com), para o aviso de versão nova, só se você ligar: uma vez por dia, pergunta qual é a versão mais recente.
+- GitHub (api.github.com), para o aviso de versão nova, só se você ligar: uma vez por dia, pergunta qual é a versão mais recente. Se você clicar em "Atualizar e reiniciar", baixa o novo instalador do GitHub.
 - Google Agenda e Google Tasks, só se você conectar sua conta. A comunicação é direta entre o seu PC e o Google.
 
 Este instalador também baixa o .NET 10 Desktop Runtime da Microsoft, se ele estiver faltando.

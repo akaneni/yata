@@ -6,7 +6,7 @@ Yata only goes online in these cases:
 
 - LRCLIB (lrclib.net), for song lyrics: sends the artist, title and length of the track that is playing. On by default; can be turned off in Settings.
 - Open-Meteo (open-meteo.com), for the weather, only if you turn it on: sends the coordinates of the chosen city, rounded to about 1 km.
-- GitHub (api.github.com), for the new-version notice, only if you turn it on: once a day, asks which version is the latest.
+- GitHub (api.github.com), for the new-version notice, only if you turn it on: once a day, asks which version is the latest. If you click "Update and restart", downloads the new installer from GitHub.
 - Google Calendar and Google Tasks, only if you connect your account. Data goes directly between your PC and Google.
 
 This installer also downloads the .NET 10 Desktop Runtime from Microsoft if it is missing.

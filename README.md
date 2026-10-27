@@ -14,7 +14,7 @@ Open source, no account and no telemetry.
 
 **Network access:** only what you turn on, and nothing about the PC is sent:
 - lyrics lookup on [LRCLIB](https://lrclib.net) (an open, free service), sending only the artist, title and length of the song. Lyrics are cached in `%LOCALAPPDATA%\Yata\lyrics`. Can be turned off in Settings.
-- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. Installing stays manual.
+- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs.
 - **weather** from [Open-Meteo](https://open-meteo.com) (open, no account or key), only if you turn it on: sends the chosen city's coordinates, rounded to ~1 km. The city search sends only the name you type.
 - **Google Calendar and Google Tasks**, only if you connect your account and allow each one: reading your calendars and today's and tomorrow's events, and syncing one task list, directly between the PC and Google. The access is encrypted with DPAPI in `%LOCALAPPDATA%\Yata\google.dat` and events stay in memory only. Details in [PRIVACY.md](PRIVACY.md).
 
@@ -146,6 +146,7 @@ src/Yata/
   Services/FullscreenWatcher.cs  detects full-screen apps and keeps the notch on top
   Services/PrivacyWatcher.cs  camera and microphone in use (MicrophoneMonitor.cs: Core Audio)
   Services/UpdateChecker.cs   optional new version notice (GitHub releases)
+  Services/UpdateInstaller.cs "Update and restart": download, SHA-256 check, silent setup
   Services/AppStore.cs        local storage (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    water and reminders

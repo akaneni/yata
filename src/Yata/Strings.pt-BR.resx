@@ -31,9 +31,16 @@
   <data name="Settings_AccentHint" xml:space="preserve"><value>Desligado, tudo fica em preto e branco.</value></data>
   <data name="Settings_Updates" xml:space="preserve"><value>Atualizações</value></data>
   <data name="Settings_UpdateCheck" xml:space="preserve"><value>Avisar quando houver versão nova</value></data>
-  <data name="Settings_UpdateCheckHint" xml:space="preserve"><value>Uma consulta por dia à página pública de versões do GitHub. Nada sobre você ou o PC é enviado, e a instalação continua manual.</value></data>
+  <data name="Settings_UpdateCheckHint" xml:space="preserve"><value>Uma consulta por dia à página pública de versões do GitHub. Nada sobre você ou o PC é enviado. A atualização só acontece quando você clica: o instalador vem do GitHub e é conferido antes de rodar.</value></data>
   <data name="Settings_UpdateAvailable" xml:space="preserve"><value>Versão {0} disponível</value></data>
   <data name="Settings_OpenDownload" xml:space="preserve"><value>Abrir página de download</value></data>
+  <data name="Settings_UpdateNow" xml:space="preserve"><value>Atualizar e reiniciar</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>Baixando e conferindo o instalador…</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>Instalando. O Yata abre de novo em instantes.</value></data>
+  <data name="Update_UpToDate" xml:space="preserve"><value>Esta já é a versão mais nova.</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>Não foi possível atualizar. Tente mais tarde ou use a página de download.</value></data>
+  <data name="Update_BadFile" xml:space="preserve"><value>O arquivo baixado não confere com o publicado no GitHub, então não foi instalado.</value></data>
+  <data name="Update_Cancelled" xml:space="preserve"><value>O download demorou demais. Tente de novo.</value></data>
   <data name="Settings_Media" xml:space="preserve"><value>Mídia</value></data>
   <data name="Settings_Lyrics" xml:space="preserve"><value>Letras sincronizadas</value></data>
   <data name="Settings_LyricsHint" xml:space="preserve"><value>Busca no LRCLIB (lrclib.net) enviando só artista, título e duração.</value></data>

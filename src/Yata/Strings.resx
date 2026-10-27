@@ -31,9 +31,16 @@
   <data name="Settings_AccentHint" xml:space="preserve"><value>When off, everything stays black and white.</value></data>
   <data name="Settings_Updates" xml:space="preserve"><value>Updates</value></data>
   <data name="Settings_UpdateCheck" xml:space="preserve"><value>Tell me when there's a new version</value></data>
-  <data name="Settings_UpdateCheckHint" xml:space="preserve"><value>One check a day of GitHub's public releases page. Nothing about you or the PC is sent, and installing stays manual.</value></data>
+  <data name="Settings_UpdateCheckHint" xml:space="preserve"><value>One check a day of GitHub's public releases page. Nothing about you or the PC is sent. Updating happens only when you click it: the installer comes from GitHub and is checked before it runs.</value></data>
   <data name="Settings_UpdateAvailable" xml:space="preserve"><value>Version {0} available</value></data>
   <data name="Settings_OpenDownload" xml:space="preserve"><value>Open download page</value></data>
+  <data name="Settings_UpdateNow" xml:space="preserve"><value>Update and restart</value></data>
+  <data name="Update_Downloading" xml:space="preserve"><value>Downloading and checking the installer…</value></data>
+  <data name="Update_Installing" xml:space="preserve"><value>Installing. Yata opens again in a moment.</value></data>
+  <data name="Update_UpToDate" xml:space="preserve"><value>This is already the newest version.</value></data>
+  <data name="Update_Failed" xml:space="preserve"><value>Couldn't update. Try again later, or use the download page.</value></data>
+  <data name="Update_BadFile" xml:space="preserve"><value>The downloaded file didn't match the one published on GitHub, so it wasn't installed.</value></data>
+  <data name="Update_Cancelled" xml:space="preserve"><value>The download took too long. Try again.</value></data>
   <data name="Settings_Media" xml:space="preserve"><value>Media</value></data>
   <data name="Settings_Lyrics" xml:space="preserve"><value>Synced lyrics</value></data>
   <data name="Settings_LyricsHint" xml:space="preserve"><value>Looked up on LRCLIB (lrclib.net), sending only artist, title and length.</value></data>

@@ -263,9 +263,17 @@
                     </views:SettingRow>
                     <!-- Shown when the last check found a newer version -->
                     <views:SettingRow x:Name="UpdateRow" Style="{StaticResource Row}" Visibility="Collapsed">
-                        <TextBlock x:Name="UpdateText" Style="{StaticResource Label}" VerticalAlignment="Center"/>
-                        <Button Style="{StaticResource PrimaryPillButton}" Content="{x:Static y:Strings.Settings_OpenDownload}"
-                                HorizontalAlignment="Right" Click="OnOpenReleases"/>
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock x:Name="UpdateText" Style="{StaticResource Label}"/>
+                            <!-- Downloading, or why it didn't work -->
+                            <TextBlock x:Name="UpdateStatus" Style="{StaticResource Hint}" Visibility="Collapsed"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Settings_OpenDownload}" Margin="0,0,8,0"
+                                    Click="OnOpenReleases"/>
+                            <Button x:Name="UpdateButton" Style="{StaticResource PrimaryPillButton}" Content="{x:Static y:Strings.Settings_UpdateNow}"
+                                    Click="OnUpdateNow"/>
+                        </StackPanel>
                     </views:SettingRow>
                 </StackPanel>
             </Border>

@@ -18,7 +18,7 @@ Yata only goes online in these cases:
 
 - **LRCLIB** (lrclib.net), to look up song lyrics: sends the artist, title and length of the track that is playing. Can be turned off in Settings.
 - **Open-Meteo** (open-meteo.com), for the weather, only if you turn it on: sends the latitude and longitude of the chosen city, rounded to about 1 km. When you search for a city, it sends the name you typed. If you click "Use my location", Yata asks Windows for your position once, rounds it to about 1 km right away and discards the precise value. It does not track your location after that and never works out where you are from your IP. Settings keep only the chosen name and the rounded coordinates.
-- **GitHub** (api.github.com), for the new-version notice, only if you turn it on (it starts off): once a day, it asks which Yata version is the latest. The request carries only the name and version of Yata.
+- **GitHub** (api.github.com), for the new-version notice, only if you turn it on (it starts off): once a day, it asks which Yata version is the latest. The request carries only the name and version of Yata. If you then click **Update and restart** in Settings, Yata downloads the new installer from GitHub, checks it against the SHA-256 that GitHub publishes for it, and runs it; nothing is sent besides the download request.
 - **Google Calendar** and **Google Tasks**, only if you connect your account and enable each one (see below).
 
 ## Google Calendar
