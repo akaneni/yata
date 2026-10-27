@@ -12,6 +12,8 @@ Tarefas, registro de água, caminhos da prateleira e configurações ficam em `%
 
 O Yata também mantém um registro de diagnóstico em `%LOCALAPPDATA%\Yata\logs`: horário, qual parte do app agiu e os erros que aconteceram. Ele não guarda títulos de músicas, textos de tarefas, títulos de eventos, nomes de arquivos, localização nem conta; caminhos, endereços web e e-mails que apareçam numa mensagem de erro são apagados antes de gravar. Cada arquivo é guardado por 7 dias e tem no máximo 1 MB por dia. Se o Yata fechar por um erro, ele grava um `crash-*.log` ali e encerra sem acionar o Relatório de Erros do Windows. Nada disso é enviado: você decide se quer anexar a uma issue (Configurações → Abrir registro ou Copiar diagnóstico).
 
+Outros programas deste PC (um script de build, um agente de IA trabalhando) podem mostrar o andamento ao lado do notch com o `yata-cli`. Eles chegam ao Yata por um canal local (um named pipe) que só o seu usuário do Windows abre e que recusa conexões pela rede. O que eles mandam (um título, um texto curto e o andamento) fica só na memória: nunca é gravado em disco nem no registro, e some quando a atividade termina ou expira, ou quando o Yata fecha. Nada é enviado para fora. Dá para desligar em Configurações → Atividades.
+
 ## Serviços externos
 
 O Yata só acessa a internet nestes casos:

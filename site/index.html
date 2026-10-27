@@ -88,10 +88,11 @@
       <div class="features">
         <div class="feature"><span class="label" data-i18n="f1.k">Media</span><h3 data-i18n="f1.t">Now playing, from any app</h3><p data-i18n="f1.d">Spotify, YouTube in the browser, anything that uses Windows media controls. Cover, progress and controls, plus synced lyrics that scroll with the song.</p></div>
         <div class="feature"><span class="label" data-i18n="f2.k">Agenda</span><h3 data-i18n="f2.t">Your next meeting</h3><p data-i18n="f2.d">Connect Google Calendar, read-only. "Standup in 8 min" appears in the closed notch, and Join opens Meet, Zoom or Teams.</p></div>
-        <div class="feature"><span class="label" data-i18n="f3.k">Focus</span><h3 data-i18n="f3.t">A Pomodoro you can see</h3><p data-i18n="f3.d">25 minutes of focus, 5 of rest, a long break every four. The countdown stays in the closed notch, and it pauses itself when you walk away.</p></div>
+        <div class="feature"><span class="label" data-i18n="f3.k">Focus</span><h3 data-i18n="f3.t">A Pomodoro you can see</h3><p data-i18n="f3.d">25 minutes of focus, 5 of rest, a long break every four. The countdown sits in the closed notch, or in a small bubble beside it while music plays, and it pauses itself when you walk away.</p></div>
         <div class="feature"><span class="label" data-i18n="f4.k">Water and tasks</span><h3 data-i18n="f4.t">Small habits, kept</h3><p data-i18n="f4.d">A daily water goal with gentle nudges. A task list where "Call Ana at 3pm" becomes a reminder, with optional two-way sync to Google Tasks.</p></div>
         <div class="feature"><span class="label" data-i18n="f5.k">Shelf</span><h3 data-i18n="f5.t">A shelf for files</h3><p data-i18n="f5.d">Drop files on the notch, drag them back out into any app later. Only the path is kept, nothing is copied.</p></div>
         <div class="feature"><span class="label" data-i18n="f6.k">System</span><h3 data-i18n="f6.t">What Windows is doing</h3><p data-i18n="f6.d">Volume, brightness, battery, audio output, Caps Lock, keyboard layout and network. A dot lights up when an app is using your microphone.</p></div>
+        <div class="feature"><span class="label" data-i18n="f7.k">Activities</span><h3 data-i18n="f7.t">Your scripts and agents, at a glance</h3><p data-i18n-html="f7.d">A build, a download or an AI agent at work can show its progress in a bubble beside the notch with <code>yata-cli</code>, and tell you when it needs you. It all stays on your PC.</p></div>
       </div>
     </div>
   </section>
@@ -126,6 +127,7 @@
             <tr><td data-i18n="t.r2">Weather</td><td class="sends" data-i18n="t.r2s">The city you chose, rounded to about 1 km. Never your IP location.</td><td>Open-Meteo</td><td><span class="pill" data-i18n="t.off">Off</span></td></tr>
             <tr><td data-i18n="t.r3">Google Calendar and Tasks</td><td class="sends" data-i18n="t.r3s">Goes straight between your PC and Google. Access is encrypted on disk with Windows DPAPI.</td><td>Google</td><td><span class="pill" data-i18n="t.off">Off</span></td></tr>
             <tr><td data-i18n="t.r4">New version notice</td><td class="sends" data-i18n="t.r4s">Nothing. Reads the public releases page once a day, and downloads the installer only when you click Update.</td><td>GitHub</td><td><span class="pill" data-i18n="t.off">Off</span></td></tr>
+            <tr><td data-i18n="t.r6">Activities from your scripts and agents</td><td class="sends" data-i18n="t.r6s">Nothing. They reach Yata through a local channel only your Windows user can open, and stay in memory.</td><td>—</td><td><span class="pill on" data-i18n="t.on">On</span></td></tr>
             <tr><td data-i18n="t.r5">Everything else</td><td class="sends" data-i18n="t.r5s">Nothing</td><td>—</td><td>—</td></tr>
           </tbody>
         </table>
@@ -153,6 +155,7 @@
         <details class="faq-item"><summary data-i18n="q6.q">Can Yata see what I type?</summary><p data-i18n-html="q6.a">No. Caps Lock and keyboard layout are read by checking key state, and there's no keyboard hook. Every line of the code is on GitHub if you want to check.</p></details>
         <details class="faq-item"><summary data-i18n="q7.q">Will it get in the way of games and videos?</summary><p data-i18n-html="q7.a">No. It hides when an app goes full screen, and <strong>Ctrl+Alt+Y</strong> opens or closes it from anywhere.</p></details>
         <details class="faq-item"><summary data-i18n="q8.q">Which music apps does it work with?</summary><p data-i18n-html="q8.a">Any app that uses Windows media controls: Spotify, YouTube and other sites in the browser, and more. Synced lyrics come from LRCLIB and can be turned off.</p></details>
+        <details class="faq-item"><summary data-i18n="q9.q">Can my scripts or AI agents use the notch?</summary><p data-i18n-html="q9.a">Yes. <code>yata-cli activity set build --title "Build" --progress 40%</code> shows a build, a download or an agent's progress in a bubble beside the notch, and <code>attention</code> tells you when it's waiting for you. It's a local channel that only your Windows user can open; nothing goes over the network.</p></details>
       </div>
     </div>
   </section>

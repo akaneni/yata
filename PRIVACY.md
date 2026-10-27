@@ -12,6 +12,8 @@ Tasks, water log, shelf paths and settings are kept in `%LOCALAPPDATA%\Yata\data
 
 Yata also keeps a diagnostic log in `%LOCALAPPDATA%\Yata\logs`: the time, which part of the app acted and any errors that happened. It does not record song titles, task text, event titles, file names, location or account. Paths, web addresses and email addresses that appear in an error message are removed before writing. Each file is kept for 7 days, with at most 1 MB per day. If Yata closes because of an error, it writes a `crash-*.log` there and exits without triggering Windows Error Reporting. None of this is sent anywhere: you decide whether to attach it to an issue (Settings → Open log or Copy diagnostics).
 
+Other programs on this PC (a build script, an AI agent at work) can show their progress beside the notch with `yata-cli`. They reach Yata through a local channel (a named pipe) that only your Windows user can open and that refuses connections from the network. What they send (a title, a short text and the progress) is kept in memory only: it is never written to disk or to the log, and it disappears when the activity ends or expires, or when Yata closes. Nothing is sent anywhere. You can turn this off in Settings → Activities.
+
 ## External services
 
 Yata only goes online in these cases:
