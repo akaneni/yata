@@ -1,7 +1,8 @@
 # Builds getyata.app into _site/ (deployed to GitHub Pages by .github/workflows/pages.yml):
 #   site/index.html is the English page; site/pt.json translates every data-i18n,
 #   data-i18n-html, data-i18n-label (aria-label) and data-i18n-content (meta content) into
-#   pt/index.html. {{LOCKUP}} becomes the inline lockup from docs/brand (run make-brand.ps1
+#   pt/index.html, and {{JSONLD}} becomes the schema.org data in each language. robots.txt,
+#   sitemap.xml and llms.txt are copied as they are. {{LOCKUP}} becomes the inline lockup from docs/brand (run make-brand.ps1
 #   after redrawing the raven). Fails on a missing translation or a leftover {{token}}.
 # Runs on Windows PowerShell 5.1 and on pwsh (the Pages workflow uses Linux).
 param([string]$Out = (Join-Path $PSScriptRoot "../_site"))
@@ -53,6 +54,30 @@ function Convert-ToPortuguese([string]$html) {
   $html.Replace('href="/privacy"', 'href="/pt/privacy"')
 }
 
+# schema.org data for search engines and AI assistants, in the page's language.
+function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
+  $app = [ordered]@{
+    "@context" = "https://schema.org"
+    "@type" = "SoftwareApplication"
+    name = "Yata"
+    alternateName = "Yata for Windows"
+    url = $url
+    inLanguage = $lang
+    description = $description
+    applicationCategory = "UtilitiesApplication"
+    operatingSystem = "Windows 10, Windows 11"
+    downloadUrl = "https://github.com/akaneni/yata/releases/latest"
+    fileSize = "6MB"
+    image = "https://getyata.app/og.png"
+    license = "https://opensource.org/licenses/MIT"
+    isAccessibleForFree = $true
+    offers = [ordered]@{ "@type" = "Offer"; price = "0"; priceCurrency = "USD" }
+    author = [ordered]@{ "@type" = "Person"; name = "akaneni"; url = "https://github.com/akaneni" }
+    sameAs = @("https://github.com/akaneni/yata")
+  }
+  "<script type=`"application/ld+json`">$(ConvertTo-Json $app -Depth 4 -Compress)</script>"
+}
+
 function Save-Page([string]$html, [string]$path) {
   $html = $html.Replace("{{LOCKUP}}", $lockup)
   $left = [regex]::Match($html, '\{\{\w+\}\}')
@@ -62,12 +87,15 @@ function Save-Page([string]$html, [string]$path) {
 }
 
 $index = [IO.File]::ReadAllText((Join-Path $site "index.html"), $utf8)
+$enDescription = [regex]::Match($index, '<meta name="description" content="([^"]+)"').Groups[1].Value
 $en = $index.Replace("{{LANG}}", "en").Replace("{{CANONICAL}}", "https://getyata.app/").Replace("{{CUR_EN}}", ' aria-current="page"').Replace("{{CUR_PT}}", "")
+$en = $en.Replace("{{OG_LOCALE}}", "en_US").Replace("{{OG_LOCALE_ALT}}", "pt_BR").Replace("{{JSONLD}}", (Get-JsonLd "en" "https://getyata.app/" $enDescription))
 Save-Page $en (Join-Path $Out "index.html")
 $ptPage = $index.Replace("{{LANG}}", "pt-BR").Replace("{{CANONICAL}}", "https://getyata.app/pt/").Replace("{{CUR_EN}}", "").Replace("{{CUR_PT}}", ' aria-current="page"')
+$ptPage = $ptPage.Replace("{{OG_LOCALE}}", "pt_BR").Replace("{{OG_LOCALE_ALT}}", "en_US").Replace("{{JSONLD}}", (Get-JsonLd "pt-BR" "https://getyata.app/pt/" (Get-Pt "meta.description")))
 Save-Page (Convert-ToPortuguese $ptPage) (Join-Path $Out "pt/index.html")
 
-foreach ($page in "privacy.html", "pt/privacy.html") {
+foreach ($page in "privacy.html", "pt/privacy.html", "404.html") {
   Save-Page ([IO.File]::ReadAllText((Join-Path $site $page), $utf8)) (Join-Path $Out $page)
 }
 "ok: $Out"

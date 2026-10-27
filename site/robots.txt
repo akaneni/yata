@@ -1,0 +1,7 @@
+# getyata.app is public. Search engines and AI assistants are welcome to read it
+# and point people to Yata. No signal is given for AI training.
+User-agent: *
+Content-Signal: search=yes, ai-input=yes
+Allow: /
+
+Sitemap: https://getyata.app/sitemap.xml

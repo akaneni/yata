@@ -1,7 +1,8 @@
 {
   "meta.title": "Yata · Um notch para o Windows",
   "meta.description": "O Yata é um notch vivo para o Windows: o que está tocando, sua próxima reunião e seus lembretes, logo abaixo da câmera. Código aberto, sem conta e sem telemetria.",
-  "aria.main": "Principal",
+  "meta.ogalt": "O logotipo do Yata: um corvo em pixel art ao lado da palavra yata, branco sobre preto",
+  "aria.main":"Principal",
   "aria.language": "Idioma",
   "aria.screen": "Prévia animada do notch",
   "aria.states": "Estados da prévia",
