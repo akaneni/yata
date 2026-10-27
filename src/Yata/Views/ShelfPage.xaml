@@ -23,7 +23,7 @@
             </StackPanel>
         </Grid>
 
-        <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False">
+        <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False" local:ScrollFade.IsEnabled="True">
             <ItemsControl x:Name="List" Focusable="False">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -68,6 +68,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <local:UndoToast x:Name="Undo"/>
 
         <!-- Shown while files are dragged over the notch -->
         <Grid x:Name="DropOverlay" Grid.RowSpan="2" Visibility="Collapsed" Background="{DynamicResource NotchBrush}">

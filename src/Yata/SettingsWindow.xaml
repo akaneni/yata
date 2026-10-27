@@ -21,6 +21,60 @@
             <Setter Property="Focusable" Value="True"/>
         </Style>
 
+        <!-- The choices under a pill button (display, task list), the current one checked. Opened from
+             code, so it isn't in the window's tree: set explicitly, not as an implicit style. -->
+        <Style x:Key="ChoiceMenu" TargetType="ContextMenu">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+            <Setter Property="FontFamily" Value="{StaticResource UiFont}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Placement" Value="Bottom"/>
+            <Setter Property="VerticalOffset" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Border Background="{DynamicResource MenuBackground}" BorderBrush="{DynamicResource DividerBrush}"
+                                BorderThickness="1" CornerRadius="10" Padding="4" MinWidth="{TemplateBinding MinWidth}">
+                            <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="ItemContainerStyle">
+                <Setter.Value>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="MenuItem">
+                                    <Border x:Name="Bg" CornerRadius="6" Padding="8,7,14,7" Background="Transparent">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="22"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock x:Name="Check" Text="&#xE73E;" FontFamily="{StaticResource IconFont}"
+                                                       FontSize="11" VerticalAlignment="Center" Visibility="Hidden"/>
+                                            <ContentPresenter Grid.Column="1" ContentSource="Header" RecognizesAccessKey="False"
+                                                              VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsHighlighted" Value="True">
+                                            <Setter TargetName="Bg" Property="Background" Value="{DynamicResource HoverFill}"/>
+                                        </Trigger>
+                                        <Trigger Property="IsChecked" Value="True">
+                                            <Setter TargetName="Check" Property="Visibility" Value="Visible"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <Style x:Key="Section" TargetType="TextBlock">
             <Setter Property="FontSize" Value="12"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -107,9 +161,9 @@
                     <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
                         <TextBlock Text="Tela do notch" Style="{StaticResource Label}" VerticalAlignment="Center"/>
-                        <!-- Each click moves to the next connected display -->
+                        <!-- Opens the list of connected displays -->
                         <Button x:Name="MonitorButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                ToolTip="Clique para trocar de tela" Click="OnMonitorClick"/>
+                                ToolTip="Escolher a tela" Click="OnMonitorClick"/>
                     </views:SettingRow>
                     <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
@@ -262,7 +316,7 @@
                         <views:SettingRow Style="{StaticResource Row}">
                             <StackPanel VerticalAlignment="Center" Margin="0,8">
                                 <TextBlock Text="Lista" Style="{StaticResource Label}"/>
-                                <TextBlock Text="Clique para trocar. A aba Tarefas mostra esta lista." Style="{StaticResource Hint}"/>
+                                <TextBlock Text="A aba Tarefas mostra esta lista." Style="{StaticResource Hint}"/>
                             </StackPanel>
                             <Button x:Name="TasksListButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
                                     VerticalAlignment="Center" MaxWidth="180" Click="OnTasksList"/>

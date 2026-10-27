@@ -74,9 +74,24 @@ public sealed class Shelf
         Save();
     }
 
-    public void Clear()
+    /// <summary>Empties the shelf; returns what was on it, for <see cref="Restore"/>.</summary>
+    public IReadOnlyList<ShelfItem> Clear()
     {
+        var cleared = Items.ToList();
         Items.Clear();
+        Save();
+        return cleared;
+    }
+
+    /// <summary>Undoes <see cref="Clear"/>, after anything dropped on the shelf since.</summary>
+    public void Restore(IEnumerable<ShelfItem> items)
+    {
+        foreach (var item in items)
+        {
+            if (Items.Count < MaxItems && item.Exists &&
+                !Items.Any(i => string.Equals(i.FilePath, item.FilePath, StringComparison.OrdinalIgnoreCase)))
+                Items.Add(item);
+        }
         Save();
     }
 

@@ -13,7 +13,8 @@
                     HorizontalAlignment="Center" Click="OnEmptyButton"/>
         </StackPanel>
 
-        <ScrollViewer x:Name="ListScroll" VerticalScrollBarVisibility="Hidden" Focusable="False">
+        <ScrollViewer x:Name="ListScroll" VerticalScrollBarVisibility="Hidden" Focusable="False"
+                      local:ScrollFade.IsEnabled="True">
             <ItemsControl x:Name="List" Focusable="False">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -65,8 +66,9 @@
                                 <Setter TargetName="Join" Property="Style" Value="{StaticResource PrimaryPillButton}"/>
                                 <Setter TargetName="Join" Property="Height" Value="26"/>
                             </DataTrigger>
+                            <!-- Over: the title steps back to the secondary color, still easy to read -->
                             <DataTrigger Binding="{Binding IsPast}" Value="True">
-                                <Setter TargetName="Row" Property="Opacity" Value="0.45"/>
+                                <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource TextSecondary}"/>
                                 <Setter TargetName="Join" Property="Visibility" Value="Collapsed"/>
                             </DataTrigger>
                         </DataTemplate.Triggers>

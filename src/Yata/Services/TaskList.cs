@@ -180,11 +180,30 @@ public sealed class TaskList
         LocalChanged?.Invoke();
     }
 
-    public void Remove(TaskItem item)
+    /// <summary>Takes a task off the list; returns where it was, for <see cref="Restore"/>.</summary>
+    public int Remove(TaskItem item)
     {
+        int index = Items.IndexOf(item);
         Items.Remove(item);
         if (item.GoogleId != null)
             PendingDeletes.Add(item.GoogleId);
+        Save();
+        LocalChanged?.Invoke();
+        return index;
+    }
+
+    /// <summary>
+    /// Undoes <see cref="Remove"/>. If the deletion hasn't gone out yet it's just called off; if
+    /// Google already deleted the task, it goes back as a new one there.
+    /// </summary>
+    public void Restore(TaskItem item, int index)
+    {
+        if (item.GoogleId != null && !PendingDeletes.Remove(item.GoogleId))
+        {
+            item.GoogleId = null;
+            item.Dirty = false;
+        }
+        Items.Insert(Math.Clamp(index, 0, Items.Count), item);
         Save();
         LocalChanged?.Invoke();
     }

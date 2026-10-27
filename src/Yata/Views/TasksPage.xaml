@@ -15,7 +15,7 @@
                        Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
         </StackPanel>
 
-        <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False">
+        <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False" local:ScrollFade.IsEnabled="True">
             <ItemsControl x:Name="List" Focusable="False">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
@@ -61,6 +61,8 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <local:UndoToast x:Name="Undo"/>
 
         <Border Grid.Row="1" Height="34" Margin="0,8,0,0" CornerRadius="10" Background="{DynamicResource SubtleFill}">
             <Grid>

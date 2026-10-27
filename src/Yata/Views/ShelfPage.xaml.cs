@@ -94,5 +94,11 @@ public partial class ShelfPage : UserControl
             _shelf?.Remove(item);
     }
 
-    private void OnClear(object sender, RoutedEventArgs e) => _shelf?.Clear();
+    private void OnClear(object sender, RoutedEventArgs e)
+    {
+        if (_shelf is not { } shelf)
+            return;
+        var cleared = shelf.Clear();
+        Undo.Show("Prateleira limpa", () => shelf.Restore(cleared));
+    }
 }

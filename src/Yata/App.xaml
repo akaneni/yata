@@ -32,7 +32,8 @@
                 </Setter>
             </Style>
 
-            <Style x:Key="IconButton" TargetType="Button">
+            <!-- ButtonBase, so the stepper's hold-to-repeat buttons share it -->
+            <Style x:Key="IconButton" TargetType="ButtonBase">
                 <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                 <Setter Property="FontFamily" Value="{StaticResource IconFont}"/>
                 <Setter Property="FontSize" Value="16"/>
@@ -46,7 +47,7 @@
                 <Setter Property="Background" Value="#00FFFFFF"/>
                 <Setter Property="Template">
                     <Setter.Value>
-                        <ControlTemplate TargetType="Button">
+                        <ControlTemplate TargetType="ButtonBase">
                             <Grid>
                                 <Ellipse x:Name="Bg" Fill="{TemplateBinding Background}"/>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>

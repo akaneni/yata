@@ -2,10 +2,15 @@ using System;
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 
 namespace Yata.Views;
 
-/// <summary>A minimal "− value +" number picker; no typing, so no invalid input.</summary>
+/// <summary>
+/// A minimal "− value +" number picker; no typing, so no invalid input. Hold a button to keep
+/// going; with a button focused, the arrow keys step too.
+/// </summary>
 public partial class Stepper : UserControl
 {
     public static readonly DependencyProperty ValueProperty = DependencyProperty.Register(
@@ -73,6 +78,22 @@ public partial class Stepper : UserControl
     private void OnMinus(object sender, RoutedEventArgs e) => Value = Math.Max(Minimum, Value - Step);
 
     private void OnPlus(object sender, RoutedEventArgs e) => Value = Math.Min(Maximum, Value + Step);
+
+    /// <summary>Goes through the button's Click, so the settings window saves it like a click.</summary>
+    private void OnKeyDown(object sender, KeyEventArgs e)
+    {
+        var button = e.Key switch
+        {
+            Key.Up or Key.Right => Plus,
+            Key.Down or Key.Left => Minus,
+            _ => null,
+        };
+        if (button == null)
+            return;
+        e.Handled = true;
+        if (button.IsEnabled)
+            button.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+    }
 
     private void Refresh()
     {
