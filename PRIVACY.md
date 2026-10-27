@@ -1,6 +1,6 @@
 # Política de privacidade do Yata
 
-*Última atualização: 26 de outubro de 2026*
+*Última atualização: 27 de outubro de 2026*
 
 O Yata é um app de código aberto para Windows que mostra um "notch" no topo da tela. Ele não tem conta, servidor nem telemetria. Esta política explica quais dados o Yata usa e para onde eles vão.
 
@@ -54,7 +54,7 @@ O uso e a transferência, pelo Yata, de informações recebidas das APIs do Goog
 
 ## Este site
 
-O [getyata.app](https://getyata.app) é uma página estática hospedada no GitHub Pages. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes vêm do Google Fonts. O GitHub, como hospedagem, pode manter registros comuns de servidor. A mesma política está no site em [inglês](https://getyata.app/privacy) e [português](https://getyata.app/pt/privacy).
+O [getyata.app](https://getyata.app) é uma página estática hospedada no GitHub Pages e entregue pelo Cloudflare. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes vêm do Google Fonts. O GitHub e o Cloudflare, como hospedagem e entrega, podem manter registros comuns de servidor. A mesma política está no site em [inglês](https://getyata.app/privacy) e [português](https://getyata.app/pt/privacy).
 
 ## Contato
 
