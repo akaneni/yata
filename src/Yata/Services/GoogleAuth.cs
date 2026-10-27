@@ -143,7 +143,7 @@ public sealed class GoogleAuth
     /// <returns>Whether every scope in <paramref name="wanted"/> was granted.</returns>
     public async Task<bool> SignInAsync(string[] wanted, CancellationToken ct)
     {
-        var client = _client ?? throw new GoogleAuthException("Esta versão do Yata não tem acesso ao Google configurado.");
+        var client = _client ?? throw new GoogleAuthException(Strings.GoogleAuth_NoClient);
 
         using var listener = new TcpListener(IPAddress.Loopback, 0);
         listener.Start();
@@ -183,14 +183,14 @@ public sealed class GoogleAuth
         }
         catch (TokenEndpointException ex)
         {
-            throw new GoogleAuthException($"O Google recusou a conexão ({ex.Error}).");
+            throw new GoogleAuthException(string.Format(Strings.GoogleAuth_RefusedCode, ex.Error));
         }
         using var _ = tokens;
         var root = tokens.RootElement;
 
         string? refresh = root.TryGetProperty("refresh_token", out var r) ? r.GetString() : null;
         if (string.IsNullOrEmpty(refresh))
-            throw new GoogleAuthException("O Google não devolveu um acesso permanente. Tente conectar de novo.");
+            throw new GoogleAuthException(Strings.GoogleAuth_NoRefresh);
 
         // Google lets people untick individual permissions on the consent screen.
         string granted = root.TryGetProperty("scope", out var s) ? s.GetString() ?? "" : "";
@@ -198,7 +198,7 @@ public sealed class GoogleAuth
         {
             // Good for nothing: don't keep an access the user didn't mean to give.
             await RevokeAsync(refresh);
-            throw new GoogleAuthException("Nenhuma permissão foi marcada no Google, então nada foi conectado.");
+            throw new GoogleAuthException(Strings.GoogleAuth_NothingGranted);
         }
 
         _credential = new GoogleCredential
@@ -244,10 +244,10 @@ public sealed class GoogleAuth
         if (!forceRefresh && _accessToken != null && DateTime.UtcNow < _accessExpiresUtc)
             return _accessToken;
 
-        var client = _client ?? throw new GoogleAuthException("Esta versão do Yata não tem acesso ao Google configurado.");
+        var client = _client ?? throw new GoogleAuthException(Strings.GoogleAuth_NoClient);
         var credential = _credential;
         if (credential == null || NeedsReconnect)
-            throw new GoogleAuthException("Conta Google não conectada.", needsReconnect: true);
+            throw new GoogleAuthException(Strings.GoogleAuth_NotConnected, needsReconnect: true);
 
         try
         {
@@ -264,11 +264,11 @@ public sealed class GoogleAuth
             // Revoked in the Google account, password changed, or expired (test-mode clients: 7 days).
             NeedsReconnect = true;
             _accessToken = null;
-            throw new GoogleAuthException("O acesso à conta Google expirou. Conecte de novo.", needsReconnect: true);
+            throw new GoogleAuthException(Strings.GoogleAuth_Expired, needsReconnect: true);
         }
         catch (TokenEndpointException ex)
         {
-            throw new GoogleAuthException($"Não foi possível renovar o acesso ({ex.Error}).");
+            throw new GoogleAuthException(string.Format(Strings.GoogleAuth_RenewFailed, ex.Error));
         }
     }
 
@@ -323,14 +323,14 @@ public sealed class GoogleAuth
 
             if (query.TryGetValue("code", out var code) && code.Length > 0)
             {
-                await RespondAsync(connection, "200 OK", ResultPage("Conta Google conectada", "Pode fechar esta aba e voltar ao Yata."), ct);
+                await RespondAsync(connection, "200 OK", ResultPage(Strings.GoogleAuth_PageConnected, Strings.GoogleAuth_PageConnectedText), ct);
                 return code;
             }
 
-            await RespondAsync(connection, "200 OK", ResultPage("Conexão cancelada", "Nada foi compartilhado. Pode fechar esta aba."), ct);
+            await RespondAsync(connection, "200 OK", ResultPage(Strings.GoogleAuth_PageCancelled, Strings.GoogleAuth_PageCancelledText), ct);
             throw new GoogleAuthException(query.GetValueOrDefault("error") == "access_denied"
-                ? "Conexão cancelada no Google."
-                : "O Google recusou a conexão.");
+                ? Strings.GoogleAuth_Cancelled
+                : Strings.GoogleAuth_Refused);
         }
     }
 
@@ -390,7 +390,7 @@ public sealed class GoogleAuth
     }
 
     private static string ResultPage(string title, string text) =>
-        "<!doctype html><html lang=\"pt-BR\"><head><meta charset=\"utf-8\"><title>Yata</title>" +
+        $"<!doctype html><html lang=\"{Lang.Culture.Name}\"><head><meta charset=\"utf-8\"><title>Yata</title>" +
         "<style>body{margin:0;height:100vh;display:grid;place-items:center;background:#000;color:#fff;" +
         "font-family:'Segoe UI Variable Text','Segoe UI',sans-serif}h1{font-size:20px;font-weight:600;margin:0 0 6px}" +
         "p{margin:0;color:#ffffff99;font-size:14px}</style></head>" +

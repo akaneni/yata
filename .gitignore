@@ -10,3 +10,5 @@ dist/
 client_secret*.json
 google-client.json
 _site/
+# Generated from Strings.resx on every build
+src/Yata/Strings.Designer.cs

@@ -50,41 +50,41 @@ public partial class FocusPage : UserControl
         TimeText.Text = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
         ProgressArc.Data = BuildArc(_timer.Progress);
 
-        string session = $"sessão {Math.Min(_timer.CompletedSessions + 1, _timer.SessionsPerCycle)} de {_timer.SessionsPerCycle}";
+        int session = Math.Min(_timer.CompletedSessions + 1, _timer.SessionsPerCycle), sessions = _timer.SessionsPerCycle;
         PhaseText.Text = _timer.Phase switch
         {
-            FocusPhase.ShortBreak => "Pausa curta",
-            FocusPhase.LongBreak => "Pausa longa",
-            _ => "Foco",
+            FocusPhase.ShortBreak => Strings.Focus_ShortBreak,
+            FocusPhase.LongBreak => Strings.Focus_LongBreak,
+            _ => Strings.Focus_Focus,
         };
         StatusText.Text = (_timer.State, _timer.IsBreak) switch
         {
-            (FocusState.Ready, _) => Capitalize(session) + " · pronto para começar",
-            (FocusState.Paused, false) => "Pausado · " + session,
-            (FocusState.Paused, true) => "Pausa em espera",
-            (_, true) => "Levante, alongue, beba água",
-            _ => Capitalize(session),
+            (FocusState.Ready, _) => string.Format(Strings.Focus_Ready, session, sessions),
+            (FocusState.Paused, false) => string.Format(Strings.Focus_Paused, session, sessions),
+            (FocusState.Paused, true) => Strings.Focus_BreakOnHold,
+            (_, true) => Strings.Focus_BreakTip,
+            _ => string.Format(Strings.Focus_Session, session, sessions),
         };
 
         switch (_timer.State)
         {
             case FocusState.Ready:
-                SetButton(PrimaryButton, PrimaryGlyph, PrimaryLabel, PlayGlyph, "Iniciar");
+                SetButton(PrimaryButton, PrimaryGlyph, PrimaryLabel, PlayGlyph, Strings.Focus_Start);
                 break;
             case FocusState.Running:
-                SetButton(PrimaryButton, PrimaryGlyph, PrimaryLabel, PauseGlyph, "Pausar");
+                SetButton(PrimaryButton, PrimaryGlyph, PrimaryLabel, PauseGlyph, Strings.Focus_Pause);
                 break;
             case FocusState.Paused:
-                SetButton(PrimaryButton, PrimaryGlyph, PrimaryLabel, PlayGlyph, "Continuar");
+                SetButton(PrimaryButton, PrimaryGlyph, PrimaryLabel, PlayGlyph, Strings.Focus_Resume);
                 break;
         }
 
         // Nothing to stop before starting; during a break "skip" is the way out.
         SecondaryButton.Visibility = _timer.IsActive ? Visibility.Visible : Visibility.Collapsed;
         if (_timer.IsBreak)
-            SetButton(SecondaryButton, SecondaryGlyph, SecondaryLabel, SkipGlyph, "Pular pausa");
+            SetButton(SecondaryButton, SecondaryGlyph, SecondaryLabel, SkipGlyph, Strings.Focus_SkipBreak);
         else
-            SetButton(SecondaryButton, SecondaryGlyph, SecondaryLabel, StopGlyph, "Parar");
+            SetButton(SecondaryButton, SecondaryGlyph, SecondaryLabel, StopGlyph, Strings.Focus_Stop);
 
         // Paused: dim the ring and let the time breathe, so it reads as "on hold" at a glance.
         ProgressArc.Opacity = _timer.IsPaused ? 0.4 : 1;
@@ -123,8 +123,6 @@ public partial class FocusPage : UserControl
             })
             : null);
     }
-
-    private static string Capitalize(string text) => char.ToUpperInvariant(text[0]) + text[1..];
 
     /// <summary>Clockwise arc from 12 o'clock covering <paramref name="progress"/> of the ring.</summary>
     private static Geometry BuildArc(double progress)

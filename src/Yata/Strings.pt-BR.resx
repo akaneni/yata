@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- Portuguese (Brazil): same keys as Strings.resx; StringsTests fails on a missing or extra one. -->
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Tray_Settings" xml:space="preserve"><value>Configurações…</value></data>
+  <data name="Tray_Demo" xml:space="preserve"><value>Demonstração do Yata</value></data>
+  <data name="Tray_Quit" xml:space="preserve"><value>Sair</value></data>
+  <data name="Crash_Title" xml:space="preserve"><value>O Yata fechou inesperadamente</value></data>
+  <data name="Crash_Text" xml:space="preserve"><value>Clique para ver o registro do erro. Ele fica só neste PC.</value></data>
+  <data name="Monitor_Label" xml:space="preserve"><value>Tela {0} · {1}×{2}</value></data>
+  <data name="Monitor_LabelPrimary" xml:space="preserve"><value>Tela {0} · {1}×{2} (principal)</value></data>
+  <data name="Common_Cancel" xml:space="preserve"><value>Cancelar</value></data>
+  <data name="Common_Loading" xml:space="preserve"><value>Carregando…</value></data>
+  <data name="Settings_Title" xml:space="preserve"><value>Yata — Configurações</value></data>
+  <data name="Settings_Version" xml:space="preserve"><value>versão {0} · código aberto (MIT)</value></data>
+  <data name="Settings_General" xml:space="preserve"><value>Geral</value></data>
+  <data name="Settings_Language" xml:space="preserve"><value>Idioma</value></data>
+  <data name="Settings_LanguageHint" xml:space="preserve"><value>Vale a partir da próxima vez que o Yata abrir.</value></data>
+  <data name="Settings_LanguageAuto" xml:space="preserve"><value>Igual ao Windows ({0})</value></data>
+  <data name="Settings_StartWithWindows" xml:space="preserve"><value>Iniciar com o Windows</value></data>
+  <data name="Settings_Display" xml:space="preserve"><value>Tela do notch</value></data>
+  <data name="Settings_DisplayTip" xml:space="preserve"><value>Clique para trocar de tela</value></data>
+  <data name="Settings_Hotkey" xml:space="preserve"><value>Abrir e fechar com Ctrl+Alt+Y</value></data>
+  <data name="Settings_HotkeyHint" xml:space="preserve"><value>O Windows avisa só essa combinação; nada mais do que você digita é lido.</value></data>
+  <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Esconder em apps de tela cheia</value></data>
+  <data name="Settings_HoverDelay" xml:space="preserve"><value>Abrir ao passar o mouse após</value></data>
+  <data name="Settings_Accent" xml:space="preserve"><value>Cor da capa como destaque</value></data>
+  <data name="Settings_AccentHint" xml:space="preserve"><value>Desligado, tudo fica em preto e branco.</value></data>
+  <data name="Settings_Updates" xml:space="preserve"><value>Atualizações</value></data>
+  <data name="Settings_UpdateCheck" xml:space="preserve"><value>Avisar quando houver versão nova</value></data>
+  <data name="Settings_UpdateCheckHint" xml:space="preserve"><value>Uma consulta por dia à página pública de versões do GitHub. Nada sobre você ou o PC é enviado, e a instalação continua manual.</value></data>
+  <data name="Settings_UpdateAvailable" xml:space="preserve"><value>Versão {0} disponível</value></data>
+  <data name="Settings_OpenDownload" xml:space="preserve"><value>Abrir página de download</value></data>
+  <data name="Settings_Media" xml:space="preserve"><value>Mídia</value></data>
+  <data name="Settings_Lyrics" xml:space="preserve"><value>Letras sincronizadas</value></data>
+  <data name="Settings_LyricsHint" xml:space="preserve"><value>Busca no LRCLIB (lrclib.net) enviando só artista, título e duração.</value></data>
+  <data name="Settings_Calendar" xml:space="preserve"><value>Agenda</value></data>
+  <data name="Settings_Allow" xml:space="preserve"><value>Permitir</value></data>
+  <data name="Settings_RemindBefore" xml:space="preserve"><value>Avisar antes do evento</value></data>
+  <data name="Settings_RemindBeforeHint" xml:space="preserve"><value>Com 0, avisa só quando começa.</value></data>
+  <data name="Settings_NextEventCompact" xml:space="preserve"><value>Próximo evento no notch fechado</value></data>
+  <data name="Settings_NextEventCompactHint" xml:space="preserve"><value>Nos 15 minutos antes, no lugar do relógio.</value></data>
+  <data name="Settings_Tasks" xml:space="preserve"><value>Tarefas</value></data>
+  <data name="Settings_TaskList" xml:space="preserve"><value>Lista</value></data>
+  <data name="Settings_TaskListHint" xml:space="preserve"><value>Clique para trocar. A aba Tarefas mostra esta lista.</value></data>
+  <data name="Settings_Weather" xml:space="preserve"><value>Tempo</value></data>
+  <data name="Settings_ShowWeather" xml:space="preserve"><value>Mostrar o tempo</value></data>
+  <data name="Settings_ShowWeatherHint" xml:space="preserve"><value>Dados do Open-Meteo (open-meteo.com), sem conta. Envia só as coordenadas da cidade, arredondadas (~1 km).</value></data>
+  <data name="Settings_City" xml:space="preserve"><value>Cidade</value></data>
+  <data name="Settings_NoCity" xml:space="preserve"><value>nenhuma escolhida</value></data>
+  <data name="Settings_CitySearch" xml:space="preserve"><value>Buscar cidade (ex.: Campinas)</value></data>
+  <data name="Settings_Search" xml:space="preserve"><value>Buscar</value></data>
+  <data name="Settings_Searching" xml:space="preserve"><value>Buscando…</value></data>
+  <data name="Settings_NoCityFound" xml:space="preserve"><value>Nenhuma cidade encontrada.</value></data>
+  <data name="Settings_NoOpenMeteo" xml:space="preserve"><value>Sem conexão com o Open-Meteo.</value></data>
+  <data name="Settings_LocateHint" xml:space="preserve"><value>Ou use a localização do Windows uma vez: a posição é arredondada para ~1 km na hora e nunca é guardada com precisão.</value></data>
+  <data name="Settings_UseMyLocation" xml:space="preserve"><value>Usar minha localização</value></data>
+  <data name="Settings_Locating" xml:space="preserve"><value>Pedindo a localização ao Windows…</value></data>
+  <data name="Settings_MyLocation" xml:space="preserve"><value>Minha localização ({0}, {1})</value></data>
+  <data name="Settings_LocationOff" xml:space="preserve"><value>A localização está desligada para apps da área de trabalho.</value></data>
+  <data name="Settings_LocationFailed" xml:space="preserve"><value>Não foi possível obter a localização agora. Tente de novo ou busque a cidade.</value></data>
+  <data name="Settings_OpenWindowsSettings" xml:space="preserve"><value>Abrir configurações do Windows</value></data>
+  <data name="Settings_RainAlerts" xml:space="preserve"><value>Avisar quando for chover</value></data>
+  <data name="Settings_RainAlertsHint" xml:space="preserve"><value>Quando a chance passa de 60% nas próximas 2 horas.</value></data>
+  <data name="Settings_Notices" xml:space="preserve"><value>Avisos no notch</value></data>
+  <data name="Settings_HudVolume" xml:space="preserve"><value>Volume</value></data>
+  <data name="Settings_HudBrightness" xml:space="preserve"><value>Brilho</value></data>
+  <data name="Settings_HudPower" xml:space="preserve"><value>Carregador e bateria baixa</value></data>
+  <data name="Settings_HudAudioDevice" xml:space="preserve"><value>Troca de saída de áudio (fone, caixa)</value></data>
+  <data name="Settings_HudCapsLock" xml:space="preserve"><value>Caps Lock</value></data>
+  <data name="Settings_HudKeyboardLayout" xml:space="preserve"><value>Idioma do teclado</value></data>
+  <data name="Settings_HudNetwork" xml:space="preserve"><value>Conexão de rede</value></data>
+  <data name="Settings_HudPrivacy" xml:space="preserve"><value>Câmera e microfone em uso</value></data>
+  <data name="Settings_Focus" xml:space="preserve"><value>Foco (Pomodoro)</value></data>
+  <data name="Settings_FocusLength" xml:space="preserve"><value>Foco</value></data>
+  <data name="Settings_ShortBreak" xml:space="preserve"><value>Pausa curta</value></data>
+  <data name="Settings_LongBreak" xml:space="preserve"><value>Pausa longa</value></data>
+  <data name="Settings_SessionsPerCycle" xml:space="preserve"><value>Sessões até a pausa longa</value></data>
+  <data name="Settings_PauseWhenAway" xml:space="preserve"><value>Pausar quando você sai</value></data>
+  <data name="Settings_PauseWhenAwayHint" xml:space="preserve"><value>Após 5 min sem uso, devolvendo o tempo não acompanhado.</value></data>
+  <data name="Settings_Water" xml:space="preserve"><value>Água</value></data>
+  <data name="Settings_WaterGoal" xml:space="preserve"><value>Meta diária</value></data>
+  <data name="Settings_CupSize" xml:space="preserve"><value>Tamanho do copo</value></data>
+  <data name="Settings_WaterReminders" xml:space="preserve"><value>Lembretes</value></data>
+  <data name="Settings_WaterEvery" xml:space="preserve"><value>Lembrar a cada</value></data>
+  <data name="Settings_Companion" xml:space="preserve"><value>Mostrar o Yata quando o PC fica parado</value></data>
+  <data name="Settings_CompanionHint" xml:space="preserve"><value>Usa só o horário do último uso do mouse/teclado, nunca o conteúdo.</value></data>
+  <data name="Settings_CompanionAfter" xml:space="preserve"><value>Aparece após</value></data>
+  <data name="Settings_CompanionSleep" xml:space="preserve"><value>Cochila após</value></data>
+  <data name="Settings_AwaySummary" xml:space="preserve"><value>Resumo ao voltar ("enquanto você esteve fora")</value></data>
+  <data name="Settings_DataLocal" xml:space="preserve"><value>Seus dados ficam só neste PC.</value></data>
+  <data name="Settings_OpenDataFolder" xml:space="preserve"><value>Abrir pasta de dados</value></data>
+  <data name="Settings_LogLocal" xml:space="preserve"><value>Algum problema? O registro também fica só aqui.</value></data>
+  <data name="Settings_OpenLog" xml:space="preserve"><value>Abrir registro</value></data>
+  <data name="Settings_CopyDiagnostics" xml:space="preserve"><value>Copiar diagnóstico</value></data>
+  <data name="Settings_Copied" xml:space="preserve"><value>Copiado</value></data>
+  <data name="Google_Account" xml:space="preserve"><value>Conta Google</value></data>
+  <data name="Google_NotConfigured" xml:space="preserve"><value>Esta versão foi compilada sem credenciais do Google (veja docs/google-calendar.md).</value></data>
+  <data name="Google_ContinueInBrowser" xml:space="preserve"><value>Continue no navegador que abriu…</value></data>
+  <data name="Google_ConnectedAs" xml:space="preserve"><value>Conectado como {0}</value></data>
+  <data name="Google_ConnectedHint" xml:space="preserve"><value>O acesso fica protegido pelo Windows neste PC. Desconectar revoga o acesso no Google.</value></data>
+  <data name="Google_Disconnect" xml:space="preserve"><value>Desconectar</value></data>
+  <data name="Google_ConnectAgain" xml:space="preserve"><value>Conecte de novo.</value></data>
+  <data name="Google_Reconnect" xml:space="preserve"><value>Reconectar</value></data>
+  <data name="Google_Intro" xml:space="preserve"><value>Agenda e tarefas do Google no notch. Na tela do Google você escolhe o que liberar; o acesso fica protegido pelo Windows neste PC.</value></data>
+  <data name="Google_Connect" xml:space="preserve"><value>Conectar com Google</value></data>
+  <data name="Google_SomeUnchecked" xml:space="preserve"><value>Algumas permissões ficaram desmarcadas; dá para liberar depois aqui.</value></data>
+  <data name="Calendar_Intro" xml:space="preserve"><value>Mostra seus próximos eventos e avisa antes de cada um. Só leitura.</value></data>
+  <data name="Calendar_Connected" xml:space="preserve"><value>Só leitura: suas agendas e os eventos de hoje e amanhã ficam só na memória.</value></data>
+  <data name="Calendar_Primary" xml:space="preserve"><value>Agenda principal</value></data>
+  <data name="Tasks_Intro" xml:space="preserve"><value>Sincroniza a aba Tarefas com o Google Tasks, nos dois sentidos; as abertas daqui vão para a lista. O horário dos lembretes fica só no Yata.</value></data>
+  <data name="Tasks_Connected" xml:space="preserve"><value>Concluir, criar e remover aqui vale também no Google. Desligar tira da aba as tarefas do Google.</value></data>
+  <data name="Format_LongDate" xml:space="preserve"><value>dddd, d 'de' MMMM</value></data>
+  <data name="Format_WeekdayDate" xml:space="preserve"><value>dddd, d/M</value></data>
+  <data name="Format_DayMonth" xml:space="preserve"><value>dd/MM</value></data>
+  <data name="Format_DayMonthTime" xml:space="preserve"><value>dd/MM HH:mm</value></data>
+  <data name="Due_Today" xml:space="preserve"><value>hoje</value></data>
+  <data name="Due_Tomorrow" xml:space="preserve"><value>amanhã</value></data>
+  <data name="Due_TomorrowAt" xml:space="preserve"><value>amanhã {0:HH:mm}</value></data>
+  <data name="Tab_Media" xml:space="preserve"><value>Mídia</value></data>
+  <data name="Tab_Agenda" xml:space="preserve"><value>Agenda</value></data>
+  <data name="Tab_Focus" xml:space="preserve"><value>Foco</value></data>
+  <data name="Tab_Water" xml:space="preserve"><value>Água</value></data>
+  <data name="Tab_Tasks" xml:space="preserve"><value>Tarefas</value></data>
+  <data name="Tab_Shelf" xml:space="preserve"><value>Prateleira</value></data>
+  <data name="Tab_Settings" xml:space="preserve"><value>Configurações</value></data>
+  <data name="Media_Previous" xml:space="preserve"><value>Anterior</value></data>
+  <data name="Media_Next" xml:space="preserve"><value>Próxima</value></data>
+  <data name="Media_Play" xml:space="preserve"><value>Tocar</value></data>
+  <data name="Media_Pause" xml:space="preserve"><value>Pausar</value></data>
+  <data name="Media_NothingPlaying" xml:space="preserve"><value>Nada tocando</value></data>
+  <data name="Weather_RainAround" xml:space="preserve"><value>chuva por volta das {0:HH}h</value></data>
+  <data name="Weather_RainNow" xml:space="preserve"><value>Pode chover a qualquer momento</value></data>
+  <data name="Weather_RainExpected" xml:space="preserve"><value>Chuva prevista por volta das {0:HH}h</value></data>
+  <data name="Weather_Clear" xml:space="preserve"><value>Céu limpo</value></data>
+  <data name="Weather_MostlyClear" xml:space="preserve"><value>Quase limpo</value></data>
+  <data name="Weather_PartlyCloudy" xml:space="preserve"><value>Parcialmente nublado</value></data>
+  <data name="Weather_Cloudy" xml:space="preserve"><value>Nublado</value></data>
+  <data name="Weather_Fog" xml:space="preserve"><value>Neblina</value></data>
+  <data name="Weather_Drizzle" xml:space="preserve"><value>Garoa</value></data>
+  <data name="Weather_FreezingDrizzle" xml:space="preserve"><value>Garoa congelante</value></data>
+  <data name="Weather_LightRain" xml:space="preserve"><value>Chuva fraca</value></data>
+  <data name="Weather_Rain" xml:space="preserve"><value>Chuva</value></data>
+  <data name="Weather_HeavyRain" xml:space="preserve"><value>Chuva forte</value></data>
+  <data name="Weather_FreezingRain" xml:space="preserve"><value>Chuva congelante</value></data>
+  <data name="Weather_Snow" xml:space="preserve"><value>Neve</value></data>
+  <data name="Weather_RainShowers" xml:space="preserve"><value>Pancadas de chuva</value></data>
+  <data name="Weather_HeavyShowers" xml:space="preserve"><value>Pancadas fortes</value></data>
+  <data name="Weather_SnowShowers" xml:space="preserve"><value>Pancadas de neve</value></data>
+  <data name="Weather_Thunderstorm" xml:space="preserve"><value>Trovoada</value></data>
+  <data name="Weather_ThunderstormHail" xml:space="preserve"><value>Trovoada com granizo</value></data>
+  <data name="Agenda_Join" xml:space="preserve"><value>Entrar</value></data>
+  <data name="Agenda_NotConfigured" xml:space="preserve"><value>Esta versão do Yata foi compilada sem acesso ao Google.</value></data>
+  <data name="Agenda_Connecting" xml:space="preserve"><value>Continue no navegador para conectar sua agenda…</value></data>
+  <data name="Agenda_ConnectAgain" xml:space="preserve"><value>Conecte de novo sua conta Google.</value></data>
+  <data name="Agenda_SignedOut" xml:space="preserve"><value>Veja seus próximos eventos do Google Agenda aqui.</value></data>
+  <data name="Agenda_Connect" xml:space="preserve"><value>Conectar agenda</value></data>
+  <data name="Agenda_NothingLeft" xml:space="preserve"><value>Nada mais na agenda hoje nem amanhã</value></data>
+  <data name="Agenda_Free" xml:space="preserve"><value>Agenda livre hoje e amanhã</value></data>
+  <data name="Agenda_Tomorrow" xml:space="preserve"><value>Amanhã</value></data>
+  <data name="Agenda_AllDay" xml:space="preserve"><value>Dia inteiro</value></data>
+  <data name="Agenda_NowUntil" xml:space="preserve"><value>agora · até {0:HH:mm}</value></data>
+  <data name="Agenda_Ended" xml:space="preserve"><value>terminou {0:HH:mm}</value></data>
+  <data name="Agenda_SoonUntil" xml:space="preserve"><value>{0} · até {1:HH:mm}</value></data>
+  <data name="Agenda_Until" xml:space="preserve"><value>até {0:HH:mm}</value></data>
+  <data name="Calendar_Now" xml:space="preserve"><value>agora</value></data>
+  <data name="Calendar_InMinutes" xml:space="preserve"><value>em {0} min</value></data>
+  <data name="Calendar_InHours" xml:space="preserve"><value>em {0}h{1:00}</value></data>
+  <data name="Calendar_Untitled" xml:space="preserve"><value>(Sem título)</value></data>
+  <data name="Focus_Focus" xml:space="preserve"><value>Foco</value></data>
+  <data name="Focus_ShortBreak" xml:space="preserve"><value>Pausa curta</value></data>
+  <data name="Focus_LongBreak" xml:space="preserve"><value>Pausa longa</value></data>
+  <data name="Focus_Session" xml:space="preserve"><value>Sessão {0} de {1}</value></data>
+  <data name="Focus_Ready" xml:space="preserve"><value>Sessão {0} de {1} · pronto para começar</value></data>
+  <data name="Focus_Paused" xml:space="preserve"><value>Pausado · sessão {0} de {1}</value></data>
+  <data name="Focus_BreakOnHold" xml:space="preserve"><value>Pausa em espera</value></data>
+  <data name="Focus_BreakTip" xml:space="preserve"><value>Levante, alongue, beba água</value></data>
+  <data name="Focus_Start" xml:space="preserve"><value>Iniciar</value></data>
+  <data name="Focus_Pause" xml:space="preserve"><value>Pausar</value></data>
+  <data name="Focus_Resume" xml:space="preserve"><value>Continuar</value></data>
+  <data name="Focus_SkipBreak" xml:space="preserve"><value>Pular pausa</value></data>
+  <data name="Focus_Stop" xml:space="preserve"><value>Parar</value></data>
+  <data name="Focus_BreakTime" xml:space="preserve"><value>Hora da pausa</value></data>
+  <data name="Focus_BackToFocus" xml:space="preserve"><value>De volta ao foco</value></data>
+  <data name="Shelf_DropHere" xml:space="preserve"><value>Arraste arquivos para cá</value></data>
+  <data name="Shelf_Remove" xml:space="preserve"><value>Tirar da prateleira</value></data>
+  <data name="Shelf_DropToKeep" xml:space="preserve"><value>Solte para guardar</value></data>
+  <data name="Shelf_Clear" xml:space="preserve"><value>Limpar</value></data>
+  <data name="Shelf_CountOne" xml:space="preserve"><value>1 item · arraste para usar</value></data>
+  <data name="Shelf_Count" xml:space="preserve"><value>{0} itens · arraste para usar</value></data>
+  <data name="Tasks_Empty" xml:space="preserve"><value>Nenhuma tarefa por aqui</value></data>
+  <data name="Tasks_Remove" xml:space="preserve"><value>Remover</value></data>
+  <data name="Tasks_NewPlaceholder" xml:space="preserve"><value>Nova tarefa (ex.: Reunião 15:30)</value></data>
+  <data name="Tasks_Add" xml:space="preserve"><value>Adicionar</value></data>
+  <data name="Tasks_Unnamed" xml:space="preserve"><value>Sem nome</value></data>
+  <data name="Water_Undo" xml:space="preserve"><value>Desfazer</value></data>
+  <data name="Water_GoalReached" xml:space="preserve"><value>Meta de água batida</value></data>
+  <data name="Water_Reminder" xml:space="preserve"><value>Hora de beber água</value></data>
+  <data name="Away_FocusPaused" xml:space="preserve"><value>Foco pausado quando você saiu</value></data>
+  <data name="Away_Title" xml:space="preserve"><value>Enquanto você esteve fora · {0}</value></data>
+  <data name="Away_TitleCount" xml:space="preserve"><value>Enquanto você esteve fora · {0} · {1} avisos</value></data>
+  <data name="Away_Battery" xml:space="preserve"><value>Bateria {0}% → {1}%</value></data>
+  <data name="Demo_Meeting" xml:space="preserve"><value>Reunião com o time</value></data>
+  <data name="Hud_DataUnreadable" xml:space="preserve"><value>Dados ilegíveis; recomecei do zero</value></data>
+  <data name="Hud_CameraAndMicrophone" xml:space="preserve"><value>Câmera e microfone em uso</value></data>
+  <data name="Hud_Camera" xml:space="preserve"><value>Câmera em uso</value></data>
+  <data name="Hud_Microphone" xml:space="preserve"><value>Microfone em uso</value></data>
+  <data name="Hud_AudioOutput" xml:space="preserve"><value>Saída de áudio</value></data>
+  <data name="Hud_Muted" xml:space="preserve"><value>Mudo</value></data>
+  <data name="Hud_Volume" xml:space="preserve"><value>Volume</value></data>
+  <data name="Hud_Brightness" xml:space="preserve"><value>Brilho</value></data>
+  <data name="Hud_Charging" xml:space="preserve"><value>Carregando</value></data>
+  <data name="Hud_OnBattery" xml:space="preserve"><value>Na bateria</value></data>
+  <data name="Hud_BatteryVeryLow" xml:space="preserve"><value>Bateria muito baixa</value></data>
+  <data name="Hud_BatteryLow" xml:space="preserve"><value>Bateria baixa</value></data>
+  <data name="Hud_Connected" xml:space="preserve"><value>Conectado</value></data>
+  <data name="Hud_NoInternet" xml:space="preserve"><value>Sem internet</value></data>
+  <data name="Hud_CapsLockOn" xml:space="preserve"><value>Caps Lock ativado</value></data>
+  <data name="Hud_CapsLockOff" xml:space="preserve"><value>Caps Lock desativado</value></data>
+  <data name="Hud_Keyboard" xml:space="preserve"><value>Teclado</value></data>
+  <data name="Hud_NewVersion" xml:space="preserve"><value>Nova versão do Yata</value></data>
+  <data name="Google_NoConnection" xml:space="preserve"><value>Sem conexão com o Google.</value></data>
+  <data name="Google_BrowserFailed" xml:space="preserve"><value>Não foi possível abrir o navegador.</value></data>
+  <data name="Google_SaveFailed" xml:space="preserve"><value>Não foi possível guardar o acesso neste PC.</value></data>
+  <data name="GoogleAuth_NoClient" xml:space="preserve"><value>Esta versão do Yata não tem acesso ao Google configurado.</value></data>
+  <data name="GoogleAuth_RefusedCode" xml:space="preserve"><value>O Google recusou a conexão ({0}).</value></data>
+  <data name="GoogleAuth_Refused" xml:space="preserve"><value>O Google recusou a conexão.</value></data>
+  <data name="GoogleAuth_Cancelled" xml:space="preserve"><value>Conexão cancelada no Google.</value></data>
+  <data name="GoogleAuth_NoRefresh" xml:space="preserve"><value>O Google não devolveu um acesso permanente. Tente conectar de novo.</value></data>
+  <data name="GoogleAuth_NothingGranted" xml:space="preserve"><value>Nenhuma permissão foi marcada no Google, então nada foi conectado.</value></data>
+  <data name="GoogleAuth_NotConnected" xml:space="preserve"><value>Conta Google não conectada.</value></data>
+  <data name="GoogleAuth_Expired" xml:space="preserve"><value>O acesso à conta Google expirou. Conecte de novo.</value></data>
+  <data name="GoogleAuth_RenewFailed" xml:space="preserve"><value>Não foi possível renovar o acesso ({0}).</value></data>
+  <data name="GoogleAuth_PageConnected" xml:space="preserve"><value>Conta Google conectada</value></data>
+  <data name="GoogleAuth_PageConnectedText" xml:space="preserve"><value>Pode fechar esta aba e voltar ao Yata.</value></data>
+  <data name="GoogleAuth_PageCancelled" xml:space="preserve"><value>Conexão cancelada</value></data>
+  <data name="GoogleAuth_PageCancelledText" xml:space="preserve"><value>Nada foi compartilhado. Pode fechar esta aba.</value></data>
+  <data name="Calendar_AskPermission" xml:space="preserve"><value>Marque a permissão de ver a agenda para o Yata poder mostrar seus eventos.</value></data>
+  <data name="Calendar_ApiDisabled" xml:space="preserve"><value>A API do Google Agenda não está ativada no projeto do Google Cloud.</value></data>
+  <data name="Calendar_NoConnection" xml:space="preserve"><value>Sem conexão com o Google Agenda.</value></data>
+  <data name="Tasks_AskPermission" xml:space="preserve"><value>Marque a permissão de tarefas para o Yata poder sincronizar.</value></data>
+  <data name="Tasks_ApiDisabled" xml:space="preserve"><value>A API do Google Tasks não está ativada no projeto do Google Cloud.</value></data>
+  <data name="Tasks_NoConnection" xml:space="preserve"><value>Sem conexão com o Google Tasks.</value></data>
+  <data name="Settings_CitySearchName" xml:space="preserve"><value>Buscar cidade</value></data>
+  <data name="Agenda_JoinCall" xml:space="preserve"><value>Entrar na chamada</value></data>
+  <data name="Tasks_Complete" xml:space="preserve"><value>Concluir</value></data>
+  <data name="Water_AddCup" xml:space="preserve"><value>Registrar um copo</value></data>
+  <data name="Stepper_Decrease" xml:space="preserve"><value>Diminuir {0}</value></data>
+  <data name="Stepper_Increase" xml:space="preserve"><value>Aumentar {0}</value></data>
+</root>

@@ -1,6 +1,7 @@
 <Window x:Class="Yata.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:y="clr-namespace:Yata"
         xmlns:views="clr-namespace:Yata.Views"
         Title="Yata"
         Width="300" Height="80"
@@ -180,19 +181,19 @@
                         </Border>
                         <StackPanel Orientation="Horizontal">
                             <RadioButton x:Name="TabMedia" Style="{StaticResource TabButton}" GroupName="Pages"
-                                         Content="&#xE8D6;" ToolTip="Mídia" IsChecked="True" Checked="OnTabChecked"/>
+                                         Content="&#xE8D6;" ToolTip="{x:Static y:Strings.Tab_Media}" IsChecked="True" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabAgenda" Style="{StaticResource TabButton}" GroupName="Pages"
-                                         Content="&#xE787;" ToolTip="Agenda" Checked="OnTabChecked"/>
+                                         Content="&#xE787;" ToolTip="{x:Static y:Strings.Tab_Agenda}" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabFocus" Style="{StaticResource TabButton}" GroupName="Pages"
-                                         Content="&#xE916;" ToolTip="Foco" Checked="OnTabChecked"/>
+                                         Content="&#xE916;" ToolTip="{x:Static y:Strings.Tab_Focus}" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabWater" Style="{StaticResource TabButton}" GroupName="Pages"
-                                         Content="&#xEB42;" ToolTip="Água" Checked="OnTabChecked"/>
+                                         Content="&#xEB42;" ToolTip="{x:Static y:Strings.Tab_Water}" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabTasks" Style="{StaticResource TabButton}" GroupName="Pages"
-                                         Content="&#xE9D5;" ToolTip="Tarefas" Checked="OnTabChecked"/>
+                                         Content="&#xE9D5;" ToolTip="{x:Static y:Strings.Tab_Tasks}" Checked="OnTabChecked"/>
                             <RadioButton x:Name="TabShelf" Style="{StaticResource TabButton}" GroupName="Pages"
-                                         Content="&#xE7B8;" ToolTip="Prateleira" Checked="OnTabChecked"/>
+                                         Content="&#xE7B8;" ToolTip="{x:Static y:Strings.Tab_Shelf}" Checked="OnTabChecked"/>
                             <Button Style="{StaticResource IconButton}" Width="28" Height="26" FontSize="13" Margin="6,0,0,0"
-                                    Foreground="{DynamicResource TextSecondary}" Content="&#xE713;" ToolTip="Configurações"
+                                    Foreground="{DynamicResource TextSecondary}" Content="&#xE713;" ToolTip="{x:Static y:Strings.Tab_Settings}"
                                     Click="OnSettingsClick"/>
                         </StackPanel>
                         </Grid>
@@ -282,11 +283,11 @@
 
                             <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,2,0,0">
                                 <!-- Filled glyphs, same family as the focus timer's buttons -->
-                                <Button Style="{StaticResource IconButton}" Content="&#xF8AC;" ToolTip="Anterior" Click="OnPrevious"/>
+                                <Button Style="{StaticResource IconButton}" Content="&#xF8AC;" ToolTip="{x:Static y:Strings.Media_Previous}" Click="OnPrevious"/>
                                 <Button x:Name="PlayPauseButton" Style="{StaticResource PrimaryIconButton}"
                                         Width="38" Height="38" FontSize="15" Margin="12,0"
                                         Content="&#xF5B0;" Click="OnPlayPause"/>
-                                <Button Style="{StaticResource IconButton}" Content="&#xF8AD;" ToolTip="Próxima" Click="OnNext"/>
+                                <Button Style="{StaticResource IconButton}" Content="&#xF8AD;" ToolTip="{x:Static y:Strings.Media_Next}" Click="OnNext"/>
                             </StackPanel>
                         </Grid>
                     </Grid>
@@ -323,7 +324,7 @@
                                        FontWeight="SemiBold" Typography.NumeralAlignment="Tabular"/>
                             <views:RavenSprite x:Name="IdleRaven" PixelSize="2" VerticalAlignment="Bottom" Margin="10,0,0,10"/>
                         </StackPanel>
-                        <TextBlock Text="Nada tocando" FontSize="13" HorizontalAlignment="Center"
+                        <TextBlock Text="{x:Static y:Strings.Media_NothingPlaying}" FontSize="13" HorizontalAlignment="Center"
                                    Foreground="{DynamicResource TextSecondary}"/>
                         <StackPanel x:Name="IdleWeather" Orientation="Horizontal" HorizontalAlignment="Center"
                                     Margin="0,8,0,0" Visibility="Collapsed">

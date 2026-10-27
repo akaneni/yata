@@ -65,7 +65,7 @@ internal static class CalendarEvents
             return null;
         }
 
-        string title = Str(item, "summary")?.Trim() is { Length: > 0 } summary ? summary : "(Sem título)";
+        string title = Str(item, "summary")?.Trim() is { Length: > 0 } summary ? summary : Strings.Calendar_Untitled;
         string id = Str(item, "iCalUID") ?? Str(item, "id") ?? title;
         return new CalendarEvent(id, title, from, to, allDay, FindMeetingUrl(item));
     }
@@ -149,13 +149,13 @@ internal static class CalendarReminders
     public static CalendarEvent? NextWithin(IEnumerable<CalendarEvent> events, DateTime now, TimeSpan window) =>
         events.Where(e => !e.AllDay && e.Start > now && e.Start - now <= window).MinBy(e => e.Start);
 
-    /// <summary>"em 8 min", "em 1h05", "agora".</summary>
+    /// <summary>"in 8 min", "in 1h05", "now".</summary>
     public static string Until(DateTime start, DateTime now)
     {
         var left = start - now;
         if (left <= TimeSpan.Zero)
-            return "agora";
+            return Strings.Calendar_Now;
         int minutes = (int)Math.Ceiling(left.TotalMinutes);
-        return minutes < 60 ? $"em {minutes} min" : $"em {minutes / 60}h{minutes % 60:00}";
+        return minutes < 60 ? string.Format(Strings.Calendar_InMinutes, minutes) : string.Format(Strings.Calendar_InHours, minutes / 60, minutes % 60);
     }
 }

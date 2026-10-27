@@ -27,6 +27,7 @@ internal static class Diagnostics
             .AppendLine($"{windows}, {RuntimeInformation.OSArchitecture}, .NET {Environment.Version}")
             .AppendLine($"Telas: {displays.Count} ({string.Join(", ", displays.Select(d => $"{d.Width}×{d.Height}{(d.IsPrimary ? " principal" : "")}"))})")
             .AppendLine($"Notch na tela: {(settings.Monitor == null ? "principal" : "escolhida")}")
+            .AppendLine($"Idioma: {settings.Language ?? $"do Windows ({Lang.FromWindows})"}")
             .AppendLine($"Letras: {OnOff(settings.LyricsEnabled)} · Tempo: {OnOff(settings.WeatherEnabled)} · " +
                         $"Aviso de versão: {OnOff(settings.UpdateCheckEnabled)} · Atalho: {OnOff(settings.HotkeyEnabled)}")
             .AppendLine($"Conta Google: {google} · Agenda no notch fechado: {OnOff(settings.CalendarInCompact)} · " +

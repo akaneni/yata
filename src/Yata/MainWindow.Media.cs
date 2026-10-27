@@ -66,7 +66,7 @@ public partial class MainWindow
             ArtistText.Text = _state.Artist;
             ArtistText.Visibility = string.IsNullOrEmpty(_state.Artist) ? Visibility.Collapsed : Visibility.Visible;
             PlayPauseButton.Content = _state.IsPlaying ? "\uF8AE" : "\uF5B0";
-            AutomationProperties.SetName(PlayPauseButton, _state.IsPlaying ? "Pausar" : "Tocar");
+            AutomationProperties.SetName(PlayPauseButton, _state.IsPlaying ? Strings.Media_Pause : Strings.Media_Play);
 
             if (previous == null || !ReferenceEquals(previous.Thumbnail, _state.Thumbnail))
                 SetArtwork(_state.Thumbnail);

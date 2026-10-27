@@ -38,8 +38,8 @@ internal sealed class KeyboardWatcher : IDisposable
         {
             _capsLock = capsLock;
             Message?.Invoke(capsLock
-                ? new HudMessage(Glyphs.Lock, "Caps Lock ativado", Kind: HudKind.CapsLock)
-                : new HudMessage(Glyphs.Keyboard, "Caps Lock desativado", Kind: HudKind.CapsLock));
+                ? new HudMessage(Glyphs.Lock, Strings.Hud_CapsLockOn, Kind: HudKind.CapsLock)
+                : new HudMessage(Glyphs.Keyboard, Strings.Hud_CapsLockOff, Kind: HudKind.CapsLock));
         }
 
         // Layouts are per window; only a change within the same window is a user switch.
@@ -67,7 +67,7 @@ internal sealed class KeyboardWatcher : IDisposable
         }
         catch (CultureNotFoundException)
         {
-            return ("Teclado", $"{languageId:X4}");
+            return (Strings.Hud_Keyboard, $"{languageId:X4}");
         }
     }
 }

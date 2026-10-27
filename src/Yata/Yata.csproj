@@ -68,6 +68,31 @@
     <InternalsVisibleTo Include="Yata.Tests" />
   </ItemGroup>
 
+  <!-- Interface text: Strings.resx is English (the default), Strings.pt-BR.resx the Portuguese.
+       Builds the Yata.Strings class, used as Strings.Key in code and {x:Static y:Strings.Key} in XAML. -->
+  <PropertyGroup>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Strings.resx">
+      <StronglyTypedFileName>Strings.Designer.cs</StronglyTypedFileName>
+      <StronglyTypedLanguage>CSharp</StronglyTypedLanguage>
+      <StronglyTypedNamespace>Yata</StronglyTypedNamespace>
+      <StronglyTypedClassName>Strings</StronglyTypedClassName>
+      <PublicClass>true</PublicClass>
+    </EmbeddedResource>
+  </ItemGroup>
+  <!-- WPF compiles the XAML before resources by default, but x:Static needs the class first. The class
+       sits next to Strings.resx (git-ignored) because XAML's temporary build only sees project files;
+       ResGen adds it to Compile again, so it is put back once. -->
+  <Target Name="StringsBeforeXaml" BeforeTargets="MarkupCompilePass1" DependsOnTargets="PrepareResourceNames;ResGen" />
+  <Target Name="StringsCompiledOnce" AfterTargets="CoreResGen">
+    <ItemGroup>
+      <Compile Remove="Strings.Designer.cs" />
+      <Compile Include="Strings.Designer.cs" />
+    </ItemGroup>
+  </Target>
+
   <!-- Google OAuth client ("Desktop app") for the calendar. Official releases get it from the
        YATA_GOOGLE_CLIENT_ID / YATA_GOOGLE_CLIENT_SECRET environment variables (GitHub secrets); it is
        never committed. Builds without it still run, with the calendar disabled. See docs/google-calendar.md. -->

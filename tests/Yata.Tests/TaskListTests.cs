@@ -20,6 +20,12 @@ public class TaskListTests
     [InlineData("Reunião 15:30", "Reunião", 15, 30)]
     [InlineData("ligar às 9h05", "ligar", 9, 5)]
     [InlineData("pagar conta as 18:00", "pagar conta", 18, 0)]
+    [InlineData("Call Ana at 3pm", "Call Ana", 15, 0)]
+    [InlineData("Dentist 9:30 am", "Dentist", 9, 30)]
+    [InlineData("Standup at 10:00", "Standup", 10, 0)]
+    [InlineData("Lunch 12pm", "Lunch", 12, 0)]
+    [InlineData("Backup 12:15 a.m.", "Backup", 0, 15)]
+    [InlineData("Revisar às 4 PM", "Revisar", 16, 0)]
     public void A_trailing_time_becomes_the_due_time(string input, string text, int hour, int minute)
     {
         var list = NewList();
@@ -46,6 +52,9 @@ public class TaskListTests
     [InlineData("Ler capítulo 25")]
     [InlineData("Treino 25:00")]   // not a time of day
     [InlineData("Ver 10:75")]
+    [InlineData("Room 13pm")]      // no 13 o'clock on a 12-hour clock
+    [InlineData("Shift 0am")]
+    [InlineData("Read chapter 3")]
     public void Text_without_a_valid_trailing_time_has_no_due(string input)
     {
         var list = NewList();

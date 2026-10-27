@@ -80,7 +80,7 @@ public sealed class GoogleCalendar
     public async Task ConnectAsync()
     {
         if (await _account.ConnectAsync(GoogleAuth.CalendarScopes,
-                "Marque a permissão de ver a agenda para o Yata poder mostrar seus eventos."))
+                Strings.Calendar_AskPermission))
             await RefreshAsync();
     }
 
@@ -173,14 +173,14 @@ public sealed class GoogleCalendar
         catch (GoogleApiException ex) when (ex.ApiDisabled)
         {
             Log.Warn("calendar", "API do Google Agenda desativada no projeto", ex);
-            _error = "A API do Google Agenda não está ativada no projeto do Google Cloud.";
+            _error = Strings.Calendar_ApiDisabled;
             Changed?.Invoke();
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             // Offline or a hiccup: keep showing what we had and retry soon.
             Log.Warn("calendar", "Falha ao buscar eventos", ex);
-            _error = "Sem conexão com o Google Agenda.";
+            _error = Strings.Calendar_NoConnection;
             Changed?.Invoke();
         }
         finally
@@ -196,7 +196,7 @@ public sealed class GoogleCalendar
         {
             Chime.Play();
             Message?.Invoke(new HudMessage(Glyphs.Calendar, e.Title,
-                starting ? "agora" : CalendarReminders.Until(e.Start, now), DurationMs: 6000, Important: true));
+                starting ? Strings.Calendar_Now : CalendarReminders.Until(e.Start, now), DurationMs: 6000, Important: true));
         }
     }
 

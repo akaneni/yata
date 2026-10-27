@@ -1,62 +1,64 @@
-# Política de privacidade do Yata
+# Yata privacy policy
 
-*Última atualização: 27 de outubro de 2026*
+**English** · [Português](PRIVACY.pt-BR.md)
 
-O Yata é um app de código aberto para Windows que mostra um "notch" no topo da tela. Ele não tem conta, servidor nem telemetria. Esta política explica quais dados o Yata usa e para onde eles vão.
+*Last updated: October 27, 2026*
 
-## Dados que ficam no seu computador
+Yata is an open-source Windows app that shows a "notch" at the top of the screen. It has no account, no server and no telemetry. This policy explains what data Yata uses and where it goes.
 
-Tarefas, registro de água, caminhos da prateleira e configurações ficam em `%LOCALAPPDATA%\Yata\data.json`. Esses dados nunca são enviados para fora do PC, com uma exceção que você escolhe: se ligar a sincronização com o Google Tasks, as tarefas vão para a sua lista no Google (veja abaixo).
+## Data that stays on your computer
 
-O Yata também mantém um registro de diagnóstico em `%LOCALAPPDATA%\Yata\logs`: horário, qual parte do app agiu e os erros que aconteceram. Ele não guarda títulos de músicas, textos de tarefas, títulos de eventos, nomes de arquivos, localização nem conta; caminhos, endereços web e e-mails que apareçam numa mensagem de erro são apagados antes de gravar. Cada arquivo é guardado por 7 dias e tem no máximo 1 MB por dia. Se o Yata fechar por um erro, ele grava um `crash-*.log` ali e encerra sem acionar o Relatório de Erros do Windows. Nada disso é enviado: você decide se quer anexar a uma issue (Configurações → Abrir registro ou Copiar diagnóstico).
+Tasks, water log, shelf paths and settings are kept in `%LOCALAPPDATA%\Yata\data.json`. This data never leaves your PC, with one exception you choose: if you turn on Google Tasks sync, your tasks go to your list on Google (see below).
 
-## Serviços externos
+Yata also keeps a diagnostic log in `%LOCALAPPDATA%\Yata\logs`: the time, which part of the app acted and any errors that happened. It does not record song titles, task text, event titles, file names, location or account. Paths, web addresses and email addresses that appear in an error message are removed before writing. Each file is kept for 7 days, with at most 1 MB per day. If Yata closes because of an error, it writes a `crash-*.log` there and exits without triggering Windows Error Reporting. None of this is sent anywhere: you decide whether to attach it to an issue (Settings → Open log or Copy diagnostics).
 
-O Yata só acessa a internet nestes casos:
+## External services
 
-- **LRCLIB** (lrclib.net), para buscar letras de músicas: envia artista, título e duração da faixa que está tocando. Pode ser desligado nas Configurações.
-- **Open-Meteo** (open-meteo.com), para o tempo, somente se você ligar: envia a latitude e a longitude da cidade escolhida, arredondadas para cerca de 1 km. Ao buscar a cidade, envia o nome digitado. Se você clicar em "Usar minha localização", o Yata pede ao Windows a posição uma única vez, arredonda para cerca de 1 km na hora e descarta o valor preciso. Ele não acompanha a localização depois disso e nunca descobre onde você está pelo IP. Guarda nas configurações só o nome escolhido e as coordenadas arredondadas.
-- **GitHub** (api.github.com), para o aviso de versão nova, somente se você ligar (vem desligado): uma vez por dia, pergunta qual é a versão mais recente do Yata. O pedido leva só o nome e a versão do Yata.
-- **Google Agenda** e **Google Tasks**, somente se você conectar sua conta e liberar cada um (veja abaixo).
+Yata only goes online in these cases:
 
-## Google Agenda
+- **LRCLIB** (lrclib.net), to look up song lyrics: sends the artist, title and length of the track that is playing. Can be turned off in Settings.
+- **Open-Meteo** (open-meteo.com), for the weather, only if you turn it on: sends the latitude and longitude of the chosen city, rounded to about 1 km. When you search for a city, it sends the name you typed. If you click "Use my location", Yata asks Windows for your position once, rounds it to about 1 km right away and discards the precise value. It does not track your location after that and never works out where you are from your IP. Settings keep only the chosen name and the rounded coordinates.
+- **GitHub** (api.github.com), for the new-version notice, only if you turn it on (it starts off): once a day, it asks which Yata version is the latest. The request carries only the name and version of Yata.
+- **Google Calendar** and **Google Tasks**, only if you connect your account and enable each one (see below).
 
-Ao conectar, você autoriza o Yata, na tela do próprio Google, a:
+## Google Calendar
 
-- ver seu endereço de e-mail, só para mostrar qual conta está conectada;
-- ver a lista das suas agendas, para você escolher quais aparecem;
-- ver os eventos das agendas escolhidas (**somente leitura**).
+When you connect, you authorize Yata, on Google's own screen, to:
 
-Como os dados são usados:
+- see your email address, only to show which account is connected;
+- see the list of your calendars, so you can choose which ones appear;
+- see the events in the chosen calendars (**read-only**).
 
-- O Yata busca os eventos **de hoje e de amanhã** para mostrá-los no notch e na aba Agenda e para avisar antes de cada um. Do evento, o app usa título, horário, status de resposta e link da chamada (Meet, Zoom, Teams).
-- Os eventos ficam **só na memória** e somem quando o Yata fecha. Nada é gravado em disco, exceto a lista de agendas que você escolheu.
-- O acesso concedido pelo Google (*refresh token*) e seu e-mail ficam em `%LOCALAPPDATA%\Yata\google.dat`, **cifrados com a proteção de dados do Windows (DPAPI)**: só o seu usuário do Windows, neste computador, consegue ler.
-- A comunicação é feita **diretamente** entre o seu PC e os servidores do Google. Nenhum dado passa por servidores do Yata ou de terceiros, porque eles não existem.
-- O Yata **não** cria, altera nem apaga eventos, **não** compartilha seus dados com ninguém, **não** os usa para publicidade e **não** os usa para treinar modelos de IA.
+How the data is used:
+
+- Yata fetches **today's and tomorrow's** events to show them in the notch and in the Agenda tab, and to notify you before each one. From each event, the app uses the title, time, response status and call link (Meet, Zoom, Teams).
+- Events are kept **in memory only** and disappear when Yata closes. Nothing is written to disk except the list of calendars you chose.
+- The access granted by Google (*refresh token*) and your email are kept in `%LOCALAPPDATA%\Yata\google.dat`, **encrypted with Windows data protection (DPAPI)**: only your Windows user, on this computer, can read it.
+- Communication happens **directly** between your PC and Google's servers. No data goes through Yata's or anyone else's servers, because there are none.
+- Yata does **not** create, change or delete events, does **not** share your data with anyone, does **not** use it for advertising and does **not** use it to train AI models.
 
 ## Google Tasks
 
-Se você liga **Tarefas** nas Configurações, o Yata pede ao Google permissão para **ver e editar suas tarefas**. A edição é necessária porque a sincronização vale nos dois sentidos.
+If you turn on **Tasks** in Settings, Yata asks Google for permission to **see and edit your tasks**. Editing is needed because the sync works both ways.
 
-- O Yata lê **uma lista** escolhida por você (de início, "Minhas tarefas"): as tarefas abertas e as concluídas hoje. Usa título, situação (aberta ou concluída) e data.
-- Quando você cria, conclui, reabre ou remove uma tarefa no Yata, ele faz o mesmo nessa lista. Ele **não** mexe em outras listas nem em notas e subtarefas.
-- As tarefas sincronizadas ficam em `%LOCALAPPDATA%\Yata\data.json`, junto com as tarefas locais, para a aba funcionar sem internet. Ao desligar a sincronização ou desconectar a conta, as tarefas vindas do Google são apagadas desse arquivo (elas continuam no Google).
-- O horário de um lembrete ("Reunião 15:30") fica só no Yata. O Google Tasks recebe apenas o dia.
-- Como na agenda, a comunicação é direta entre o seu PC e o Google, e os dados não são compartilhados, usados para publicidade ou para treinar modelos de IA.
+- Yata reads **one list** chosen by you (at first, "My Tasks"): open tasks and those completed today. It uses the title, status (open or completed) and date.
+- When you create, complete, reopen or remove a task in Yata, it does the same in that list. It does **not** touch other lists, notes or subtasks.
+- Synced tasks are kept in `%LOCALAPPDATA%\Yata\data.json`, together with local tasks, so the tab works offline. When you turn off sync or disconnect the account, the tasks that came from Google are deleted from that file (they stay on Google).
+- The time of a reminder ("Meeting 15:30") stays in Yata only. Google Tasks receives just the day.
+- As with the calendar, communication is direct between your PC and Google, and the data is not shared, used for advertising or used to train AI models.
 
-O uso e a transferência, pelo Yata, de informações recebidas das APIs do Google seguem a [Política de dados do usuário dos serviços de API do Google](https://developers.google.com/terms/api-services-user-data-policy), incluindo os requisitos de Uso Limitado (*Limited Use*).
+Yata's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements.
 
-### Como remover o acesso
+### How to remove access
 
-- No Yata: **Configurações → Google → Desconectar**. O acesso (agenda e tarefas) é revogado no Google e o arquivo local é apagado.
-- No Google: <https://myaccount.google.com/connections>, removendo o Yata.
-- Desinstalar o Yata não apaga a pasta `%LOCALAPPDATA%\Yata`. Apague a pasta manualmente se quiser remover tudo.
+- In Yata: **Settings → Google → Disconnect**. Access (calendar and tasks) is revoked at Google and the local file is deleted.
+- At Google: <https://myaccount.google.com/connections>, removing Yata.
+- Uninstalling Yata does not delete the `%LOCALAPPDATA%\Yata` folder. Delete it by hand if you want to remove everything.
 
-## Este site
+## This website
 
-O [getyata.app](https://getyata.app) é uma página estática hospedada no GitHub Pages e entregue pelo Cloudflare. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes vêm do Google Fonts. O GitHub e o Cloudflare, como hospedagem e entrega, podem manter registros comuns de servidor. A mesma política está no site em [inglês](https://getyata.app/privacy) e [português](https://getyata.app/pt/privacy).
+[getyata.app](https://getyata.app) is a static page hosted on GitHub Pages and served through Cloudflare. It sets no cookies and runs no analytics or trackers. Fonts load from Google Fonts. GitHub and Cloudflare, as host and delivery network, may keep standard server logs. The same policy is on the website in [English](https://getyata.app/privacy) and [Portuguese](https://getyata.app/pt/privacy).
 
-## Contato
+## Contact
 
-Dúvidas ou problemas: abra uma issue em <https://github.com/akaneni/yata/issues>.
+Questions or problems: open an issue at <https://github.com/akaneni/yata/issues>.

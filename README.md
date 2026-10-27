@@ -1,173 +1,181 @@
 <h1><img src="docs/brand/yata-lockup.svg" alt="Yata" height="56"></h1>
 
-![O Yata, corvo em pixel art, pousado diante de um sol pontilhado](docs/yata-hero.png)
+**English** · [Português](README.pt-BR.md)
 
-Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que está tocando, a hora, seus lembretes, e sai do caminho quando não é necessário. Site: **[getyata.app](https://getyata.app)**.
+![Yata, a pixel-art raven, perched in front of a dithered sun](docs/yata-hero.png)
 
-O nome vem de **Yatagarasu** (八咫烏), o corvo mensageiro e guia da mitologia japonesa — parente dos corvos Huginn e Muninn, que voam pelo mundo e voltam contando o que viram. É isso que o Yata faz: fica lá em cima e te traz as notícias.
+A live notch at the top of the Windows screen, right below the camera: it shows what's playing, the time and your reminders, and gets out of the way when it isn't needed. Website: **[getyata.app](https://getyata.app)**.
 
-Projeto de código aberto, sem conta e sem telemetria.
+The name comes from **Yatagarasu** (八咫烏), the messenger and guide crow of Japanese mythology — a relative of Huginn and Muninn, the ravens who fly over the world and come back to tell what they saw. That's what Yata does: it sits up there and brings you the news.
 
-**Dados locais:** tarefas, registro de água e caminhos da prateleira ficam em `%LOCALAPPDATA%\Yata\data.json`. Um registro de diagnóstico (erros e o que cada parte do app fez, sem músicas, tarefas, eventos, caminhos ou contas) fica em `%LOCALAPPDATA%\Yata\logs` por 7 dias, para você anexar numa issue se quiser.
+Open source, no account and no telemetry.
 
-**Acesso à rede:** só o que você liga, e nada sobre o PC é enviado:
-- busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`. Pode ser desligada nas configurações.
-- aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. A instalação continua manual.
-- **tempo** no [Open-Meteo](https://open-meteo.com) (aberto, sem conta nem chave), só se você ligar: envia as coordenadas da cidade escolhida, arredondadas para ~1 km. A busca da cidade envia só o nome digitado.
-- **Google Agenda e Google Tasks**, só se você conectar sua conta e liberar cada um: leitura das agendas e dos eventos de hoje e amanhã, e sincronização de uma lista de tarefas, direto entre o PC e o Google. O acesso fica cifrado com DPAPI em `%LOCALAPPDATA%\Yata\google.dat` e os eventos ficam só na memória. Detalhes em [PRIVACY.md](PRIVACY.md).
+**Local data:** tasks, the water log and shelf paths are kept in `%LOCALAPPDATA%\Yata\data.json`. A diagnostic log (errors and what each part of the app did, with no songs, tasks, events, paths or accounts) is kept in `%LOCALAPPDATA%\Yata\logs` for 7 days, for you to attach to an issue if you want.
 
-## Identidade
+**Network access:** only what you turn on, and nothing about the PC is sent:
+- lyrics lookup on [LRCLIB](https://lrclib.net) (an open, free service), sending only the artist, title and length of the song. Lyrics are cached in `%LOCALAPPDATA%\Yata\lyrics`. Can be turned off in Settings.
+- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. Installing stays manual.
+- **weather** from [Open-Meteo](https://open-meteo.com) (open, no account or key), only if you turn it on: sends the chosen city's coordinates, rounded to ~1 km. The city search sends only the name you type.
+- **Google Calendar and Google Tasks**, only if you connect your account and allow each one: reading your calendars and today's and tomorrow's events, and syncing one task list, directly between the PC and Google. The access is encrypted with DPAPI in `%LOCALAPPDATA%\Yata\google.dat` and events stay in memory only. Details in [PRIVACY.md](PRIVACY.md).
 
-- **Minimalista e monocromático**: notch preto, texto branco; a cor da capa da música é o único acento.
-- **O Yata**: um corvo em pixel art 1-bit (16×14), branco sobre o preto do notch. Desenhado à mão em `Views/RavenSprite.cs`; o ícone do app é gerado a partir do mesmo sprite (`tools/make-icon.ps1`).
-- **Repertório**: pisca, olha para trás, se ajeita e, de vez em quando, olha para cima, estica a asa ou dá um pulinho; dorme respirando devagar; grasna quando traz um lembrete, se sacode quando a meta de água é batida e chega com uma carta quando traz as novidades.
-- **Logotipo**: "yata" em letras de pixel na mesma grade do corvo, traço de 2 px; o rabo do "y" desce no mesmo ângulo das costas do Yata, que pousa na linha de base do texto. Versões em branco, preto e uma que segue o tema claro/escuro em `docs/brand/`, geradas por `tools/make-brand.ps1` a partir do próprio sprite (junto com o favicon e a prévia de link do site).
-- **Tipografia do site**: DotGothic16 nos títulos (pixel, com o 八咫烏), Geist no texto e Geist Mono nos detalhes.
-- **Artes maiores** (README e instalador): o mesmo traço no dobro da resolução e com três pernas, como o Yatagarasu do mito, diante de um sol pontilhado em 1-bit. Geradas com o PhotoCraft da suíte ArtCraft (`tools/make-art.ps1`); o GIF abaixo sai do próprio sprite e é codificado no EffectCraft (`tools/make-gif.ps1`).
+## Identity
 
-![O repertório do Yata no notch](docs/yata.gif)
+- **Minimal and monochrome**: black notch, white text; the album art's color is the only accent.
+- **Yata**: a 1-bit pixel-art raven (16×14), white on the notch's black. Hand-drawn in `Views/RavenSprite.cs`; the app icon is generated from the same sprite (`tools/make-icon.ps1`).
+- **Repertoire**: blinks, looks back, settles its feathers and, now and then, looks up, stretches a wing or hops; sleeps breathing slowly; caws when it brings a reminder, shakes off water when the water goal is reached and arrives with a letter when it brings the news.
+- **Logo**: "yata" in pixel letters on the raven's grid, with a 2 px stroke; the tail of the "y" goes down at the same angle as Yata's back, and Yata perches on the text's baseline. White, black and light/dark-theme versions in `docs/brand/`, generated by `tools/make-brand.ps1` from the sprite itself (along with the favicon and the site's link preview).
+- **Website type**: DotGothic16 for headings (pixel, with the 八咫烏), Geist for text and Geist Mono for details.
+- **Larger art** (README and installer): the same stroke at twice the resolution and with three legs, like the Yatagarasu of the myth, in front of a 1-bit dithered sun. Made with PhotoCraft from the ArtCraft suite (`tools/make-art.ps1`); the GIF below comes from the sprite itself and is encoded with EffectCraft (`tools/make-gif.ps1`).
 
-## Funcionalidades (v0.1)
+![Yata's repertoire in the notch](docs/yata.gif)
 
-- **Notch compacto**: relógio quando nada toca; capa, título e equalizador animado quando há mídia.
-- **Expande ao passar o mouse** com animação de mola; recolhe ao sair.
-- **Player de mídia** de qualquer app que use os controles de mídia do Windows (Spotify, YouTube no navegador, etc.): capa, título, artista, barra de progresso com busca, anterior/play/próxima. Com vários players abertos, segue o que está **tocando de fato**.
-- **Letras sincronizadas**: o notch se divide em dois (player + letra rolando), a linha atual fica em destaque e clicar numa linha pula para ela. No modo compacto aparece a linha sendo cantada.
-- **Avisos do sistema** no notch compacto: volume/mudo, brilho, carregador conectado/desconectado, bateria baixa (20% e 10%), troca de saída de áudio (fone/caixa), Caps Lock, troca de idioma do teclado e conexão de rede. O teclado é lido por consulta de estado, **sem hook** — o app nunca vê o que é digitado.
-- **Câmera e microfone em uso**: ponto laranja (microfone) ou verde (câmera) no notch fechado e o nome dos apps no notch aberto. O microfone vem das sessões de áudio do Windows (Core Audio). A câmera depende do registro que o Windows mantinha até a versão 25H2; no Windows 11 26H2 esse dado passou a exigir administrador, então lá só o microfone é detectado.
-- **Atalho Ctrl+Alt+Y** abre e fecha o notch de qualquer lugar (`RegisterHotKey`: o Windows avisa só essa combinação).
-- **Vários monitores**: escolha nas configurações em qual tela o notch fica; respeita a escala de cada tela.
-- **Abas no notch aberto**: Mídia, Agenda, Foco, Água, Tarefas e Prateleira.
-- **Agenda (Google)**: conecte com sua conta Google (OAuth, só leitura) e escolha quais agendas aparecem. A aba mostra hoje e amanhã, destaca o evento em andamento e tem o botão **Entrar** para chamadas do Meet, Zoom e Teams. O notch fechado mostra "Daily em 8 min" nos 15 minutos antes, e chega um aviso (com som) alguns minutos antes, configurável, e outro quando o evento começa. Convites recusados não aparecem. Para cadastrar o app no Google, veja [docs/google-calendar.md](docs/google-calendar.md).
-- **Tempo** (desligado por padrão): você escolhe a cidade pelo nome ou, se preferir, com uma leitura única da localização do Windows (arredondada para ~1 km na hora, nunca guardada com precisão). Nada de geolocalização por IP. Ícones em pixel art 1-bit no estilo do Yata. O notch fechado mostra ícone e temperatura ao lado do relógio; aberto sem música, mostra condição, máxima/mínima e a chuva prevista. Chega um aviso quando a chance de chuva passa de 60% nas próximas 2 horas. Dados do tempo: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
-- **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
-- **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
-- **Tarefas**: lista com marcar/remover; um horário no fim do texto ("Reunião 15:30") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
-- **Prateleira de arquivos**: arraste arquivos ou pastas até o notch para guardar e arraste de volta para qualquer app; clique duplo abre. Guarda só o caminho (nada é copiado) e itens apagados/movidos somem sozinhos. Imagens ganham miniatura.
-- **O Yata (companheiro)**, a partir do tempo desde o último uso de mouse/teclado (`GetLastInputInfo` — só o horário, nunca o conteúdo):
-  - **Modo ambiente** (2 min parado, nada tocando): o relógio dá lugar ao Yata pousado, que pisca, olha em volta e se ajeita; aos 10 min ele cochila.
-  - **Com música tocando** e você longe: ele toma o lugar do equalizador e balança a cabeça.
-  - **"Enquanto você esteve fora"**: ao voltar, o Yata chega voando com uma carta e os avisos que você perdeu (lembretes, água, bateria, foco pausado).
-  - **Mensageiro**: lembretes (tarefas, água, foco, versão nova) chegam com o Yata grasnando no lugar do ícone; pequenas vitórias ganham comemoração (voo ao fim do foco, sacudida na meta de água).
-  - **Pausa automática do foco** após 5 min longe (devolvendo o tempo não acompanhado), exceto se houver mídia tocando.
-  - **Demonstração** pelo menu da bandeja (ou `Yata.exe --demo`) para ver todos os estados em ~30 s.
-- **Configurações** (engrenagem no notch, menu ou clique duplo na bandeja): iniciar com o Windows, esconder em tela cheia, demora para abrir, cor da capa ou preto e branco, letras liga/desliga, cada tipo de aviso, tempos do Pomodoro, meta e lembretes de água, e o comportamento do Yata. Tudo aplica na hora.
-- Lembretes que chegam com o notch aberto ou em tela cheia esperam e aparecem depois, em vez de serem perdidos.
-- **Some em tela cheia** (vídeos, jogos, apresentações).
-- Não rouba o foco, não aparece no Alt+Tab nem na barra de tarefas. Sair pelo ícone na bandeja.
+## Features (v0.1)
 
-## Instalar
+- **English and Portuguese**: follows the Windows language (Portuguese on any Portuguese Windows, English everywhere else), or pick one in Settings → Language.
+- **Compact notch**: a clock when nothing is playing; album art, title and an animated equalizer when media is.
+- **Expands on hover** with a spring animation; collapses when the mouse leaves.
+- **Media player** for any app that uses the Windows media controls (Spotify, YouTube in the browser, etc.): album art, title, artist, a seekable progress bar, previous/play/next. With several players open, it follows the one that is **actually playing**.
+- **Synced lyrics**: the notch splits in two (player + scrolling lyrics), the current line is highlighted and clicking a line jumps to it. The compact notch shows the line being sung.
+- **System notices** in the compact notch: volume/mute, brightness, charger plugged/unplugged, low battery (20% and 10%), audio output change (headphones/speakers), Caps Lock, keyboard language change and network connection. The keyboard is read by polling its state, **with no hook** — the app never sees what you type.
+- **Camera and microphone in use**: an orange (microphone) or green (camera) dot in the closed notch and the apps' names in the open notch. The microphone comes from Windows audio sessions (Core Audio). The camera relies on the registry Windows kept up to version 25H2; on Windows 11 26H2 that data requires administrator rights, so there only the microphone is detected.
+- **Ctrl+Alt+Y shortcut** opens and closes the notch from anywhere (`RegisterHotKey`: Windows reports only that combination).
+- **Multiple displays**: choose in Settings which display the notch sits on; it respects each display's scaling.
+- **Tabs in the open notch**: Media, Calendar, Focus, Water, Tasks and Shelf.
+- **Calendar (Google)**: connect your Google account (OAuth, read-only) and choose which calendars appear. The tab shows today and tomorrow, highlights the ongoing event and has a **Join** button for Meet, Zoom and Teams calls. The closed notch shows "Standup in 8 min" in the 15 minutes before, and a notice (with sound) arrives a configurable few minutes before, plus another when the event starts. Declined invitations don't appear. To register the app with Google, see [docs/google-calendar.md](docs/google-calendar.md) (in Portuguese).
+- **Weather** (off by default): pick the city by name or, if you prefer, with a single reading of the Windows location (rounded to ~1 km right away, never stored precisely). No IP geolocation. 1-bit pixel-art icons in Yata's style. The closed notch shows the icon and temperature next to the clock; open with no music, it shows the condition, high/low and expected rain. A notice arrives when the chance of rain goes over 60% in the next 2 hours. Weather data: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
+- **Focus (Pomodoro)**: 25 min of focus / 5 min break, a 15 min long break every 4 sessions, a sound at the end of each phase and a countdown in the compact notch. Explicit controls for each state: **Start**, **Pause**, **Resume**, **Stop** and **Skip break**; when paused, the ring dims and the time pulses gently (and the compact notch shows ⏸).
+- **Water**: a daily goal, a +250 ml button, a chart of the last 7 days and an hourly reminder (8:00–22:00) until the goal is reached.
+- **Tasks**: a list with check/remove; a time at the end of the text ("Call Ana at 3pm", "Meeting 15:30", "ligar às 9h00") becomes a reminder. Optionally syncs both ways with a **Google Tasks** list (Google keeps only the day; the reminder time stays in Yata). The notch takes keyboard focus only while you type and gives focus back to the previous window when you're done.
+- **File shelf**: drag files or folders onto the notch to keep them and drag them back out into any app; double-click opens. Only the path is kept (nothing is copied), and deleted/moved items disappear on their own. Images get a thumbnail.
+- **Yata (the companion)**, based on the time since the last mouse/keyboard input (`GetLastInputInfo` — only the time, never the content):
+  - **Ambient mode** (2 min idle, nothing playing): the clock gives way to Yata perched, blinking, looking around and settling; at 10 min it naps.
+  - **With music playing** while you're away: it takes the equalizer's place and bobs its head.
+  - **"While you were away"**: when you come back, Yata flies in with a letter and the notices you missed (reminders, water, battery, paused focus).
+  - **Messenger**: reminders (tasks, water, focus, new version) arrive with Yata cawing in place of the icon; small wins get a celebration (a flight at the end of focus, a shake at the water goal).
+  - **Automatic focus pause** after 5 min away (giving back the unattended time), unless media is playing.
+  - **Demo** from the tray menu (or `Yata.exe --demo`) to see every state in ~30 s.
+- **Settings** (the gear in the notch, the menu or a double-click on the tray icon): language, start with Windows, hide in full screen, hover delay, album art color or black and white, lyrics on/off, each kind of notice, Pomodoro times, water goal and reminders, and Yata's behavior. Everything applies immediately.
+- Reminders that arrive while the notch is open or in full screen wait and show up afterwards instead of being lost.
+- **Hides in full screen** (videos, games, presentations).
+- Doesn't steal focus and doesn't show in Alt+Tab or the taskbar. Quit from the tray icon.
 
-Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~3 MB). O instalador:
+## Install
 
-- instala só para o seu usuário, sem pedir administrador;
-- se faltar o **.NET 10 Desktop Runtime**, baixa direto da Microsoft e instala (essa etapa pede permissão de administrador);
-- oferece iniciar com o Windows e atalho na área de trabalho;
-- na desinstalação, remove o app e a inicialização automática, mas **mantém seus dados** em `%LOCALAPPDATA%\Yata`.
+Download `Yata-Setup-x.y.z.exe` from [Releases](https://github.com/akaneni/yata/releases) (~3 MB). The installer:
 
-Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução. A assinatura gratuita pela SignPath Foundation está em andamento: veja a [política de assinatura de código](https://getyata.app/code-signing) e [docs/code-signing.md](docs/code-signing.md).
+- installs for your user only, without asking for administrator rights;
+- if the **.NET 10 Desktop Runtime** is missing, downloads it straight from Microsoft and installs it (that step asks for administrator rights);
+- offers to start with Windows and a desktop shortcut;
+- on uninstall, removes the app and the automatic start but **keeps your data** in `%LOCALAPPDATA%\Yata`.
 
-## Requisitos
+Each release comes with a `SHA256SUMS.txt` to check the downloaded file. The installer isn't digitally signed yet, so Windows SmartScreen may warn on the first run. Free signing through the SignPath Foundation is in progress: see the [code signing policy](https://getyata.app/code-signing) and [docs/code-signing.md](docs/code-signing.md) (in Portuguese).
 
-- Windows 10 (2004+) ou 11, x64
-- [.NET 10 SDK](https://dotnet.microsoft.com/download) para compilar
+## Requirements
 
-## Compilar e rodar
+- Windows 10 (2004+) or 11, x64
+- [.NET 10 SDK](https://dotnet.microsoft.com/download) to build
+
+## Build and run
 
 ```powershell
 dotnet run --project src/Yata
 ```
 
-A agenda e as tarefas do Google precisam de um cliente OAuth próprio, que não fica no repositório. Sem ele, o resto do app funciona normalmente. Veja [docs/google-calendar.md](docs/google-calendar.md).
+Google Calendar and Tasks need your own OAuth client, which isn't in the repository. Without it, the rest of the app works normally. See [docs/google-calendar.md](docs/google-calendar.md).
 
-Testes automáticos (Pomodoro, letras, tarefas, água, presença, escolha do player, aviso de versão e agenda, com relógio simulado e sem rede). Rodam também no GitHub Actions a cada push:
+Automated tests (Pomodoro, lyrics, tasks, water, presence, player choice, version notice, calendar and translations, with a simulated clock and no network). They also run on GitHub Actions on every push:
 
 ```powershell
 dotnet test
 ```
 
-Abrir o notch numa aba sem usar o mouse, por N segundos (prévias, capturas e testes de interface):
+Open the notch on a tab without using the mouse, for N seconds (previews, screenshots and UI tests):
 
 ```powershell
-Yata.exe --show foco 30     # foco | agua | tarefas | prateleira | media
+Yata.exe --show focus 30     # focus | water | tasks | shelf | calendar | media
 ```
 
-Medir CPU, despertares, memória e tempo de abertura em estados fixos (nada tocando, música com letra, notch aberto e Pomodoro). Cada rodada usa um perfil descartável, uma música simulada e nenhuma rede, então seus dados e o que você faz no PC durante a medição não entram nos números. Um Yata aberto é fechado e reaberto no fim:
+Measure CPU, wake-ups, memory and startup time in fixed states (nothing playing, music with lyrics, open notch and Pomodoro). Each round uses a throwaway profile, a simulated song and no network, so your data and what you do on the PC during the measurement stay out of the numbers. A running Yata is closed and reopened at the end:
 
 ```powershell
 ./tools/measure.ps1 -Phases             # -States parado,musica -Rounds 3 -Seconds 20 -OutFile medicao.csv
 ```
 
-Gerar o instalador localmente (precisa do [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
+Build the installer locally (needs [Inno Setup 6](https://jrsoftware.org/isinfo.php)):
 
 ```powershell
-./tools/build-installer.ps1 -Version 0.1.0   # sai em dist/
+./tools/build-installer.ps1 -Version 0.1.0   # output in dist/
 ```
 
-Releases são gerados pelo GitHub Actions ao enviar uma tag de versão:
+Releases are built by GitHub Actions when a version tag is pushed:
 
 ```powershell
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-O site ([getyata.app](https://getyata.app)) fica em `site/`: a página em inglês é `site/index.html`, e a versão em português sai das traduções em `site/pt.json`. A política de privacidade do site espelha o `PRIVACY.md`. Montar e ver localmente (publicado no GitHub Pages a cada push na `main` que mexa no site):
+## Translations
+
+Interface text lives in `src/Yata/Strings.resx` (English, the default) and `src/Yata/Strings.pt-BR.resx` (Portuguese). Use it as `Strings.Key` in C# and `{x:Static y:Strings.Key}` in XAML. A test fails when a language misses a key, has one left over or uses different `{0}` placeholders. `Helpers/Lang.cs` picks the language at startup. Log messages stay in Portuguese, since they're for whoever is debugging.
+
+The website ([getyata.app](https://getyata.app)) lives in `site/`: the English page is `site/index.html`, and the Portuguese version comes from the translations in `site/pt.json`. The site's privacy policy mirrors `PRIVACY.md` and `PRIVACY.pt-BR.md`. Build and preview locally (published to GitHub Pages on every push to `main` that touches the site):
 
 ```powershell
-./tools/make-site.ps1                        # sai em _site/
+./tools/make-site.ps1                        # output in _site/
 python -m http.server 8000 -d _site          # http://localhost:8000
 ```
 
-## Estrutura
+## Structure
 
 ```
 src/Yata/
-  App.xaml(.cs)               inicialização, instância única, ícone na bandeja
-  MainWindow.xaml(.cs)        janela do notch, formato, animação, modos compacto/expandido
-  MainWindow.*.cs             partes por assunto: mídia, letra, avisos, Yata, privacidade, atalho...
-  Views/RavenSprite.cs        o Yata: quadros em pixel art e renderização nítida
-  Views/RavenAnimator.cs      comportamento do Yata (piscar, olhar, dormir, voar)
-  Views/                      páginas Foco, Água, Tarefas e Prateleira
-  Services/PresenceTracker.cs ausência/retorno e o resumo "enquanto você esteve fora"
-  Services/MediaService.cs    sessão de mídia do Windows (SMTC)
-  Services/LyricsService.cs   busca/cache de letras (LRCLIB) e parser LRC
-  Services/AudioWatcher.cs    volume e dispositivo de saída (Core Audio)
-  Services/BrightnessWatcher.cs  brilho (WMI)
-  Services/PowerWatcher.cs    carregador e bateria
-  Services/NetworkWatcher.cs  conexão de rede
-  Services/KeyboardWatcher.cs Caps Lock e idioma do teclado (sem hook)
-  Services/FullscreenWatcher.cs  detecta app em tela cheia e mantém o notch no topo
-  Services/PrivacyWatcher.cs  câmera e microfone em uso (MicrophoneMonitor.cs: Core Audio)
-  Services/UpdateChecker.cs   aviso opcional de versão nova (releases do GitHub)
-  Services/AppStore.cs        persistência local (JSON)
+  App.xaml(.cs)               startup, single instance, tray icon
+  MainWindow.xaml(.cs)        the notch window, shape, animation, compact/expanded modes
+  MainWindow.*.cs             parts by topic: media, lyrics, notices, Yata, privacy, hotkey...
+  Views/RavenSprite.cs        Yata: pixel-art frames and crisp rendering
+  Views/RavenAnimator.cs      Yata's behavior (blink, look, sleep, fly)
+  Views/                      Focus, Water, Tasks and Shelf pages
+  Services/PresenceTracker.cs away/back and the "while you were away" summary
+  Services/MediaService.cs    Windows media session (SMTC)
+  Services/LyricsService.cs   lyrics lookup/cache (LRCLIB) and LRC parser
+  Services/AudioWatcher.cs    volume and output device (Core Audio)
+  Services/BrightnessWatcher.cs  brightness (WMI)
+  Services/PowerWatcher.cs    charger and battery
+  Services/NetworkWatcher.cs  network connection
+  Services/KeyboardWatcher.cs Caps Lock and keyboard language (no hook)
+  Services/FullscreenWatcher.cs  detects full-screen apps and keeps the notch on top
+  Services/PrivacyWatcher.cs  camera and microphone in use (MicrophoneMonitor.cs: Core Audio)
+  Services/UpdateChecker.cs   optional new version notice (GitHub releases)
+  Services/AppStore.cs        local storage (JSON)
   Services/FocusTimer.cs      Pomodoro
-  Services/WaterTracker.cs    água e lembretes
-  Services/TaskList.cs        tarefas e lembretes
-  Services/GoogleTasks.cs     sincronização com o Google Tasks (GoogleAccount.cs: conta compartilhada com a agenda)
-  Services/Shelf.cs           prateleira de arquivos
-  Helpers/                    mola das animações, cor da capa, ícones de arquivo, som, caminhos
-  Interop/                    chamadas Win32 e COM (Core Audio)
-  Assets/yata.ico             ícone (gerado por tools/make-icon.ps1)
-  SettingsWindow.xaml(.cs)    janela de configurações
-installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
-docs/                         imagens do README, cadastro no Google e assinatura de código
-.signpath/                    configurações de artefato do SignPath (cópia do que está no projeto de lá)
-tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft), instalador e medição
-tests/Yata.Tests/             testes (xUnit)
-.github/workflows/ci.yml      build e testes a cada push
-.github/workflows/release.yml release automático por tag
+  Services/WaterTracker.cs    water and reminders
+  Services/TaskList.cs        tasks and reminders
+  Services/GoogleTasks.cs     Google Tasks sync (GoogleAccount.cs: account shared with the calendar)
+  Services/Shelf.cs           file shelf
+  Helpers/                    animation springs, album art color, file icons, sound, paths, language
+  Interop/                    Win32 and COM calls (Core Audio)
+  Assets/yata.ico             icon (generated by tools/make-icon.ps1)
+  SettingsWindow.xaml(.cs)    settings window
+  Strings.resx                interface text in English (Strings.pt-BR.resx: Portuguese)
+installer/yata.iss            installer (Inno Setup) and its images (wizard-*.png)
+docs/                         README images, Google registration and code signing
+.signpath/                    SignPath artifact configurations (a copy of what's in the project there)
+tools/                        icon, art (PhotoCraft), GIF (EffectCraft), installer and measurement
+tests/Yata.Tests/             tests (xUnit)
+.github/workflows/ci.yml      build and tests on every push
+.github/workflows/release.yml automatic release from a tag
 ```
 
 ## Roadmap
 
-1. ~~Base do notch + mídia~~
-2. ~~Letras sincronizadas (LRCLIB)~~
-3. ~~Avisos do sistema: volume, brilho, bateria, fone, Caps Lock~~
-4. ~~Pomodoro, lembrete de água, to-do~~
-5. ~~Prateleira de arquivos (arrastar e soltar)~~
-6. ~~Identidade (Yata) e companheiro~~
-7. ~~Configurações, iniciar com o Windows, instalador~~
+1. ~~Notch base + media~~
+2. ~~Synced lyrics (LRCLIB)~~
+3. ~~System notices: volume, brightness, battery, headphones, Caps Lock~~
+4. ~~Pomodoro, water reminder, to-do~~
+5. ~~File shelf (drag and drop)~~
+6. ~~Identity (Yata) and companion~~
+7. ~~Settings, start with Windows, installer~~
+8. ~~Camera/microphone in use, multiple displays, global hotkey, version notice~~
+9. ~~English and Portuguese~~
 
-8. ~~Câmera/microfone em uso, vários monitores, atalho global, aviso de versão~~
-
-Próximas ideias: assinatura digital (em andamento, veja [docs/code-signing.md](docs/code-signing.md)), app em inglês, winget.
+Next ideas: code signing (in progress, see [docs/code-signing.md](docs/code-signing.md)), winget.

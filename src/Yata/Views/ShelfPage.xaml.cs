@@ -42,7 +42,7 @@ public partial class ShelfPage : UserControl
         int count = _shelf?.Items.Count ?? 0;
         EmptyState.Visibility = count == 0 ? Visibility.Visible : Visibility.Collapsed;
         Footer.Visibility = count == 0 ? Visibility.Collapsed : Visibility.Visible;
-        CountText.Text = count == 1 ? "1 item · arraste para usar" : $"{count} itens · arraste para usar";
+        CountText.Text = count == 1 ? Strings.Shelf_CountOne : string.Format(Strings.Shelf_Count, count);
     }
 
     private void OnTileMouseDown(object sender, MouseButtonEventArgs e)
