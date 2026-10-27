@@ -65,7 +65,7 @@ Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/relea
 - oferece iniciar com o Windows e atalho na área de trabalho;
 - na desinstalação, remove o app e a inicialização automática, mas **mantém seus dados** em `%LOCALAPPDATA%\Yata`.
 
-Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução.
+Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução. A assinatura gratuita pela SignPath Foundation está em andamento: veja a [política de assinatura de código](https://getyata.app/code-signing) e [docs/code-signing.md](docs/code-signing.md).
 
 ## Requisitos
 
@@ -150,7 +150,8 @@ src/Yata/
   Assets/yata.ico             ícone (gerado por tools/make-icon.ps1)
   SettingsWindow.xaml(.cs)    janela de configurações
 installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
-docs/                         imagens do README
+docs/                         imagens do README, cadastro no Google e assinatura de código
+.signpath/                    configurações de artefato do SignPath (cópia do que está no projeto de lá)
 tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft), instalador e medição
 tests/Yata.Tests/             testes (xUnit)
 .github/workflows/ci.yml      build e testes a cada push

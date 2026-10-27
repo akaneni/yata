@@ -73,8 +73,9 @@
   "dl.l1": "Instala só para o seu usuário, sem permissão de administrador.",
   "dl.l2": "Se faltar o .NET 10 Desktop Runtime, o instalador baixa direto da Microsoft. Só essa etapa pede administrador.",
   "dl.l3": "Cada versão traz um <code>SHA256SUMS.txt</code> para você conferir o arquivo baixado.",
-  "dl.l4": "O instalador ainda não é assinado, então o SmartScreen pode avisar na primeira vez. Clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>.",
+  "dl.l4": "O instalador ainda não é assinado, então o SmartScreen pode avisar na primeira vez. Clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>. A assinatura está a caminho: veja a <a href=\"/pt/code-signing\">política de assinatura de código</a>.",
   "dl.l5": "Desinstalar mantém seus dados, caso você volte.",
   "footer.privacy": "Política de privacidade",
+  "footer.signing": "Política de assinatura",
   "footer.made": "licença MIT · feito por akaneni"
 }

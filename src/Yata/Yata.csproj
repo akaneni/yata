@@ -15,6 +15,9 @@
     <AssemblyName>Yata</AssemblyName>
     <RootNamespace>Yata</RootNamespace>
     <Version>0.1.1</Version>
+    <!-- Keep ProductVersion exactly the version ("0.1.1", not "0.1.1+commit"): code signing (SignPath)
+         checks it against the release tag. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- DPI awareness lives in app.manifest for WPF; the WinForms analyzer doesn't apply. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>

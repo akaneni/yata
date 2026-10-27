@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Code signing policy · Yata</title>
+<meta name="description" content="How Yata releases are signed, by whom, and how to check the signature.">
+<link rel="canonical" href="https://getyata.app/code-signing">
+<link rel="alternate" hreflang="en" href="https://getyata.app/code-signing">
+<link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/code-signing">
+<link rel="alternate" hreflang="x-default" href="https://getyata.app/code-signing">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Yata">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="pt_BR">
+<meta property="og:title" content="Code signing policy · Yata">
+<meta property="og:description" content="How Yata releases are signed, by whom, and how to check the signature.">
+<meta property="og:url" content="https://getyata.app/code-signing">
+<meta property="og:image" content="https://getyata.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Yata logo: a pixel raven next to the word yata, white on black">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- Mirrors site/pt/code-signing.html (Portuguese). Change both together. -->
+<header>
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Main">
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="lang" role="group" aria-label="Language">
+        <a href="/code-signing" hreflang="en" lang="en" aria-current="page">EN</a>
+        <a href="/pt/code-signing" hreflang="pt-BR" lang="pt-BR">PT</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="doc">
+    <h1>Code signing policy</h1>
+    <p class="updated">Last updated: October 27, 2026</p>
+    <p>Free code signing provided by <a href="https://about.signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>.</p>
+    <p><strong>Status:</strong> Signing through SignPath Foundation is being set up. Releases are signed starting with the first version published after the project is approved. Until then the installer is unsigned, and each release ships a <code>SHA256SUMS.txt</code> so you can check the file you got.</p>
+
+    <h2>What is signed</h2>
+    <ul>
+      <li><code>Yata.exe</code>, the app itself, signed before it goes into the installer.</li>
+      <li><code>Yata-Setup-x.y.z.exe</code>, the installer published on <a href="https://github.com/akaneni/yata/releases">GitHub Releases</a>.</li>
+    </ul>
+    <p>Both are built by GitHub Actions on GitHub-hosted runners, from a version tag of the public repository (<a href="https://github.com/akaneni/yata/blob/main/.github/workflows/release.yml">release.yml</a>). Nothing built on a personal computer is signed, and every signing request is approved by hand. The .NET Desktop Runtime the installer may download comes from Microsoft and carries Microsoft's own signature.</p>
+
+    <h2>Team roles</h2>
+    <ul>
+      <li><strong>Committers and reviewers:</strong> <a href="https://github.com/akaneni">akaneni</a>. Changes from other contributors are reviewed before they are merged.</li>
+      <li><strong>Approvers:</strong> <a href="https://github.com/akaneni">akaneni</a> approves each signing request.</li>
+    </ul>
+    <p>Everyone in these roles uses multi-factor authentication on GitHub and SignPath.</p>
+
+    <h2>Privacy</h2>
+    <p>Yata has no account, server or telemetry. What it sends over the network, and when, is in the <a href="/privacy">privacy policy</a>; the installer shows a summary before installing.</p>
+
+    <h2>Checking the signature</h2>
+    <p>Right-click the file, choose <strong>Properties</strong>, then <strong>Digital Signatures</strong>. The signer should be <strong>SignPath Foundation</strong>. Anything else, or no signature on a release marked as signed, is not an official Yata build: please open an issue.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Footer">
+      <a href="/privacy">Privacy policy</a>
+      <a href="/code-signing" aria-current="page">Code signing policy</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="mono">MIT license · made by akaneni</span>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -24,4 +24,16 @@
     <xhtml:link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/privacy"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://getyata.app/privacy"/>
   </url>
+  <url>
+    <loc>https://getyata.app/code-signing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://getyata.app/code-signing"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/code-signing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://getyata.app/code-signing"/>
+  </url>
+  <url>
+    <loc>https://getyata.app/pt/code-signing</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://getyata.app/code-signing"/>
+    <xhtml:link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/code-signing"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://getyata.app/code-signing"/>
+  </url>
 </urlset>

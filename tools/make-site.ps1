@@ -51,7 +51,7 @@ function Convert-ToPortuguese([string]$html) {
       [regex]::Replace($m.Value, "\s$($pair[1])=`"[^`"]*`"", " $($pair[1])=`"$value`"")
     })
   }
-  $html.Replace('href="/privacy"', 'href="/pt/privacy"')
+  $html.Replace('href="/privacy"', 'href="/pt/privacy"').Replace('href="/code-signing"', 'href="/pt/code-signing"')
 }
 
 # schema.org data for search engines and AI assistants, in the page's language.
@@ -95,7 +95,7 @@ $ptPage = $index.Replace("{{LANG}}", "pt-BR").Replace("{{CANONICAL}}", "https://
 $ptPage = $ptPage.Replace("{{OG_LOCALE}}", "pt_BR").Replace("{{OG_LOCALE_ALT}}", "en_US").Replace("{{JSONLD}}", (Get-JsonLd "pt-BR" "https://getyata.app/pt/" (Get-Pt "meta.description")))
 Save-Page (Convert-ToPortuguese $ptPage) (Join-Path $Out "pt/index.html")
 
-foreach ($page in "privacy.html", "pt/privacy.html", "404.html") {
+foreach ($page in "privacy.html", "pt/privacy.html", "code-signing.html", "pt/code-signing.html", "404.html") {
   Save-Page ([IO.File]::ReadAllText((Join-Path $site $page), $utf8)) (Join-Path $Out $page)
 }
 "ok: $Out"

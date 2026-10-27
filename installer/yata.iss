@@ -19,6 +19,13 @@ AppPublisher=akaneni
 AppPublisherURL=https://github.com/akaneni/yata
 AppSupportURL=https://github.com/akaneni/yata/issues
 AppUpdatesURL=https://github.com/akaneni/yata/releases
+; Code signing (SignPath) checks the product name and version of the installer against the release.
+VersionInfoVersion={#AppVersion}
+VersionInfoProductName=Yata
+VersionInfoProductVersion={#AppVersion}
+VersionInfoProductTextVersion={#AppVersion}
+VersionInfoCompany=akaneni
+VersionInfoDescription=Yata Setup
 DefaultDirName={localappdata}\Programs\Yata
 DisableProgramGroupPage=yes
 DisableDirPage=auto
@@ -49,8 +56,9 @@ CloseApplications=force
 RestartApplications=no
 
 [Languages]
-Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"
-Name: "english"; MessagesFile: "compiler:Default.isl"
+; What leaves the PC, shown before installing (a SignPath Foundation requirement); full policy in PRIVACY.md.
+Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortuguese.isl"; InfoBeforeFile: "privacy-pt.txt"
+Name: "english"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "privacy-en.txt"
 
 [CustomMessages]
 brazilianportuguese.AutoStart=Iniciar o Yata com o Windows
