@@ -33,6 +33,8 @@ public sealed class UpdateData
 public sealed class SettingsData
 {
     // General
+    /// <summary>"en" or "pt-BR" (see Lang); null follows the Windows language.</summary>
+    public string? Language { get; set; }
     public bool HideInFullscreen { get; set; } = true;
     public int HoverDelayMs { get; set; } = 140;
     public bool UseArtworkAccent { get; set; } = true;

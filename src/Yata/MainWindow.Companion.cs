@@ -129,7 +129,7 @@ public partial class MainWindow
     {
         // Pause focus so time away isn't counted — unless something is playing (likely a video).
         if (Settings.PauseFocusWhenAway && _state?.IsPlaying != true && _focus.PauseAfterIdle(unattended))
-            _presence.Add(Glyphs.Timer, "Foco pausado quando você saiu");
+            _presence.Add(Glyphs.Timer, Strings.Away_FocusPaused);
     }
 
     private void OnReturned(AwayReport report)
@@ -144,8 +144,8 @@ public partial class MainWindow
         _newsCount = items.Count;
         NewsList.ItemsSource = items;
         NewsTitle.Text = report.Items.Count > items.Count
-            ? $"Enquanto você esteve fora · {FormatAway(report.Duration)} · {report.Items.Count} avisos"
-            : $"Enquanto você esteve fora · {FormatAway(report.Duration)}";
+            ? string.Format(Strings.Away_TitleCount, FormatAway(report.Duration), report.Items.Count)
+            : string.Format(Strings.Away_Title, FormatAway(report.Duration));
 
         _hudActive = false;
         _hudTimer.Stop();
@@ -192,18 +192,18 @@ public partial class MainWindow
         _presence.Simulate(_presence.IdleAfter);
         await Task.Delay(7000);
         _presence.Simulate(_presence.SleepAfter + TimeSpan.FromMinutes(37));
-        _presence.Add(Glyphs.Bell, "Reunião com o time · 15:30");
-        _presence.Add(Glyphs.Water, "Hora de beber água · 750/2000 ml");
+        _presence.Add(Glyphs.Bell, $"{Strings.Demo_Meeting} · 15:30");
+        _presence.Add(Glyphs.Water, $"{Strings.Water_Reminder} · 750/2000 ml");
         await Task.Delay(7000);
         _presence.Simulate(TimeSpan.Zero); // "You're back."
         await Task.Delay(1500);
         _presence.Simulate(null);
         await Task.Delay(9000); // Let the news run out.
-        ShowHud(new HudMessage(Glyphs.Timer, "Hora da pausa", "5 min", DurationMs: 4000, Celebrate: true));
+        ShowHud(new HudMessage(Glyphs.Timer, Strings.Focus_BreakTime, "5 min", DurationMs: 4000, Celebrate: true));
         await Task.Delay(4500);
-        ShowHud(new HudMessage(Glyphs.Water, "Meta de água batida", "2000/2000 ml", 1, DurationMs: 3500, Celebrate: true));
+        ShowHud(new HudMessage(Glyphs.Water, Strings.Water_GoalReached, "2000/2000 ml", 1, DurationMs: 3500, Celebrate: true));
         await Task.Delay(4000);
-        ShowHud(new HudMessage(Glyphs.Bell, "Reunião com o time", "15:30", DurationMs: 4000, Important: true));
+        ShowHud(new HudMessage(Glyphs.Bell, Strings.Demo_Meeting, "15:30", DurationMs: 4000, Important: true));
     }
 
     private static string FormatAway(TimeSpan duration) =>

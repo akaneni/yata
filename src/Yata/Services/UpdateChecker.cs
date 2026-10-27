@@ -93,7 +93,7 @@ public sealed class UpdateChecker
             return;
         Data.Announced = version;
         _store.SaveSoon();
-        Message?.Invoke(new HudMessage(Glyphs.Bell, "Nova versão do Yata", version, DurationMs: 5000, Important: true));
+        Message?.Invoke(new HudMessage(Glyphs.Bell, Strings.Hud_NewVersion, version, DurationMs: 5000, Important: true));
     }
 
     private static async Task<string?> FetchLatestAsync()

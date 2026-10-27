@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Yata.Helpers;
 using Yata.Services;
 
 namespace Yata.Views;
@@ -18,7 +18,6 @@ public sealed record AgendaRow(string Time, string Title, string Detail, string?
 
 public partial class AgendaPage : UserControl
 {
-    private static readonly CultureInfo PtBr = new("pt-BR");
 
     // "Ongoing" and "past" drift with the clock, so the list is rebuilt while it's on screen.
     private readonly DispatcherTimer _refresh = new() { Interval = TimeSpan.FromSeconds(30) };
@@ -67,12 +66,12 @@ public partial class AgendaPage : UserControl
     {
         var (text, button, frame) = _calendar!.Status switch
         {
-            CalendarStatus.NotConfigured => ("Esta versão do Yata foi compilada sem acesso ao Google.", null, RavenFrame.Perch),
-            CalendarStatus.Connecting => ("Continue no navegador para conectar sua agenda…", "Cancelar", RavenFrame.Perch),
-            CalendarStatus.NeedsReconnect => (_calendar.Error ?? "Conecte de novo sua conta Google.", "Reconectar", RavenFrame.Perch),
-            CalendarStatus.SignedOut => (_calendar.Error ?? "Veja seus próximos eventos do Google Agenda aqui.", "Conectar agenda", RavenFrame.Perch),
+            CalendarStatus.NotConfigured => (Strings.Agenda_NotConfigured, null, RavenFrame.Perch),
+            CalendarStatus.Connecting => (Strings.Agenda_Connecting, Strings.Common_Cancel, RavenFrame.Perch),
+            CalendarStatus.NeedsReconnect => (_calendar.Error ?? Strings.Agenda_ConnectAgain, Strings.Google_Reconnect, RavenFrame.Perch),
+            CalendarStatus.SignedOut => (_calendar.Error ?? Strings.Agenda_SignedOut, Strings.Agenda_Connect, RavenFrame.Perch),
             _ when _calendar.Error != null => (_calendar.Error, null, RavenFrame.Perch),
-            _ => (now.Hour >= 18 ? "Nada mais na agenda hoje nem amanhã" : "Agenda livre hoje e amanhã", (string?)null, RavenFrame.Sleep),
+            _ => (now.Hour >= 18 ? Strings.Agenda_NothingLeft : Strings.Agenda_Free, (string?)null, RavenFrame.Sleep),
         };
 
         EmptyText.Text = text;
@@ -92,19 +91,19 @@ public partial class AgendaPage : UserControl
         foreach (var group in visible.GroupBy(e => e.AllDay || e.Start < today ? today : e.Start.Date).OrderBy(g => g.Key))
         {
             if (group.Key != today)
-                rows.Add(new AgendaRow("", group.Key == today.AddDays(1) ? "Amanhã" : group.Key.ToString("dddd, d/M", PtBr), "", null,
+                rows.Add(new AgendaRow("", group.Key == today.AddDays(1) ? Strings.Agenda_Tomorrow : group.Key.ToString(Strings.Format_WeekdayDate, Lang.Culture), "", null,
                     false, false, IsHeader: true));
 
             foreach (var e in group.OrderBy(e => !e.AllDay).ThenBy(e => e.Start))
             {
                 bool past = !e.AllDay && e.End <= now;
                 bool ongoing = e.IsOngoing(now);
-                string detail = e.AllDay ? "Dia inteiro"
-                              : ongoing ? $"agora · até {e.End:HH:mm}"
-                              : past ? $"terminou {e.End:HH:mm}"
+                string detail = e.AllDay ? Strings.Agenda_AllDay
+                              : ongoing ? string.Format(Strings.Agenda_NowUntil, e.End)
+                              : past ? string.Format(Strings.Agenda_Ended, e.End)
                               : e.Start - now <= TimeSpan.FromHours(2) && e.Start.Date == today
-                                  ? $"{CalendarReminders.Until(e.Start, now)} · até {e.End:HH:mm}"
-                                  : $"até {e.End:HH:mm}";
+                                  ? string.Format(Strings.Agenda_SoonUntil, CalendarReminders.Until(e.Start, now), e.End)
+                                  : string.Format(Strings.Agenda_Until, e.End);
                 rows.Add(new AgendaRow(e.AllDay ? "—" : e.Start.ToString("HH:mm"), e.Title, detail, e.MeetingUrl, ongoing, past));
             }
         }

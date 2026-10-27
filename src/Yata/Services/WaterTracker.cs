@@ -69,7 +69,7 @@ public sealed class WaterTracker
 
         // Shown once the notch closes, since drinking is logged with it open.
         if (before < GoalMl && today >= GoalMl)
-            Message?.Invoke(new HudMessage(Glyphs.Water, "Meta de água batida", $"{today}/{GoalMl} ml", 1,
+            Message?.Invoke(new HudMessage(Glyphs.Water, Strings.Water_GoalReached, $"{today}/{GoalMl} ml", 1,
                 DurationMs: 4000, Important: true, Celebrate: true));
     }
 
@@ -88,7 +88,7 @@ public sealed class WaterTracker
             return;
 
         _lastReminder = now;
-        Message?.Invoke(new HudMessage(Glyphs.Water, "Hora de beber água", $"{TodayMl}/{GoalMl} ml",
+        Message?.Invoke(new HudMessage(Glyphs.Water, Strings.Water_Reminder, $"{TodayMl}/{GoalMl} ml",
             (double)TodayMl / GoalMl, DurationMs: 4000, Important: true));
     }
 

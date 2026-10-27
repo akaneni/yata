@@ -1,6 +1,7 @@
 <UserControl x:Class="Yata.Views.TasksPage"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:y="clr-namespace:Yata"
              xmlns:local="clr-namespace:Yata.Views">
     <Grid Margin="16,0,16,14">
         <Grid.RowDefinitions>
@@ -11,7 +12,7 @@
         <!-- Nothing to do: Yata naps -->
         <StackPanel x:Name="EmptyText" HorizontalAlignment="Center" VerticalAlignment="Center">
             <local:RavenSprite Frame="Sleep" PixelSize="2" HorizontalAlignment="Center" Opacity="0.7"/>
-            <TextBlock Margin="0,4,0,0" Text="Nenhuma tarefa por aqui" FontSize="13"
+            <TextBlock Margin="0,4,0,0" Text="{x:Static y:Strings.Tasks_Empty}" FontSize="13"
                        Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
         </StackPanel>
 
@@ -40,7 +41,7 @@
                                 </StackPanel>
                             </Border>
                             <Button Grid.Column="3" Style="{StaticResource IconButton}" Width="26" Height="26" FontSize="10"
-                                    Opacity="0.6" Content="&#xE711;" ToolTip="Remover" Click="OnRemove"/>
+                                    Opacity="0.6" Content="&#xE711;" ToolTip="{x:Static y:Strings.Tasks_Remove}" Click="OnRemove"/>
                         </Grid>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding Done}" Value="True">
@@ -68,14 +69,14 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock x:Name="Placeholder" Margin="12,0" VerticalAlignment="Center" FontSize="13" IsHitTestVisible="False"
-                           Foreground="#66FFFFFF" Text="Nova tarefa (ex.: Reunião 15:30)"/>
+                           Foreground="#66FFFFFF" Text="{x:Static y:Strings.Tasks_NewPlaceholder}"/>
                 <TextBox x:Name="Input" Margin="9,0" VerticalAlignment="Center" FontSize="13"
                          Background="Transparent" BorderThickness="0" Foreground="White" CaretBrush="White"
                          SelectionBrush="#66FFFFFF" MaxLength="200"
                          PreviewMouseLeftButtonDown="OnInputMouseDown" KeyDown="OnInputKeyDown"
                          TextChanged="OnInputTextChanged" LostKeyboardFocus="OnInputLostFocus"/>
                 <Button Grid.Column="1" Style="{StaticResource IconButton}" Width="30" Height="30" FontSize="13"
-                        Margin="0,0,2,0" Content="&#xE710;" ToolTip="Adicionar" Click="OnAdd"/>
+                        Margin="0,0,2,0" Content="&#xE710;" ToolTip="{x:Static y:Strings.Tasks_Add}" Click="OnAdd"/>
             </Grid>
         </Border>
     </Grid>

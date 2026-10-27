@@ -42,10 +42,10 @@ public partial class MainWindow
 
         var apps = string.Join(", ", camera.Concat(microphone).Distinct());
         var message = camera.Count > 0 && microphone.Count > 0
-            ? new HudMessage(Glyphs.Camera, "Câmera e microfone em uso", apps, DurationMs: 3000, Kind: HudKind.Privacy)
+            ? new HudMessage(Glyphs.Camera, Strings.Hud_CameraAndMicrophone, apps, DurationMs: 3000, Kind: HudKind.Privacy)
             : camera.Count > 0
-                ? new HudMessage(Glyphs.Camera, "Câmera em uso", apps, DurationMs: 3000, Kind: HudKind.Privacy)
-                : new HudMessage(Glyphs.Microphone, "Microfone em uso", apps, DurationMs: 3000, Kind: HudKind.Privacy);
+                ? new HudMessage(Glyphs.Camera, Strings.Hud_Camera, apps, DurationMs: 3000, Kind: HudKind.Privacy)
+                : new HudMessage(Glyphs.Microphone, Strings.Hud_Microphone, apps, DurationMs: 3000, Kind: HudKind.Privacy);
         ShowHud(message);
     }
 

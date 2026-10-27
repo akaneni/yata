@@ -65,18 +65,18 @@ public sealed class GoogleAccount
         catch (Exception ex) when (ex is HttpRequestException or System.Net.Sockets.SocketException)
         {
             Log.Warn("google", "Sem conexão com o Google ao conectar", ex);
-            SetStatus(SignedOutStatus, "Sem conexão com o Google.");
+            SetStatus(SignedOutStatus, Strings.Google_NoConnection);
         }
         catch (System.ComponentModel.Win32Exception ex)
         {
             Log.Warn("google", "Navegador não abriu", ex);
-            SetStatus(SignedOutStatus, "Não foi possível abrir o navegador.");
+            SetStatus(SignedOutStatus, Strings.Google_BrowserFailed);
         }
         catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException or
                                    System.Security.Cryptography.CryptographicException)
         {
             Log.Error("google", "Não foi possível guardar o acesso", ex);
-            SetStatus(SignedOutStatus, "Não foi possível guardar o acesso neste PC.");
+            SetStatus(SignedOutStatus, Strings.Google_SaveFailed);
         }
         finally
         {

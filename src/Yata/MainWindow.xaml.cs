@@ -42,7 +42,7 @@ public partial class MainWindow : Window
     private static readonly Size CompactEventTimer = new(380, 32);
     // Expanded heights include the 42px header with the page tabs.
     private static readonly Size ExpandedIdle = new(420, 170);
-    // Room for the weather line under "Nada tocando".
+    // Room for the weather line under "Nothing playing".
     private static readonly Size ExpandedIdleWeather = new(420, 190);
     private static readonly Size ExpandedMedia = new(520, 196);
     private static readonly Size ExpandedLyrics = new(880, 196);
@@ -64,7 +64,6 @@ public partial class MainWindow : Window
     private const double PeekWidth = 8;
     private const double PeekHeight = 3;
     private const double PrivacyGap = 8;
-    private static readonly CultureInfo PtBr = new("pt-BR");
 
     private readonly MediaService _media;
     private readonly DispatcherTimer _lyricsTimer = new();
@@ -144,6 +143,8 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         StartupTimings.Mark("fields");
+        // Before any text is built: the notch, the tray menu and Settings all read it.
+        Lang.Apply(_store.Settings.Language);
         Resources["AccentBrush"] = _accent;
         InitializeComponent();
         StartupTimings.Mark("InitializeComponent");
@@ -333,7 +334,7 @@ public partial class MainWindow : Window
         Log.Info("app", string.Create(CultureInfo.InvariantCulture,
             $"Yata {UpdateChecker.Current} aberto em {StartupTimings.SinceProcessStart:F0} ms ({Environment.OSVersion.Version})"));
         if (_store.RecoveredFromDamage)
-            ShowHud(new HudMessage(Glyphs.Bell, "Dados ilegíveis; recomecei do zero", Warning: true, DurationMs: 6000,
+            ShowHud(new HudMessage(Glyphs.Bell, Strings.Hud_DataUnreadable, Warning: true, DurationMs: 6000,
                 Important: true));
     }
 
@@ -870,7 +871,7 @@ public partial class MainWindow : Window
             if (report.High is double high && report.Low is double low)
                 line += $" · {Weather.Degrees(high)} / {Weather.Degrees(low)}";
             if (report.RainAt is DateTime rain && !Weather.IsWet(report.Code))
-                line += $" · chuva por volta das {rain:HH}h";
+                line += " · " + string.Format(Lang.Culture, Strings.Weather_RainAround, rain);
             IdleWeatherText.Text = line;
         }
         UpdateTargets();
@@ -891,7 +892,7 @@ public partial class MainWindow : Window
     private void UpdateClock()
     {
         var now = DateTime.Now;
-        string time = now.ToString("HH:mm", PtBr);
+        string time = now.ToString("HH:mm", Lang.Culture);
 
         string? upcoming = null;
         if (_state == null && Settings.CalendarInCompact &&
@@ -908,7 +909,7 @@ public partial class MainWindow : Window
             SetCompactText(upcoming ?? time);
 
         IdleClock.Text = time;
-        string date = now.ToString("dddd, d 'de' MMMM", PtBr);
-        HeaderDate.Text = char.ToUpper(date[0], PtBr) + date[1..];
+        string date = now.ToString(Strings.Format_LongDate, Lang.Culture);
+        HeaderDate.Text = char.ToUpper(date[0], Lang.Culture) + date[1..];
     }
 }

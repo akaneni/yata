@@ -192,7 +192,7 @@ public sealed class FocusTimer
             Phase = CompletedSessions >= SessionsPerCycle ? FocusPhase.LongBreak : FocusPhase.ShortBreak;
             _pausedRemaining = PhaseLength;
             if (notify)
-                Notify("Hora da pausa", $"{PhaseLength.TotalMinutes:0} min", celebrate: true);
+                Notify(Strings.Focus_BreakTime, $"{PhaseLength.TotalMinutes:0} min", celebrate: true);
             Run(); // Breaks start on their own.
         }
         else
@@ -204,7 +204,7 @@ public sealed class FocusTimer
             State = FocusState.Ready;
             _pausedRemaining = PhaseLength;
             if (notify)
-                Notify("De volta ao foco", $"{PhaseLength.TotalMinutes:0} min");
+                Notify(Strings.Focus_BackToFocus, $"{PhaseLength.TotalMinutes:0} min");
             Changed?.Invoke();
         }
     }

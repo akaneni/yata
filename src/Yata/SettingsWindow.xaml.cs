@@ -39,8 +39,9 @@ public partial class SettingsWindow : Window
         DataContext = store.Data;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"versão {version?.ToString(3)} · código aberto (MIT)";
+        VersionText.Text = string.Format(Strings.Settings_Version, version?.ToString(3));
         StartupSwitch.IsChecked = Autostart.IsEnabled;
+        ShowLanguage();
         ShowMonitor();
         ShowUpdate();
         Activated += (_, _) => ShowUpdate(); // A check may have finished meanwhile.
@@ -63,11 +64,10 @@ public partial class SettingsWindow : Window
 
     // ---- Weather ----------------------------------------------------------------------
 
-    private static readonly System.Globalization.CultureInfo PtBr = new("pt-BR");
     private CancellationTokenSource? _weatherSearch;
 
     private void ShowWeatherPlace() =>
-        WeatherPlaceText.Text = _store.Settings.WeatherPlace ?? "nenhuma escolhida";
+        WeatherPlaceText.Text = _store.Settings.WeatherPlace ?? Strings.Settings_NoCity;
 
     private void OnWeatherSearchChanged(object sender, TextChangedEventArgs e) =>
         WeatherSearchPlaceholder.Visibility = WeatherSearchBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -90,19 +90,19 @@ public partial class SettingsWindow : Window
 
         _weatherSearch?.Cancel();
         var cts = _weatherSearch = new CancellationTokenSource();
-        SetWeatherStatus("Buscando…");
+        SetWeatherStatus(Strings.Settings_Searching);
         try
         {
             var places = await WeatherService.SearchAsync(name, cts.Token);
             if (cts.IsCancellationRequested)
                 return;
             WeatherResults.ItemsSource = places;
-            SetWeatherStatus(places.Count == 0 ? "Nenhuma cidade encontrada." : null);
+            SetWeatherStatus(places.Count == 0 ? Strings.Settings_NoCityFound : null);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or System.Text.Json.JsonException)
         {
             if (!cts.IsCancellationRequested)
-                SetWeatherStatus("Sem conexão com o Open-Meteo.");
+                SetWeatherStatus(Strings.Settings_NoOpenMeteo);
         }
     }
 
@@ -117,24 +117,24 @@ public partial class SettingsWindow : Window
     {
         WeatherLocateButton.IsEnabled = false;
         LocationSettingsButton.Visibility = Visibility.Collapsed;
-        SetWeatherStatus("Pedindo a localização ao Windows…");
+        SetWeatherStatus(Strings.Settings_Locating);
         var (result, latitude, longitude) = await WeatherService.LocateOnceAsync();
         WeatherLocateButton.IsEnabled = true;
 
         switch (result)
         {
             case LocateResult.Found:
-                UseWeatherPlace($"Minha localização ({latitude.ToString("0.00", PtBr)}, {longitude.ToString("0.00", PtBr)})",
+                UseWeatherPlace(string.Format(Strings.Settings_MyLocation, latitude.ToString("0.00", Lang.Culture), longitude.ToString("0.00", Lang.Culture)),
                     latitude, longitude);
                 // Arrived after the click was handled, so save and apply here.
                 _store.NotifySettingsChanged();
                 break;
             case LocateResult.Denied:
-                SetWeatherStatus("A localização está desligada para apps da área de trabalho.");
+                SetWeatherStatus(Strings.Settings_LocationOff);
                 LocationSettingsButton.Visibility = Visibility.Visible;
                 break;
             default:
-                SetWeatherStatus("Não foi possível obter a localização agora. Tente de novo ou busque a cidade.");
+                SetWeatherStatus(Strings.Settings_LocationFailed);
                 break;
         }
     }
@@ -181,15 +181,13 @@ public partial class SettingsWindow : Window
     {
         var (title, hint, button) = _google.Status switch
         {
-            GoogleAccountStatus.NotConfigured => ("Conta Google",
-                "Esta versão foi compilada sem credenciais do Google (veja docs/google-calendar.md).", null),
-            GoogleAccountStatus.Connecting => ("Conta Google", "Continue no navegador que abriu…", "Cancelar"),
-            GoogleAccountStatus.Connected => ($"Conectado como {_google.Email}", _google.Error ??
-                "O acesso fica protegido pelo Windows neste PC. Desconectar revoga o acesso no Google.", "Desconectar"),
-            GoogleAccountStatus.NeedsReconnect => (_google.Email ?? "Conta Google", _google.Error ?? "Conecte de novo.", "Reconectar"),
-            _ => ("Conta Google", _google.Error ??
-                "Agenda e tarefas do Google no notch. Na tela do Google você escolhe o que liberar; o acesso fica protegido pelo Windows neste PC.",
-                (string?)"Conectar com Google"),
+            GoogleAccountStatus.NotConfigured => (Strings.Google_Account, Strings.Google_NotConfigured, null),
+            GoogleAccountStatus.Connecting => (Strings.Google_Account, Strings.Google_ContinueInBrowser, Strings.Common_Cancel),
+            GoogleAccountStatus.Connected => (string.Format(Strings.Google_ConnectedAs, _google.Email),
+                _google.Error ?? Strings.Google_ConnectedHint, Strings.Google_Disconnect),
+            GoogleAccountStatus.NeedsReconnect => (_google.Email ?? Strings.Google_Account,
+                _google.Error ?? Strings.Google_ConnectAgain, Strings.Google_Reconnect),
+            _ => (Strings.Google_Account, _google.Error ?? Strings.Google_Intro, (string?)Strings.Google_Connect),
         };
         GoogleTitle.Text = title;
         GoogleHint.Text = hint;
@@ -199,26 +197,26 @@ public partial class SettingsWindow : Window
 
         // Calendar
         bool calendar = _calendar.Status == CalendarStatus.Connected;
-        CalendarHint.Text = !calendar ? "Mostra seus próximos eventos e avisa antes de cada um. Só leitura."
-            : _calendar.Error ?? "Só leitura: suas agendas e os eventos de hoje e amanhã ficam só na memória.";
+        CalendarHint.Text = !calendar ? Strings.Calendar_Intro
+            : _calendar.Error ?? Strings.Calendar_Connected;
         CalendarButton.Visibility = calendar ? Visibility.Collapsed : Visibility.Visible;
         CalendarOptions.Visibility = calendar ? Visibility.Visible : Visibility.Collapsed;
         CalendarList.ItemsSource = calendar
             ? _calendar.Calendars
-                .Select(c => new CalendarChoice(c.Id, c.Name, c.Primary ? "Agenda principal" : "", _calendar.IsIncluded(c)))
+                .Select(c => new CalendarChoice(c.Id, c.Name, c.Primary ? Strings.Calendar_Primary : "", _calendar.IsIncluded(c)))
                 .ToList()
             : null;
 
         // Tasks
         bool access = _googleTasks.HasAccess, on = _googleTasks.IsOn;
         TasksHint.Text = !on
-            ? "Sincroniza a aba Tarefas com o Google Tasks, nos dois sentidos; as abertas daqui vão para a lista. O horário dos lembretes fica só no Yata."
-            : _googleTasks.Error ?? "Concluir, criar e remover aqui vale também no Google. Desligar tira da aba as tarefas do Google.";
+            ? Strings.Tasks_Intro
+            : _googleTasks.Error ?? Strings.Tasks_Connected;
         TasksButton.Visibility = access ? Visibility.Collapsed : Visibility.Visible;
         TasksSwitch.Visibility = access ? Visibility.Visible : Visibility.Collapsed;
         TasksSwitch.IsChecked = on;
         TasksOptions.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
-        TasksListButton.Content = _store.Settings.TasksListName ?? "Carregando…";
+        TasksListButton.Content = _store.Settings.TasksListName ?? Strings.Common_Loading;
         TasksListButton.IsEnabled = _googleTasks.Lists.Count > 1;
     }
 
@@ -242,7 +240,7 @@ public partial class SettingsWindow : Window
     private async Task ConnectGoogleAsync()
     {
         await _google.ConnectAsync(GoogleAuth.CalendarScopes.Concat(GoogleAuth.TasksScopes).ToArray(),
-            "Algumas permissões ficaram desmarcadas; dá para liberar depois aqui.");
+            Strings.Google_SomeUnchecked);
         if (_googleTasks.HasAccess && !_googleTasks.IsOn)
             await _googleTasks.EnableAsync();
         await _calendar.RefreshAsync();
@@ -290,6 +288,19 @@ public partial class SettingsWindow : Window
         StartupSwitch.IsChecked = Autostart.IsEnabled;
     }
 
+    /// <summary>Next language, then back to following Windows; it takes effect at the next start.</summary>
+    private void OnLanguageClick(object sender, RoutedEventArgs e)
+    {
+        var choices = new string?[] { null }.Concat(Lang.Supported).ToList();
+        _store.Settings.Language = choices[(choices.IndexOf(_store.Settings.Language) + 1) % choices.Count];
+        ShowLanguage();
+    }
+
+    private void ShowLanguage() =>
+        LanguageButton.Content = _store.Settings.Language is { } language
+            ? Lang.Name(language)
+            : string.Format(Strings.Settings_LanguageAuto, Lang.Name(Lang.FromWindows));
+
     /// <summary>Next display, wrapping around; the window-level Click handler then applies it.</summary>
     private void OnMonitorClick(object sender, RoutedEventArgs e)
     {
@@ -314,7 +325,7 @@ public partial class SettingsWindow : Window
         string? latest = _store.Data.Updates.Latest;
         bool newer = _store.Settings.UpdateCheckEnabled && UpdateChecker.IsNewer(latest, UpdateChecker.Current);
         UpdateRow.Visibility = newer ? Visibility.Visible : Visibility.Collapsed;
-        UpdateText.Text = $"Versão {latest} disponível";
+        UpdateText.Text = string.Format(Strings.Settings_UpdateAvailable, latest);
     }
 
     private void OnOpenReleases(object sender, RoutedEventArgs e)
@@ -366,9 +377,9 @@ public partial class SettingsWindow : Window
             Log.Warn("settings", "Área de transferência ocupada", ex);
             return;
         }
-        DiagnosticsButton.Content = "Copiado";
+        DiagnosticsButton.Content = Strings.Settings_Copied;
         await Task.Delay(2000);
-        DiagnosticsButton.Content = "Copiar diagnóstico";
+        DiagnosticsButton.Content = Strings.Settings_CopyDiagnostics;
     }
 
     private void UseDarkTitleBar()

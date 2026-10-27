@@ -107,7 +107,7 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
 
     private static (string Name, bool IsHeadphones) Describe(IMMDevice device)
     {
-        string name = "Saída de áudio";
+        string name = Strings.Hud_AudioOutput;
         bool isHeadphones = false;
         try
         {
@@ -168,7 +168,7 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
                      : percent < 67 ? Glyphs.Volume2
                      : Glyphs.Volume3;
         return muted
-            ? new HudMessage(glyph, "Mudo", null, 0, Kind: HudKind.Volume)
-            : new HudMessage(glyph, "Volume", $"{percent}", level, Kind: HudKind.Volume);
+            ? new HudMessage(glyph, Strings.Hud_Muted, null, 0, Kind: HudKind.Volume)
+            : new HudMessage(glyph, Strings.Hud_Volume, $"{percent}", level, Kind: HudKind.Volume);
     }
 }

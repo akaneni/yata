@@ -15,7 +15,7 @@ internal static class Monitors
         var screens = Forms.Screen.AllScreens.OrderBy(s => s.Bounds.Left).ThenBy(s => s.Bounds.Top).ToList();
         return screens.Select((s, i) => new DisplayInfo(
             s.DeviceName,
-            $"Tela {i + 1} · {s.Bounds.Width}×{s.Bounds.Height}" + (s.Primary ? " (principal)" : ""),
+            string.Format(s.Primary ? Strings.Monitor_LabelPrimary : Strings.Monitor_Label, i + 1, s.Bounds.Width, s.Bounds.Height),
             s.Bounds.X, s.Bounds.Y, s.Bounds.Width, s.Bounds.Height, s.Primary)).ToList();
     }
 

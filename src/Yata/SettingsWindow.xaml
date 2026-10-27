@@ -2,7 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:views="clr-namespace:Yata.Views"
-        Title="Yata — Configurações"
+        xmlns:y="clr-namespace:Yata"
+        Title="{x:Static y:Strings.Settings_Title}"
         Width="580" Height="760" MinWidth="500" MinHeight="420"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Assets/yata.ico"
@@ -81,26 +82,36 @@
             </StackPanel>
 
             <!-- General -->
-            <TextBlock Text="Geral" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_General}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Iniciar com o Windows" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <StackPanel VerticalAlignment="Center" Margin="0,8,190,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_Language}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_LanguageHint}" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <!-- Each click moves to the next language, then back to following Windows -->
+                        <Button x:Name="LanguageButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Click="OnLanguageClick"/>
+                    </Grid>
+                    <Border Style="{StaticResource Divider}"/>
+                    <Grid Style="{StaticResource Row}">
+                        <TextBlock Text="{x:Static y:Strings.Settings_StartWithWindows}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox x:Name="StartupSwitch" Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   Click="OnStartupClick"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Tela do notch" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_Display}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <!-- Each click moves to the next connected display -->
                         <Button x:Name="MonitorButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                ToolTip="Clique para trocar de tela" Click="OnMonitorClick"/>
+                                ToolTip="{x:Static y:Strings.Settings_DisplayTip}" Click="OnMonitorClick"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Abrir e fechar com Ctrl+Alt+Y" Style="{StaticResource Label}"/>
-                            <TextBlock Text="O Windows avisa só essa combinação; nada mais do que você digita é lido."
+                            <TextBlock Text="{x:Static y:Strings.Settings_Hotkey}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_HotkeyHint}"
                                        Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
@@ -108,21 +119,21 @@
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Esconder em apps de tela cheia" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HideInFullscreen}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.HideInFullscreen}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Abrir ao passar o mouse após" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HoverDelay}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="0" Maximum="1000" Step="20" Suffix=" ms"
                                        Value="{Binding Settings.HoverDelayMs}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Cor da capa como destaque" Style="{StaticResource Label}"/>
-                            <TextBlock Text="Desligado, tudo fica em preto e branco." Style="{StaticResource Hint}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_Accent}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_AccentHint}" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.UseArtworkAccent}"/>
@@ -131,14 +142,14 @@
             </Border>
 
             <!-- Updates -->
-            <TextBlock Text="Atualizações" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_Updates}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Avisar quando houver versão nova" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_UpdateCheck}" Style="{StaticResource Label}"/>
                             <TextBlock Style="{StaticResource Hint}"
-                                       Text="Uma consulta por dia à página pública de versões do GitHub. Nada sobre você ou o PC é enviado, e a instalação continua manual."/>
+                                       Text="{x:Static y:Strings.Settings_UpdateCheckHint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.UpdateCheckEnabled}"/>
@@ -146,20 +157,20 @@
                     <!-- Shown when the last check found a newer version -->
                     <Grid x:Name="UpdateRow" Style="{StaticResource Row}" Visibility="Collapsed">
                         <TextBlock x:Name="UpdateText" Style="{StaticResource Label}" VerticalAlignment="Center"/>
-                        <Button Style="{StaticResource PrimaryPillButton}" Content="Abrir página de download"
+                        <Button Style="{StaticResource PrimaryPillButton}" Content="{x:Static y:Strings.Settings_OpenDownload}"
                                 HorizontalAlignment="Right" Click="OnOpenReleases"/>
                     </Grid>
                 </StackPanel>
             </Border>
 
             <!-- Media -->
-            <TextBlock Text="Mídia" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_Media}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <Grid Style="{StaticResource Row}">
                     <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                        <TextBlock Text="Letras sincronizadas" Style="{StaticResource Label}"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_Lyrics}" Style="{StaticResource Label}"/>
                         <TextBlock Style="{StaticResource Hint}"
-                                   Text="Busca no LRCLIB (lrclib.net) enviando só artista, título e duração."/>
+                                   Text="{x:Static y:Strings.Settings_LyricsHint}"/>
                     </StackPanel>
                     <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                               IsChecked="{Binding Settings.LyricsEnabled}"/>
@@ -172,7 +183,7 @@
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,170,8">
-                            <TextBlock x:Name="GoogleTitle" Text="Conta Google" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="GoogleTitle" Text="{x:Static y:Strings.Google_Account}" Style="{StaticResource Label}"/>
                             <TextBlock x:Name="GoogleHint" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <Button x:Name="GoogleButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
@@ -183,19 +194,19 @@
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,130,8">
-                            <TextBlock Text="Agenda" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_Calendar}" Style="{StaticResource Label}"/>
                             <TextBlock x:Name="CalendarHint" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <Button x:Name="CalendarButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                VerticalAlignment="Center" Content="Permitir" Click="OnCalendarButton"/>
+                                VerticalAlignment="Center" Content="{x:Static y:Strings.Settings_Allow}" Click="OnCalendarButton"/>
                     </Grid>
 
                     <StackPanel x:Name="CalendarOptions">
                         <Border Style="{StaticResource Divider}"/>
                         <Grid Style="{StaticResource Row}">
                             <StackPanel VerticalAlignment="Center" Margin="0,8,150,8">
-                                <TextBlock Text="Avisar antes do evento" Style="{StaticResource Label}"/>
-                                <TextBlock Text="Com 0, avisa só quando começa." Style="{StaticResource Hint}"/>
+                                <TextBlock Text="{x:Static y:Strings.Settings_RemindBefore}" Style="{StaticResource Label}"/>
+                                <TextBlock Text="{x:Static y:Strings.Settings_RemindBeforeHint}" Style="{StaticResource Hint}"/>
                             </StackPanel>
                             <views:Stepper HorizontalAlignment="Right" Minimum="0" Maximum="30" Step="1" Suffix=" min"
                                            Value="{Binding Settings.CalendarReminderMinutes}"/>
@@ -203,8 +214,8 @@
                         <Border Style="{StaticResource Divider}"/>
                         <Grid Style="{StaticResource Row}">
                             <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                                <TextBlock Text="Próximo evento no notch fechado" Style="{StaticResource Label}"/>
-                                <TextBlock Text="Nos 15 minutos antes, no lugar do relógio." Style="{StaticResource Hint}"/>
+                                <TextBlock Text="{x:Static y:Strings.Settings_NextEventCompact}" Style="{StaticResource Label}"/>
+                                <TextBlock Text="{x:Static y:Strings.Settings_NextEventCompactHint}" Style="{StaticResource Hint}"/>
                             </StackPanel>
                             <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                       IsChecked="{Binding Settings.CalendarInCompact}"/>
@@ -234,11 +245,11 @@
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,130,8">
-                            <TextBlock Text="Tarefas" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_Tasks}" Style="{StaticResource Label}"/>
                             <TextBlock x:Name="TasksHint" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <Button x:Name="TasksButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                VerticalAlignment="Center" Content="Permitir" Click="OnTasksButton"/>
+                                VerticalAlignment="Center" Content="{x:Static y:Strings.Settings_Allow}" Click="OnTasksButton"/>
                         <CheckBox x:Name="TasksSwitch" Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   Click="OnTasksSwitch"/>
                     </Grid>
@@ -246,8 +257,8 @@
                         <Border Style="{StaticResource Divider}"/>
                         <Grid Style="{StaticResource Row}">
                             <StackPanel VerticalAlignment="Center" Margin="0,8,190,8">
-                                <TextBlock Text="Lista" Style="{StaticResource Label}"/>
-                                <TextBlock Text="Clique para trocar. A aba Tarefas mostra esta lista." Style="{StaticResource Hint}"/>
+                                <TextBlock Text="{x:Static y:Strings.Settings_TaskList}" Style="{StaticResource Label}"/>
+                                <TextBlock Text="{x:Static y:Strings.Settings_TaskListHint}" Style="{StaticResource Hint}"/>
                             </StackPanel>
                             <Button x:Name="TasksListButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
                                     VerticalAlignment="Center" MaxWidth="180" Click="OnTasksList"/>
@@ -258,14 +269,14 @@
             </Border>
 
             <!-- Weather -->
-            <TextBlock Text="Tempo" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_Weather}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Mostrar o tempo" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_ShowWeather}" Style="{StaticResource Label}"/>
                             <TextBlock Style="{StaticResource Hint}"
-                                       Text="Dados do Open-Meteo (open-meteo.com), sem conta. Envia só as coordenadas da cidade, arredondadas (~1 km)."/>
+                                       Text="{x:Static y:Strings.Settings_ShowWeatherHint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.WeatherEnabled}"/>
@@ -273,7 +284,7 @@
                     <Border Style="{StaticResource Divider}"/>
                     <StackPanel Margin="0,12,0,12">
                         <Grid>
-                            <TextBlock Text="Cidade" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_City}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                             <TextBlock x:Name="WeatherPlaceText" Style="{StaticResource Hint}" Margin="0"
                                        HorizontalAlignment="Right" VerticalAlignment="Center"/>
                         </Grid>
@@ -286,26 +297,26 @@
                                 <Grid>
                                     <TextBlock x:Name="WeatherSearchPlaceholder" Margin="12,0" VerticalAlignment="Center"
                                                FontSize="13" IsHitTestVisible="False" Foreground="#66FFFFFF"
-                                               Text="Buscar cidade (ex.: Campinas)"/>
+                                               Text="{x:Static y:Strings.Settings_CitySearch}"/>
                                     <TextBox x:Name="WeatherSearchBox" Margin="9,0" VerticalAlignment="Center" FontSize="13"
                                              Background="Transparent" BorderThickness="0" Foreground="White"
                                              CaretBrush="White" SelectionBrush="#66FFFFFF" MaxLength="80"
                                              TextChanged="OnWeatherSearchChanged" KeyDown="OnWeatherSearchKeyDown"/>
                                 </Grid>
                             </Border>
-                            <Button Grid.Column="1" Style="{StaticResource PillButton}" Content="Buscar" Margin="8,0,0,0"
+                            <Button Grid.Column="1" Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Settings_Search}" Margin="8,0,0,0"
                                     Click="OnWeatherSearch"/>
                         </Grid>
                         <!-- Alternative to typing: one reading from Windows location, rounded right away -->
                         <Grid Margin="0,10,0,0">
                             <TextBlock Style="{StaticResource Hint}" Margin="0,0,190,0" VerticalAlignment="Center"
-                                       Text="Ou use a localização do Windows uma vez: a posição é arredondada para ~1 km na hora e nunca é guardada com precisão."/>
+                                       Text="{x:Static y:Strings.Settings_LocateHint}"/>
                             <Button x:Name="WeatherLocateButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
                                     VerticalAlignment="Center" Click="OnWeatherLocate">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xE81D;" FontFamily="{StaticResource IconFont}" FontSize="11"
                                                VerticalAlignment="Center"/>
-                                    <TextBlock Text="Usar minha localização" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{x:Static y:Strings.Settings_UseMyLocation}" Margin="6,0,0,0" VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </Grid>
@@ -313,7 +324,7 @@
                             <TextBlock x:Name="WeatherSearchStatus" Style="{StaticResource Hint}" Margin="0,0,190,0"
                                        VerticalAlignment="Center" Visibility="Collapsed"/>
                             <Button x:Name="LocationSettingsButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                    VerticalAlignment="Center" Content="Abrir configurações do Windows" Visibility="Collapsed"
+                                    VerticalAlignment="Center" Content="{x:Static y:Strings.Settings_OpenWindowsSettings}" Visibility="Collapsed"
                                     Click="OnOpenLocationSettings"/>
                         </Grid>
                         <!-- Search results: click one to use it -->
@@ -346,8 +357,8 @@
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Avisar quando for chover" Style="{StaticResource Label}"/>
-                            <TextBlock Text="Quando a chance passa de 60% nas próximas 2 horas." Style="{StaticResource Hint}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_RainAlerts}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_RainAlertsHint}" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.WeatherRainAlerts}"/>
@@ -356,83 +367,83 @@
             </Border>
 
             <!-- Notices -->
-            <TextBlock Text="Avisos no notch" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_Notices}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Volume" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudVolume}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudVolume}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Brilho" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudBrightness}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudBrightness}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Carregador e bateria baixa" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudPower}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudPower}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Troca de saída de áudio (fone, caixa)" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudAudioDevice}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudAudioDevice}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Caps Lock" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudCapsLock}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudCapsLock}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Idioma do teclado" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudKeyboardLayout}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudKeyboardLayout}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Conexão de rede" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudNetwork}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudNetwork}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Câmera e microfone em uso" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_HudPrivacy}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudPrivacy}"/>
                     </Grid>
                 </StackPanel>
             </Border>
 
             <!-- Focus -->
-            <TextBlock Text="Foco (Pomodoro)" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_Focus}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Foco" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_FocusLength}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="5" Maximum="120" Step="5" Suffix=" min"
                                        Value="{Binding Settings.FocusMinutes}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Pausa curta" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_ShortBreak}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="1" Maximum="30" Step="1" Suffix=" min"
                                        Value="{Binding Settings.ShortBreakMinutes}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Pausa longa" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_LongBreak}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="5" Maximum="60" Step="5" Suffix=" min"
                                        Value="{Binding Settings.LongBreakMinutes}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Sessões até a pausa longa" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_SessionsPerCycle}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="2" Maximum="8" Step="1"
                                        Value="{Binding Settings.SessionsPerCycle}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Pausar quando você sai" Style="{StaticResource Label}"/>
-                            <TextBlock Text="Após 5 min sem uso, devolvendo o tempo não acompanhado." Style="{StaticResource Hint}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_PauseWhenAway}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_PauseWhenAwayHint}" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.PauseFocusWhenAway}"/>
@@ -441,29 +452,29 @@
             </Border>
 
             <!-- Water -->
-            <TextBlock Text="Água" Style="{StaticResource Section}"/>
+            <TextBlock Text="{x:Static y:Strings.Settings_Water}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Meta diária" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_WaterGoal}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="500" Maximum="5000" Step="250" Suffix=" ml"
                                        Value="{Binding Water.GoalMl}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Tamanho do copo" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_CupSize}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="50" Maximum="1000" Step="50" Suffix=" ml"
                                        Value="{Binding Water.CupMl}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Lembretes" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_WaterReminders}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Water.RemindersEnabled}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Lembrar a cada" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_WaterEvery}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="15" Maximum="240" Step="15" Suffix=" min"
                                        Value="{Binding Water.ReminderMinutes}"/>
                     </Grid>
@@ -476,27 +487,27 @@
                 <StackPanel>
                     <Grid Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8,60,8">
-                            <TextBlock Text="Mostrar o Yata quando o PC fica parado" Style="{StaticResource Label}"/>
-                            <TextBlock Text="Usa só o horário do último uso do mouse/teclado, nunca o conteúdo." Style="{StaticResource Hint}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_Companion}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_CompanionHint}" Style="{StaticResource Hint}"/>
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.CompanionEnabled}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Aparece após" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_CompanionAfter}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="1" Maximum="30" Step="1" Suffix=" min"
                                        Value="{Binding Settings.CompanionIdleMinutes}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Cochila após" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <TextBlock Text="{x:Static y:Strings.Settings_CompanionSleep}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="2" Maximum="120" Step="1" Suffix=" min"
                                        Value="{Binding Settings.CompanionSleepMinutes}"/>
                     </Grid>
                     <Border Style="{StaticResource Divider}"/>
                     <Grid Style="{StaticResource Row}">
-                        <TextBlock Text="Resumo ao voltar (&quot;enquanto você esteve fora&quot;)" Style="{StaticResource Label}"
+                        <TextBlock Text="{x:Static y:Strings.Settings_AwaySummary}" Style="{StaticResource Label}"
                                    VerticalAlignment="Center" Margin="0,0,60,0"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.AwaySummaryEnabled}"/>
@@ -506,17 +517,17 @@
 
             <!-- Footer -->
             <Grid Margin="4,22,0,0">
-                <TextBlock Text="Seus dados ficam só neste PC." FontSize="12" Foreground="#8C8C8C" VerticalAlignment="Center"/>
-                <Button Style="{StaticResource PillButton}" Content="Abrir pasta de dados" HorizontalAlignment="Right"
+                <TextBlock Text="{x:Static y:Strings.Settings_DataLocal}" FontSize="12" Foreground="#8C8C8C" VerticalAlignment="Center"/>
+                <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Settings_OpenDataFolder}" HorizontalAlignment="Right"
                         Click="OnOpenDataFolder"/>
             </Grid>
             <Grid Margin="4,10,0,0">
-                <TextBlock Text="Algum problema? O registro também fica só aqui." FontSize="12" Foreground="#8C8C8C"
+                <TextBlock Text="{x:Static y:Strings.Settings_LogLocal}" FontSize="12" Foreground="#8C8C8C"
                            VerticalAlignment="Center"/>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Style="{StaticResource PillButton}" Content="Abrir registro" Margin="0,0,8,0"
+                    <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Settings_OpenLog}" Margin="0,0,8,0"
                             Click="OnOpenLogs"/>
-                    <Button x:Name="DiagnosticsButton" Style="{StaticResource PillButton}" Content="Copiar diagnóstico"
+                    <Button x:Name="DiagnosticsButton" Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Settings_CopyDiagnostics}"
                             Click="OnCopyDiagnostics"/>
                 </StackPanel>
             </Grid>

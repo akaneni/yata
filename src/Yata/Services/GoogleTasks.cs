@@ -67,7 +67,7 @@ public sealed class GoogleTasks
     public async Task EnableAsync()
     {
         if (!HasAccess && !await _account.ConnectAsync(GoogleAuth.TasksScopes,
-                "Marque a permissão de tarefas para o Yata poder sincronizar."))
+                Strings.Tasks_AskPermission))
         {
             Changed?.Invoke();
             return;
@@ -158,13 +158,13 @@ public sealed class GoogleTasks
         catch (GoogleApiException ex) when (ex.ApiDisabled)
         {
             Log.Warn("google-tasks", "API do Google Tasks desativada no projeto", ex);
-            Error = "A API do Google Tasks não está ativada no projeto do Google Cloud.";
+            Error = Strings.Tasks_ApiDisabled;
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             // Offline: changes stay marked and go out on a later round.
             Log.Warn("google-tasks", "Falha ao sincronizar", ex);
-            Error = "Sem conexão com o Google Tasks.";
+            Error = Strings.Tasks_NoConnection;
         }
         finally
         {
@@ -302,7 +302,7 @@ internal static class TaskSync
             foreach (var item in items.EnumerateArray())
             {
                 if (Str(item, "id") is { } id)
-                    lists.Add(new TaskListInfo(id, Str(item, "title") is { Length: > 0 } title ? title : "Sem nome"));
+                    lists.Add(new TaskListInfo(id, Str(item, "title") is { Length: > 0 } title ? title : Strings.Tasks_Unnamed));
             }
         }
         return lists;
