@@ -32,6 +32,14 @@ public partial class App : Application
         // Software rendering cut Task Manager memory from ~119 MB to ~43 MB and halved CPU.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
+        // Run by the uninstaller: no notch, just take Yata's hooks out of the AI agents.
+        if (e.Args.Contains("--remove-agent-hooks"))
+        {
+            Services.AgentSetup.RemoveAll();
+            Shutdown();
+            return;
+        }
+
         _singleInstance = new Mutex(true, Services.ActivityClient.SingleInstanceName, out bool isFirstInstance);
         if (!isFirstInstance)
         {

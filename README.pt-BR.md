@@ -116,14 +116,22 @@ yata-cli activity end agent
 
 ### Agentes de IA: Claude Code, Cursor e Codex
 
-O Yata pode mostrar o que o seu agente de programação está fazendo — **trabalhando**, **esperando você** (precisa de uma permissão ou da sua resposta) e **concluído** — uma bolha por sessão, com o nome do agente e da pasta do projeto ("Claude Code · yata"). Os hooks do agente chamam `yata-cli hook <agente>`; só o estado vai para o notch, nunca os seus prompts, os comandos ou as respostas do agente. Se o Yata não estiver aberto, o hook volta na hora, e ele nunca bloqueia nem muda o agente (sempre sai com 0 e só imprime a resposta neutra que alguns eventos esperam). Precisa do `yata-cli` no PATH (a opção do instalador).
+O Yata pode mostrar o que o seu agente de programação está fazendo — **trabalhando**, **esperando você** (precisa de uma permissão ou da sua resposta) e **concluído** — uma bolha por sessão, com o nome do agente e da pasta do projeto ("Claude Code · yata"). Os hooks do agente chamam `yata-cli hook <agente>`; só o estado vai para o notch, nunca os seus prompts, os comandos ou as respostas do agente. Se o Yata não estiver aberto, o hook volta na hora, e ele nunca bloqueia nem muda o agente (sempre sai com 0 e só imprime a resposta neutra que alguns eventos esperam).
+
+**O jeito fácil: Configurações → Agentes de IA.** Um interruptor para cada agente encontrado no PC (Claude Code, Cursor, Codex). O Yata põe os hooks no arquivo de configuração do próprio agente, junto do que já existe, guarda uma cópia do arquivo antes de cada mudança (`.yata-backup`), e desligar tira só o que ele pôs. As sessões novas já pegam. Também ali:
+- **Claude Code no WSL → Escolher…** lista as distros do WSL que têm o Claude Code; marque as que quiser. Cada uma recebe os mesmos hooks, chamando o `yata-cli.exe` pelo `/mnt/c`, e um link `yata-cli` em `~/.local/bin` para a skill. Uma distro sem acesso ao Windows (sem acesso ao `/mnt/c`) aparece na lista, mas não dá para ligar.
+- **yata-cli no PATH**, igual à opção do instalador (que a atualização silenciosa não mostra), para scripts e para o Codex.
+- Desinstalar o Yata tira os hooks dele do Claude Code, do Cursor e do Codex no Windows, para nenhum ficar apontando para um `yata-cli.exe` apagado. As distros do WSL ficam com os delas: desligue nas Configurações antes.
+
+**À mão**, com o `yata-cli` no PATH:
 
 - **Claude Code**: instale o plugin, que traz os hooks e a skill abaixo:
   ```
   /plugin marketplace add akaneni/yata
   /plugin install yata@yata
   ```
-  Ou configure os hooks você mesmo: `yata-cli hook setup claude` imprime o trecho para o `%USERPROFILE%\.claude\settings.json`.
+  Ou configure os hooks você mesmo: `yata-cli hook setup claude` imprime o trecho para o `%USERPROFILE%\.claude\settings.json`. Com o plugin ligado, as Configurações mostram o Claude Code como ligado por ele e não mexem.
+- **WSL à mão**: na distro, `ln -s /mnt/c/Users/<você>/AppData/Local/Programs/Yata/yata-cli.exe ~/.local/bin/yata-cli`, depois instale o plugin no Claude Code daquela distro.
 - **Cursor**: `yata-cli hook setup cursor` imprime o `%USERPROFILE%\.cursor\hooks.json`. O Cursor não tem evento para "esperando sua aprovação", então mostra trabalhando e concluído. O Yata só usa os eventos do Cursor que não bloqueiam nada, nunca os que decidem permissões.
 - **Codex**: `yata-cli hook setup codex` imprime o `%USERPROFILE%\.codex\hooks.json` (revise e confie nele com `/hooks`). Codex antigo, sem hooks: `notify = ["yata-cli", "hook", "codex"]` no `config.toml` mostra quando uma rodada termina.
 
