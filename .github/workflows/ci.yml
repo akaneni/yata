@@ -29,3 +29,10 @@ jobs:
       - name: Site
         shell: pwsh
         run: ./tools/make-site.ps1
+
+      # The built site, to look at a PR's changes before they deploy.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: _site
+          retention-days: 7
