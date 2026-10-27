@@ -1,6 +1,7 @@
 # Builds getyata.app into _site/ (deployed to GitHub Pages by .github/workflows/pages.yml):
 #   site/index.html is the English page; site/pt.json translates every data-i18n,
-#   data-i18n-html, data-i18n-label (aria-label) and data-i18n-content (meta content) into
+#   data-i18n-html, data-i18n-label (aria-label), data-i18n-content (meta content), data-i18n-alt
+#   and data-i18n-src (the screenshot in each language) into
 #   pt/index.html, and {{JSONLD}} and {{FAQ_JSONLD}} become the schema.org data in each
 #   language (the FAQ one is read from the page's <details class="faq-item">). robots.txt,
 #   sitemap.xml and llms.txt are copied as they are. {{LOCKUP}} becomes the inline lockup from docs/brand (run make-brand.ps1
@@ -45,7 +46,7 @@ function Convert-ToPortuguese([string]$html) {
     if (-not $m.Groups[3].Success) { $value = ConvertTo-Html $value }
     "<$($m.Groups[1].Value)$($m.Groups[2].Value)>$value</$($m.Groups[1].Value)>"
   })
-  foreach ($pair in @(@("label", "aria-label"), @("content", "content"))) {
+  foreach ($pair in @(@("label", "aria-label"), @("content", "content"), @("alt", "alt"), @("src", "src"))) {
     $html = [regex]::Replace($html, "<[^>]*\sdata-i18n-$($pair[0])=`"([^`"]+)`"[^>]*>", [Text.RegularExpressions.MatchEvaluator] {
       param($m)
       $value = ConvertTo-Html (Get-Pt $m.Groups[1].Value)
@@ -70,6 +71,7 @@ function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
     downloadUrl = "https://github.com/akaneni/yata/releases/latest"
     fileSize = "6MB"
     image = "https://getyata.app/og.png"
+    screenshot = "https://getyata.app/img/notch-open-$(if ($lang -eq "en") { "en" } else { "pt" }).png"
     license = "https://opensource.org/licenses/MIT"
     isAccessibleForFree = $true
     offers = [ordered]@{ "@type" = "Offer"; price = "0"; priceCurrency = "USD" }
