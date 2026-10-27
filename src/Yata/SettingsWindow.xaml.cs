@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -91,6 +92,7 @@ public partial class SettingsWindow : Window
         ShowGoogle();
         ShowWeatherPlace();
         ShowForecast();
+        ShowAgents();
         BuildSectionNav();
     }
 
@@ -551,6 +553,195 @@ public partial class SettingsWindow : Window
     }
 
     private void OnRefreshForecast(object sender, RoutedEventArgs e) => _ = _weather.RefreshNowAsync();
+
+    // ---- AI agents --------------------------------------------------------------------------
+
+    // Missing in development builds, where the switches stay off.
+    private static string CliPath => AgentSetup.InstalledCli;
+    private static string CliDir => AppContext.BaseDirectory.TrimEnd('\\');
+    private static bool HasCli => File.Exists(CliPath);
+
+    private static string Skill() => AgentSetup.EmbeddedSkill();
+
+    private static AgentSetup Agents => AgentSetup.ForThisUser();
+
+    // What went wrong with the last switch flipped, shown under it until the next try.
+    private readonly Dictionary<string, string> _agentErrors = new();
+    private string? _wslResult;
+    // The switches react to Checked/Unchecked, not Click, so that screen readers (which toggle
+    // without clicking) work too; while this window sets them itself, that's not the user.
+    private bool _showingAgents;
+
+    private void ShowAgents()
+    {
+        _showingAgents = true;
+        try
+        {
+            ShowAgentRows();
+        }
+        finally
+        {
+            _showingAgents = false;
+        }
+    }
+
+    private void ShowAgentRows()
+    {
+        var agents = Agents;
+        foreach (var (agent, hint, toggle) in new[]
+                 {
+                     ("claude", ClaudeAgentHint, ClaudeAgentSwitch),
+                     ("cursor", CursorAgentHint, CursorAgentSwitch),
+                     ("codex", CodexAgentHint, CodexAgentSwitch),
+                 })
+        {
+            var status = agents.Status(agent);
+            toggle.IsChecked = status is AgentStatus.On or AgentStatus.OnByPlugin;
+            // The plugin manages its own hooks: turning it off is done in Claude Code (/plugin).
+            toggle.IsEnabled = HasCli && status is AgentStatus.On or AgentStatus.Off;
+            hint.Text = _agentErrors.TryGetValue(agent, out string? error) ? error
+                : !HasCli ? Strings.Agents_NoCli
+                : status switch
+                {
+                    AgentStatus.NotFound => Strings.Agents_NotFound,
+                    AgentStatus.OnByPlugin => Strings.Agents_ByPlugin,
+                    AgentStatus.On => agent == "codex" ? Strings.Agents_OnCodex : Strings.Agents_On,
+                    _ => agent == "cursor" ? Strings.Agents_CursorNoWaiting : Strings.Agents_Off,
+                };
+        }
+
+        WslChooseButton.IsEnabled = HasCli && !_wslBusy;
+        WslAgentHint.Text = !HasCli ? Strings.Agents_NoCli : _wslResult ?? Strings.Agents_WslHint;
+
+        PathSwitch.IsEnabled = HasCli;
+        PathSwitch.IsChecked = HasCli && UserPath.Contains(CliDir);
+    }
+
+    private void OnAgentSwitch(object sender, RoutedEventArgs e)
+    {
+        if (_showingAgents || sender is not CheckBox { Tag: string agent } toggle)
+            return;
+        bool on = toggle.IsChecked == true;
+        _agentErrors.Remove(agent);
+        try
+        {
+            Agents.Set(agent, on);
+            // Codex calls yata-cli by name (its shell on Windows isn't documented), so it needs the PATH.
+            if (agent == "codex" && on && !UserPath.Contains(CliDir))
+                UserPath.Set(CliDir, true);
+            Log.Info("agents", $"{agent}: {(on ? "ligado" : "desligado")}");
+        }
+        catch (Exception ex) when (ex is AgentSetupException or IOException or UnauthorizedAccessException)
+        {
+            Log.Warn("agents", $"Não foi possível mudar {agent}", ex);
+            _agentErrors[agent] = ex.Message;
+        }
+        ShowAgents();
+    }
+
+    private bool _wslBusy;
+
+    /// <summary>
+    /// Looks into the distros (which starts them), then lists them with a check on those where it's
+    /// on. Clicking one turns only that one on or off; distros that can't take it are listed, greyed,
+    /// with the reason.
+    /// </summary>
+    private async void OnWslChoose(object sender, RoutedEventArgs e)
+    {
+        SetWslBusy(Strings.Agents_WslLooking);
+        List<WslDistro> distros;
+        try
+        {
+            distros = await WslAgents.ScanAsync(CliPath, Skill());
+        }
+        finally
+        {
+            SetWslBusy(null);
+        }
+        ShowWslSummary(distros);
+        if (distros.Count == 0)
+            return;
+
+        var menu = new ContextMenu { Style = (Style)FindResource("ChoiceMenu"), PlacementTarget = WslChooseButton };
+        foreach (var distro in distros)
+        {
+            bool usable = distro.HasClaude && distro.CanRunCli && distro.Status != AgentStatus.OnByPlugin;
+            var item = new MenuItem
+            {
+                Header = !distro.HasClaude ? string.Format(Strings.Agents_WslNoClaude, distro.Name)
+                    : !distro.CanRunCli ? string.Format(Strings.Agents_WslNoAccess, distro.Name)
+                    : distro.Status == AgentStatus.OnByPlugin ? string.Format(Strings.Agents_WslByPlugin, distro.Name)
+                    : distro.Name,
+                IsChecked = distro.Status is AgentStatus.On or AgentStatus.OnByPlugin,
+                IsEnabled = usable,
+            };
+            item.Click += async (_, _) => await SetWslAsync(distro, distro.Status != AgentStatus.On);
+            menu.Items.Add(item);
+        }
+        menu.IsOpen = true;
+    }
+
+    private async Task SetWslAsync(WslDistro distro, bool on)
+    {
+        SetWslBusy(string.Format(Strings.Agents_WslWorking, distro.Name));
+        try
+        {
+            if (await WslAgents.SetAsync(distro.Name, on, CliPath, Skill()))
+            {
+                Log.Info("agents", $"WSL: {(on ? "ligado" : "desligado")} numa distro");
+                ShowWslSummary(await WslAgents.ScanAsync(CliPath, Skill()));
+            }
+            else
+            {
+                _wslResult = string.Format(Strings.Agents_WslFailed, distro.Name);
+            }
+        }
+        catch (Exception ex) when (ex is AgentSetupException or IOException or UnauthorizedAccessException)
+        {
+            Log.Warn("agents", "Não foi possível configurar o WSL", ex);
+            _wslResult = ex.Message;
+        }
+        finally
+        {
+            SetWslBusy(null);
+        }
+    }
+
+    private void ShowWslSummary(List<WslDistro> distros)
+    {
+        var on = distros.Where(d => d.Status is AgentStatus.On or AgentStatus.OnByPlugin)
+            .Select(d => d.Status == AgentStatus.OnByPlugin ? string.Format(Strings.Agents_WslByPlugin, d.Name) : d.Name)
+            .ToList();
+        _wslResult = !distros.Any(d => d.HasClaude) ? Strings.Agents_WslNone
+            : on.Count > 0 ? string.Format(Strings.Agents_WslOn, string.Join(", ", on))
+            : null;
+        ShowAgents();
+    }
+
+    private void SetWslBusy(string? text)
+    {
+        _wslBusy = text != null;
+        WslChooseButton.IsEnabled = HasCli && !_wslBusy;
+        if (text != null)
+            WslAgentHint.Text = text;
+        else
+            ShowAgents();
+    }
+
+    private void OnPathSwitch(object sender, RoutedEventArgs e)
+    {
+        if (_showingAgents)
+            return;
+        try
+        {
+            UserPath.Set(CliDir, PathSwitch.IsChecked == true);
+        }
+        catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
+        {
+            Log.Warn("agents", "Não foi possível mudar o PATH", ex);
+        }
+        ShowAgents();
+    }
 
     private async void OnUpdateNow(object sender, RoutedEventArgs e)
     {

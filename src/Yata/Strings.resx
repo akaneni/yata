@@ -102,6 +102,30 @@
   <data name="Settings_Activities" xml:space="preserve"><value>Activities</value></data>
   <data name="Settings_ActivitiesEnabled" xml:space="preserve"><value>Let programs on this PC show activities</value></data>
   <data name="Settings_ActivitiesHint" xml:space="preserve"><value>Scripts, builds and AI agents can show their progress beside the notch with yata-cli. Only programs running as you on this PC; nothing goes over the network.</value></data>
+  <data name="Settings_Agents" xml:space="preserve"><value>AI agents</value></data>
+  <data name="Agents_Note" xml:space="preserve"><value>Shows in the notch when the agent is working, waiting for you and done. Yata adds its hooks to the agent's own settings, keeps a copy of the file (.yata-backup), and turning off removes only what it added.</value></data>
+  <data name="Agents_NotFound" xml:space="preserve"><value>Not found on this PC</value></data>
+  <data name="Agents_Off" xml:space="preserve"><value>Off</value></data>
+  <data name="Agents_On" xml:space="preserve"><value>On for new sessions</value></data>
+  <data name="Agents_OnCodex" xml:space="preserve"><value>On. In Codex, review and trust the hooks with /hooks.</value></data>
+  <data name="Agents_ByPlugin" xml:space="preserve"><value>On through the Yata plugin for Claude Code</value></data>
+  <data name="Agents_CursorNoWaiting" xml:space="preserve"><value>Cursor has no event for "waiting for your approval": it shows working and done.</value></data>
+  <data name="Agents_Wsl" xml:space="preserve"><value>Claude Code in WSL</value></data>
+  <data name="Agents_WslHint" xml:space="preserve"><value>Choose the distros where Claude Code should show in the notch.</value></data>
+  <data name="Agents_WslChoose" xml:space="preserve"><value>Choose…</value></data>
+  <data name="Agents_WslLooking" xml:space="preserve"><value>Looking into the WSL distros…</value></data>
+  <data name="Agents_WslWorking" xml:space="preserve"><value>Setting up {0}…</value></data>
+  <data name="Agents_WslOn" xml:space="preserve"><value>On in: {0}</value></data>
+  <data name="Agents_WslByPlugin" xml:space="preserve"><value>{0} (plugin)</value></data>
+  <data name="Agents_WslNoClaude" xml:space="preserve"><value>{0}: no Claude Code</value></data>
+  <data name="Agents_WslNoAccess" xml:space="preserve"><value>{0}: can't reach Windows</value></data>
+  <data name="Agents_WslFailed" xml:space="preserve"><value>Couldn't set up {0}</value></data>
+  <data name="Agents_WslNone" xml:space="preserve"><value>No WSL distro with Claude Code</value></data>
+  <data name="Agents_Path" xml:space="preserve"><value>yata-cli on PATH</value></data>
+  <data name="Agents_PathHint" xml:space="preserve"><value>So scripts and Codex can call yata-cli by name. Terminals already open don't see the change.</value></data>
+  <data name="Agents_NoCli" xml:space="preserve"><value>yata-cli.exe isn't next to Yata (a development build?).</value></data>
+  <data name="Agents_Unreadable" xml:space="preserve"><value>Couldn't read {0}. Fix it, or add the hooks by hand (yata-cli hook setup).</value></data>
+  <data name="Agents_NotAnObject" xml:space="preserve"><value>{0} isn't a JSON object, so Yata leaves it alone.</value></data>
   <data name="Settings_HudVolume" xml:space="preserve"><value>Volume</value></data>
   <data name="Settings_HudBrightness" xml:space="preserve"><value>Brightness</value></data>
   <data name="Settings_HudPower" xml:space="preserve"><value>Charger and low battery</value></data>

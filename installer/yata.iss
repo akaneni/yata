@@ -101,6 +101,9 @@ Filename: "{app}\Yata.exe"; Description: "{cm:LaunchProgram,Yata}"; Flags: nowai
 Filename: "{app}\Yata.exe"; Flags: nowait; Check: IsUpdate
 
 [UninstallRun]
+; First, while yata-cli.exe still exists: take Yata's hooks out of Claude Code, Cursor and Codex, so
+; none is left pointing at it (Settings → AI agents put them there). Before taskkill, which would stop it too.
+Filename: "{app}\Yata.exe"; Parameters: "--remove-agent-hooks"; Flags: runhidden waituntilterminated; RunOnceId: "RemoveAgentHooks"
 Filename: "{sys}\taskkill.exe"; Parameters: "/IM Yata.exe /F"; Flags: runhidden; RunOnceId: "StopYata"
 
 ; Note: %LOCALAPPDATA%\Yata (tasks, water log, shelf, lyrics cache) is kept on uninstall on purpose.

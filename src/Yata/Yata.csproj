@@ -64,6 +64,11 @@
     <Resource Include="Assets\yata.ico" />
   </ItemGroup>
 
+  <!-- The agent skill, kept once in the Claude Code plugin; Settings → AI agents copies it where agents look. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\integrations\claude-code\skills\yata-notch\SKILL.md" LogicalName="SKILL.md" />
+  </ItemGroup>
+
   <ItemGroup>
     <InternalsVisibleTo Include="Yata.Tests" />
   </ItemGroup>
