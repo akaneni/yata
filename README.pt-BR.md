@@ -1,5 +1,7 @@
 <h1><img src="docs/brand/yata-lockup.svg" alt="Yata" height="56"></h1>
 
+[English](README.md) · **Português**
+
 ![O Yata, corvo em pixel art, pousado diante de um sol pontilhado](docs/yata-hero.png)
 
 Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que está tocando, a hora, seus lembretes, e sai do caminho quando não é necessário. Site: **[getyata.app](https://getyata.app)**.
@@ -14,7 +16,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`. Pode ser desligada nas configurações.
 - aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. A instalação continua manual.
 - **tempo** no [Open-Meteo](https://open-meteo.com) (aberto, sem conta nem chave), só se você ligar: envia as coordenadas da cidade escolhida, arredondadas para ~1 km. A busca da cidade envia só o nome digitado.
-- **Google Agenda e Google Tasks**, só se você conectar sua conta e liberar cada um: leitura das agendas e dos eventos de hoje e amanhã, e sincronização de uma lista de tarefas, direto entre o PC e o Google. O acesso fica cifrado com DPAPI em `%LOCALAPPDATA%\Yata\google.dat` e os eventos ficam só na memória. Detalhes em [PRIVACY.md](PRIVACY.md).
+- **Google Agenda e Google Tasks**, só se você conectar sua conta e liberar cada um: leitura das agendas e dos eventos de hoje e amanhã, e sincronização de uma lista de tarefas, direto entre o PC e o Google. O acesso fica cifrado com DPAPI em `%LOCALAPPDATA%\Yata\google.dat` e os eventos ficam só na memória. Detalhes em [PRIVACY.pt-BR.md](PRIVACY.pt-BR.md).
 
 ## Identidade
 
@@ -29,6 +31,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 ## Funcionalidades (v0.1)
 
+- **Português e inglês**: segue o idioma do Windows (português em qualquer Windows em português, inglês nos demais), ou escolha em Configurações → Idioma.
 - **Notch compacto**: relógio quando nada toca; capa, título e equalizador animado quando há mídia.
 - **Expande ao passar o mouse** com animação de mola; recolhe ao sair.
 - **Player de mídia** de qualquer app que use os controles de mídia do Windows (Spotify, YouTube no navegador, etc.): capa, título, artista, barra de progresso com busca, anterior/play/próxima. Com vários players abertos, segue o que está **tocando de fato**.
@@ -42,7 +45,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Tempo** (desligado por padrão): você escolhe a cidade pelo nome ou, se preferir, com uma leitura única da localização do Windows (arredondada para ~1 km na hora, nunca guardada com precisão). Nada de geolocalização por IP. Ícones em pixel art 1-bit no estilo do Yata. O notch fechado mostra ícone e temperatura ao lado do relógio; aberto sem música, mostra condição, máxima/mínima e a chuva prevista. Chega um aviso quando a chance de chuva passa de 60% nas próximas 2 horas. Dados do tempo: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
 - **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
 - **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
-- **Tarefas**: lista com marcar/remover; um horário no fim do texto ("Reunião 15:30") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
+- **Tarefas**: lista com marcar/remover; um horário no fim do texto ("Reunião 15:30", "ligar às 9h00", "Call Ana at 3pm") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
 - **Prateleira de arquivos**: arraste arquivos ou pastas até o notch para guardar e arraste de volta para qualquer app; clique duplo abre. Guarda só o caminho (nada é copiado) e itens apagados/movidos somem sozinhos. Imagens ganham miniatura.
 - **O Yata (companheiro)**, a partir do tempo desde o último uso de mouse/teclado (`GetLastInputInfo` — só o horário, nunca o conteúdo):
   - **Modo ambiente** (2 min parado, nada tocando): o relógio dá lugar ao Yata pousado, que pisca, olha em volta e se ajeita; aos 10 min ele cochila.
@@ -80,7 +83,7 @@ dotnet run --project src/Yata
 
 A agenda e as tarefas do Google precisam de um cliente OAuth próprio, que não fica no repositório. Sem ele, o resto do app funciona normalmente. Veja [docs/google-calendar.md](docs/google-calendar.md).
 
-Testes automáticos (Pomodoro, letras, tarefas, água, presença, escolha do player, aviso de versão e agenda, com relógio simulado e sem rede). Rodam também no GitHub Actions a cada push:
+Testes automáticos (Pomodoro, letras, tarefas, água, presença, escolha do player, aviso de versão, agenda e traduções, com relógio simulado e sem rede). Rodam também no GitHub Actions a cada push:
 
 ```powershell
 dotnet test
@@ -111,7 +114,9 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-O site ([getyata.app](https://getyata.app)) fica em `site/`: a página em inglês é `site/index.html`, e a versão em português sai das traduções em `site/pt.json`. A política de privacidade do site espelha o `PRIVACY.md`. Montar e ver localmente (publicado no GitHub Pages a cada push na `main` que mexa no site):
+Os textos da interface ficam em `src/Yata/Strings.resx` (inglês, o padrão) e `src/Yata/Strings.pt-BR.resx` (português): `Strings.Chave` no C# e `{x:Static y:Strings.Chave}` no XAML. Um teste falha se um idioma tiver chave faltando ou sobrando, ou `{0}` diferentes. As mensagens do registro continuam em português, porque são para quem está depurando.
+
+O site ([getyata.app](https://getyata.app)) fica em `site/`: a página em inglês é `site/index.html`, e a versão em português sai das traduções em `site/pt.json`. A política de privacidade do site espelha o `PRIVACY.md` (inglês) e o `PRIVACY.pt-BR.md`. Montar e ver localmente (publicado no GitHub Pages a cada push na `main` que mexa no site):
 
 ```powershell
 ./tools/make-site.ps1                        # sai em _site/
@@ -149,6 +154,7 @@ src/Yata/
   Interop/                    chamadas Win32 e COM (Core Audio)
   Assets/yata.ico             ícone (gerado por tools/make-icon.ps1)
   SettingsWindow.xaml(.cs)    janela de configurações
+  Strings.resx                textos da interface em inglês (Strings.pt-BR.resx: português; Helpers/Lang.cs escolhe o idioma)
 installer/yata.iss            instalador (Inno Setup) e suas imagens (wizard-*.png)
 docs/                         imagens do README
 tools/                        gerar ícone, artes (PhotoCraft), GIF (EffectCraft), instalador e medição
@@ -168,5 +174,6 @@ tests/Yata.Tests/             testes (xUnit)
 7. ~~Configurações, iniciar com o Windows, instalador~~
 
 8. ~~Câmera/microfone em uso, vários monitores, atalho global, aviso de versão~~
+9. ~~Inglês e português~~
 
 Próximas ideias: projeção WinRT enxuta (instalador menor), assinatura digital.

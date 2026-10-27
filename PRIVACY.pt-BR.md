@@ -1,5 +1,7 @@
 # Política de privacidade do Yata
 
+[English](PRIVACY.md) · **Português**
+
 *Última atualização: 27 de outubro de 2026*
 
 O Yata é um app de código aberto para Windows que mostra um "notch" no topo da tela. Ele não tem conta, servidor nem telemetria. Esta política explica quais dados o Yata usa e para onde eles vão.
