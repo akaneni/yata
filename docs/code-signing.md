@@ -1,6 +1,8 @@
 # Assinatura de código (SignPath Foundation)
 
-As versões do Yata são assinadas pela [SignPath Foundation](https://signpath.org), que assina de graça projetos de código aberto. O certificado é da Foundation, não de uma pessoa: no Windows, o signatário aparece como **SignPath Foundation**. A política pública fica em [getyata.app/code-signing](https://getyata.app/code-signing) (e [/pt/code-signing](https://getyata.app/pt/code-signing)).
+**Situação:** a SignPath Foundation recusou o Yata em 27/10/2026. O programa pede sinais públicos que um projeto novo ainda não tem: estrelas, forks, contribuidores, artigos e discussões externas (Reddit, Stack Overflow, YouTube). O e-mail convida a pedir de novo quando o projeto tiver mais visibilidade. Até lá as versões saem sem assinatura, com o `SHA256SUMS.txt` e a comprovação de origem do GitHub (`actions/attest` no `release.yml`, conferida com `gh attestation verify`). Tudo abaixo continua valendo para quando a Foundation aprovar: sem a variável `SIGNPATH_ORGANIZATION_ID`, os passos de assinatura são pulados.
+
+A [SignPath Foundation](https://signpath.org) assina de graça projetos de código aberto. O certificado é da Foundation, não de uma pessoa: no Windows, o signatário aparece como **SignPath Foundation**. A política pública fica em [getyata.app/code-signing](https://getyata.app/code-signing) (e [/pt/code-signing](https://getyata.app/pt/code-signing)); ao ser aprovado, ela volta a descrever a assinatura.
 
 ## Como funciona no release
 

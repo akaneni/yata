@@ -69,7 +69,7 @@ function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
     applicationCategory = "UtilitiesApplication"
     operatingSystem = "Windows 10, Windows 11"
     downloadUrl = "https://github.com/akaneni/yata/releases/latest"
-    fileSize = "6MB"
+    fileSize = "3MB"
     image = "https://getyata.app/og.png"
     screenshot = "https://getyata.app/img/notch-open-$(if ($lang -eq "en") { "en" } else { "pt" }).png"
     license = "https://opensource.org/licenses/MIT"

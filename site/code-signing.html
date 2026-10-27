@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Code signing policy · Yata</title>
-<meta name="description" content="How Yata releases are signed, by whom, and how to check the signature.">
+<meta name="description" content="Yata releases are not code-signed yet: how they are built and how to check a download.">
 <link rel="canonical" href="https://getyata.app/code-signing">
 <link rel="alternate" hreflang="en" href="https://getyata.app/code-signing">
 <link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/code-signing">
@@ -14,7 +14,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="pt_BR">
 <meta property="og:title" content="Code signing policy · Yata">
-<meta property="og:description" content="How Yata releases are signed, by whom, and how to check the signature.">
+<meta property="og:description" content="Yata releases are not code-signed yet: how they are built and how to check a download.">
 <meta property="og:url" content="https://getyata.app/code-signing">
 <meta property="og:image" content="https://getyata.app/og.png">
 <meta property="og:image:width" content="1200">
@@ -47,28 +47,29 @@
   <article class="doc">
     <h1>Code signing policy</h1>
     <p class="updated">Last updated: October 27, 2026</p>
-    <p>Free code signing provided by <a href="https://about.signpath.io">SignPath.io</a>, certificate by <a href="https://signpath.org">SignPath Foundation</a>.</p>
-    <p><strong>Status:</strong> Signing through SignPath Foundation is being set up. Releases are signed starting with the first version published after the project is approved. Until then the installer is unsigned, and each release ships a <code>SHA256SUMS.txt</code> so you can check the file you got.</p>
+    <p>Yata releases are not code-signed yet, so Windows SmartScreen may warn the first time you run the installer. This page explains how releases are built and how to check that the file you have is the one published here.</p>
 
-    <h2>What is signed</h2>
+    <h2>Status</h2>
+    <p>SignPath Foundation, which signs open-source projects for free, declined Yata in October 2026: the program asks for more public visibility than a new project has. Yata will apply again as it grows. Until then, every release is unsigned.</p>
+
+    <h2>How releases are built</h2>
+    <p>The installer is built by GitHub Actions on GitHub-hosted runners, from a version tag of the public repository (<a href="https://github.com/akaneni/yata/blob/main/.github/workflows/release.yml">release.yml</a>). Nothing built on a personal computer is published. From v0.2.1 on, each installer also carries a build provenance attestation: a record signed by GitHub that ties the file to the workflow run and commit that built it.</p>
+
+    <h2>Checking a download</h2>
     <ul>
-      <li><code>Yata.exe</code>, the app itself, signed before it goes into the installer.</li>
-      <li><code>Yata-Setup-x.y.z.exe</code>, the installer published on <a href="https://github.com/akaneni/yata/releases">GitHub Releases</a>.</li>
+      <li><strong>Checksum:</strong> in PowerShell, <code>Get-FileHash .\Yata-Setup-x.y.z.exe</code> must match the line in the release's <code>SHA256SUMS.txt</code>.</li>
+      <li><strong>Provenance</strong> (v0.2.1 and later): with the <a href="https://cli.github.com">GitHub CLI</a>, <code>gh attestation verify Yata-Setup-x.y.z.exe --repo akaneni/yata</code>.</li>
+      <li><strong>Build it yourself:</strong> the <a href="https://github.com/akaneni/yata#build-and-run">README</a> shows how to build Yata and its installer from source.</li>
     </ul>
-    <p>Both are built by GitHub Actions on GitHub-hosted runners, from a version tag of the public repository (<a href="https://github.com/akaneni/yata/blob/main/.github/workflows/release.yml">release.yml</a>). Nothing built on a personal computer is signed, and every signing request is approved by hand. The .NET Desktop Runtime the installer may download comes from Microsoft and carries Microsoft's own signature.</p>
+    <p>A file that doesn't match is not an official Yata build: please <a href="https://github.com/akaneni/yata/issues">open an issue</a>.</p>
 
     <h2>Team roles</h2>
     <ul>
-      <li><strong>Committers and reviewers:</strong> <a href="https://github.com/akaneni">akaneni</a>. Changes from other contributors are reviewed before they are merged.</li>
-      <li><strong>Approvers:</strong> <a href="https://github.com/akaneni">akaneni</a> approves each signing request.</li>
+      <li><strong>Commits, reviews and releases:</strong> <a href="https://github.com/akaneni">akaneni</a>, with multi-factor authentication on GitHub. Changes from other contributors are reviewed before they are merged.</li>
     </ul>
-    <p>Everyone in these roles uses multi-factor authentication on GitHub and SignPath.</p>
 
     <h2>Privacy</h2>
     <p>Yata has no account, server or telemetry. What it sends over the network, and when, is in the <a href="/privacy">privacy policy</a>; the installer shows a summary before installing.</p>
-
-    <h2>Checking the signature</h2>
-    <p>Right-click the file, choose <strong>Properties</strong>, then <strong>Digital Signatures</strong>. The signer should be <strong>SignPath Foundation</strong>. Anything else, or no signature on a release marked as signed, is not an official Yata build: please open an issue.</p>
   </article>
 </main>
 

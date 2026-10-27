@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Política de assinatura de código · Yata</title>
-<meta name="description" content="Como as versões do Yata são assinadas, por quem e como conferir a assinatura.">
+<meta name="description" content="As versões do Yata ainda não são assinadas: como são geradas e como conferir o download.">
 <link rel="canonical" href="https://getyata.app/pt/code-signing">
 <link rel="alternate" hreflang="en" href="https://getyata.app/code-signing">
 <link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/code-signing">
@@ -14,7 +14,7 @@
 <meta property="og:locale" content="pt_BR">
 <meta property="og:locale:alternate" content="en_US">
 <meta property="og:title" content="Política de assinatura de código · Yata">
-<meta property="og:description" content="Como as versões do Yata são assinadas, por quem e como conferir a assinatura.">
+<meta property="og:description" content="As versões do Yata ainda não são assinadas: como são geradas e como conferir o download.">
 <meta property="og:url" content="https://getyata.app/pt/code-signing">
 <meta property="og:image" content="https://getyata.app/og.png">
 <meta property="og:image:width" content="1200">
@@ -45,30 +45,31 @@
 
 <main class="wrap">
   <article class="doc">
-    <h1>Política de assinatura de código (code signing policy)</h1>
+    <h1>Política de assinatura de código</h1>
     <p class="updated">Última atualização: 27 de outubro de 2026</p>
-    <p>Assinatura de código gratuita fornecida por <a href="https://about.signpath.io">SignPath.io</a>, certificado da <a href="https://signpath.org">SignPath Foundation</a>.</p>
-    <p><strong>Situação:</strong> a assinatura pela SignPath Foundation está em andamento. As versões passam a sair assinadas a partir da primeira publicada depois da aprovação do projeto. Até lá o instalador não é assinado, e cada versão traz um <code>SHA256SUMS.txt</code> para você conferir o arquivo baixado.</p>
+    <p>As versões do Yata ainda não são assinadas, então o Windows SmartScreen pode avisar na primeira vez que você executa o instalador. Esta página explica como as versões são geradas e como conferir que o arquivo que você tem é o publicado aqui.</p>
 
-    <h2>O que é assinado</h2>
+    <h2>Situação</h2>
+    <p>A SignPath Foundation, que assina de graça projetos de código aberto, recusou o Yata em outubro de 2026: o programa pede mais visibilidade pública do que um projeto novo tem. O Yata vai pedir de novo conforme crescer. Até lá, todas as versões saem sem assinatura.</p>
+
+    <h2>Como as versões são geradas</h2>
+    <p>O instalador é gerado pelo GitHub Actions, em máquinas do próprio GitHub, a partir de uma tag de versão do repositório público (<a href="https://github.com/akaneni/yata/blob/main/.github/workflows/release.yml">release.yml</a>). Nada compilado num computador pessoal é publicado. A partir da v0.2.1, cada instalador também traz uma comprovação de origem: um registro assinado pelo GitHub que liga o arquivo à execução e ao commit que o geraram.</p>
+
+    <h2>Como conferir o download</h2>
     <ul>
-      <li><code>Yata.exe</code>, o próprio app, assinado antes de entrar no instalador.</li>
-      <li><code>Yata-Setup-x.y.z.exe</code>, o instalador publicado nas <a href="https://github.com/akaneni/yata/releases">Releases do GitHub</a>.</li>
+      <li><strong>Hash:</strong> no PowerShell, <code>Get-FileHash .\Yata-Setup-x.y.z.exe</code> tem que bater com a linha do <code>SHA256SUMS.txt</code> da versão.</li>
+      <li><strong>Origem</strong> (v0.2.1 em diante): com o <a href="https://cli.github.com">GitHub CLI</a>, <code>gh attestation verify Yata-Setup-x.y.z.exe --repo akaneni/yata</code>.</li>
+      <li><strong>Compilar você mesmo:</strong> o <a href="https://github.com/akaneni/yata/blob/main/README.pt-BR.md">README</a> mostra como gerar o Yata e o instalador a partir do código.</li>
     </ul>
-    <p>Os dois são compilados pelo GitHub Actions, em máquinas do próprio GitHub, a partir de uma tag de versão do repositório público (<a href="https://github.com/akaneni/yata/blob/main/.github/workflows/release.yml">release.yml</a>). Nada compilado num computador pessoal é assinado, e cada pedido de assinatura é aprovado manualmente. O .NET Desktop Runtime que o instalador pode baixar vem da Microsoft, com a assinatura da própria Microsoft.</p>
+    <p>Um arquivo que não bate não é uma versão oficial do Yata: por favor, <a href="https://github.com/akaneni/yata/issues">abra uma issue</a>.</p>
 
     <h2>Papéis no time</h2>
     <ul>
-      <li><strong>Autores e revisores:</strong> <a href="https://github.com/akaneni">akaneni</a>. Mudanças de outras pessoas são revisadas antes de entrar.</li>
-      <li><strong>Aprovadores:</strong> <a href="https://github.com/akaneni">akaneni</a> aprova cada pedido de assinatura.</li>
+      <li><strong>Commits, revisão e versões:</strong> <a href="https://github.com/akaneni">akaneni</a>, com autenticação em dois fatores no GitHub. Mudanças de outras pessoas são revisadas antes de entrar.</li>
     </ul>
-    <p>Todos nesses papéis usam autenticação em dois fatores no GitHub e no SignPath.</p>
 
     <h2>Privacidade</h2>
     <p>O Yata não tem conta, servidor nem telemetria. O que ele envia pela rede, e quando, está na <a href="/pt/privacy">política de privacidade</a>; o instalador mostra um resumo antes de instalar.</p>
-
-    <h2>Como conferir a assinatura</h2>
-    <p>Clique com o botão direito no arquivo, escolha <strong>Propriedades</strong> e depois <strong>Assinaturas Digitais</strong>. O signatário deve ser <strong>SignPath Foundation</strong>. Qualquer outro, ou a falta de assinatura numa versão indicada como assinada, não é uma versão oficial do Yata: abra uma issue, por favor.</p>
   </article>
 </main>
 

@@ -2,6 +2,7 @@
 #   git tag v0.1.0 && git push origin v0.1.0
 # Code signing (SignPath Foundation) turns on once the SIGNPATH_ORGANIZATION_ID variable and the
 # SIGNPATH_API_TOKEN secret exist; until then releases stay unsigned. See docs/code-signing.md.
+# Every release gets a build provenance attestation (gh attestation verify <file> --repo akaneni/yata).
 name: Release
 
 on:
@@ -12,6 +13,10 @@ permissions:
   contents: write
   # SignPath downloads the unsigned artifacts with this workflow's token.
   actions: read
+  # Build provenance attestation (actions/attest).
+  id-token: write
+  attestations: write
+  artifact-metadata: write
 
 env:
   SIGNING: ${{ vars.SIGNPATH_ORGANIZATION_ID != '' }}
@@ -138,6 +143,11 @@ jobs:
           Get-ChildItem dist\*.exe | ForEach-Object {
             "$((Get-FileHash $_ -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
           } | Set-Content dist\SHA256SUMS.txt
+
+      # A record signed by GitHub that ties the installer to this run and commit.
+      - uses: actions/attest@v4
+        with:
+          subject-path: dist/*.exe
 
       - uses: softprops/action-gh-release@v3
         with:
