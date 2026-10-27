@@ -14,7 +14,7 @@
     <ApplicationIcon>Assets\yata.ico</ApplicationIcon>
     <AssemblyName>Yata</AssemblyName>
     <RootNamespace>Yata</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <!-- DPI awareness lives in app.manifest for WPF; the WinForms analyzer doesn't apply. -->
     <NoWarn>$(NoWarn);WFO0003</NoWarn>
   </PropertyGroup>
