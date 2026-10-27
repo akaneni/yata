@@ -1,0 +1,153 @@
+/* getyata.app. The page hangs from a screen edge, like the notch: one left-weighted column of
+   reading text, with the demos (the live notch, the raven) at full width. 1-bit throughout;
+   the only colour on the site is the album cover inside the demo. */
+:root {
+  --bg: #0a0a0a;          /* the notch's black */
+  --fg: #f2f2ef;          /* the raven's white, a touch off */
+  --dim: #9a9a95;
+  --line: #262624;
+  --panel: #141413;
+  --dot: #2b2b29;         /* dithered wallpaper */
+  --notch: #000;
+  --notch-fg: #f2f2ef;
+  --cover: #d0703c;       /* only accent: the album art in the demo */
+  --font-display: "DotGothic16", "MS Gothic", ui-monospace, monospace;
+  --font-body: "Geist", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --step--1: 0.8125rem; --step-0: 1rem; --step-1: 1.25rem; --step-2: 1.75rem; --step-3: clamp(2.25rem, 5.5vw, 3.75rem);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) { :root {
+  --bg: #f1f1ee; --fg: #0d0d0c; --dim: #62625e; --line: #d6d6d1; --panel: #e6e6e2; --dot: #c9c9c4;
+  color-scheme: light } }
+
+* { box-sizing: border-box }
+html { scroll-behavior: smooth }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 var(--step-0)/1.6 var(--font-body); -webkit-font-smoothing: antialiased }
+img { max-width: 100% }
+a { color: inherit }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 3px }
+::selection { background: var(--fg); color: var(--bg) }
+.wrap { max-width: 68rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.mono { font-family: var(--font-mono); font-size: var(--step--1); letter-spacing: .02em }
+.label { font-family: var(--font-mono); font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: var(--dim) }
+h1, h2, h3 { font-weight: 400; text-wrap: balance; margin: 0 }
+h1, h2 { font-family: var(--font-display); line-height: 1.15 }
+h1 { font-size: var(--step-3) }
+h2 { font-size: var(--step-2) }
+h3 { font-size: var(--step-0); font-weight: 600 }
+p { margin: 0 }
+.pix { image-rendering: pixelated; shape-rendering: crispEdges }
+
+/* Header */
+header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1.25rem }
+.logo { display: block; color: var(--fg) }
+.logo svg { display: block; height: 30px; width: auto }
+nav { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; justify-content: flex-end }
+nav a { text-decoration: none; color: var(--dim); font-size: .9375rem }
+nav a:hover { color: var(--fg) }
+.lang { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 2px }
+.lang a { font-family: var(--font-mono); font-size: .75rem; color: var(--dim); padding: .2rem .55rem; border-radius: 999px }
+.lang a[aria-current] { background: var(--fg); color: var(--bg) }
+@media (max-width: 640px) { nav a.hide-sm { display: none } }
+
+/* Hero */
+.hero { padding-block: 2.5rem 4rem; display: grid; gap: 2.5rem }
+.hero-copy { display: grid; gap: 1.25rem; max-width: 40rem }
+.lede { font-size: var(--step-1); line-height: 1.5; color: var(--dim); max-width: 36rem }
+.lede strong { color: var(--fg); font-weight: 500 }
+.cta { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center }
+.btn { display: inline-flex; align-items: center; gap: .6rem; padding: .8rem 1.2rem; text-decoration: none; font-weight: 500; border: 1px solid var(--fg) }
+.btn-primary { background: var(--fg); color: var(--bg) }
+.btn-primary:hover { background: transparent; color: var(--fg) }
+.btn-ghost:hover { background: var(--fg); color: var(--bg) }
+.btn svg { width: 16px; height: 16px; fill: currentColor }
+.trust { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; color: var(--dim) }
+.trust span::before { content: "■ "; font-size: .6em; vertical-align: .2em }
+
+/* The screen with the live notch */
+.screen { position: relative; height: 15rem; max-width: 100%; border: 1px solid var(--line); border-top: 0; overflow: hidden;
+  background-color: var(--panel); background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 6px 6px }
+.screen::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--fg); opacity: .35 }
+.notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); height: 38px; min-width: 120px; max-width: calc(100% - 24px);
+  background: var(--notch); color: var(--notch-fg); border-radius: 0 0 18px 18px; display: flex; align-items: center; justify-content: center;
+  padding: 0 16px; transition: width .55s cubic-bezier(.34, 1.45, .5, 1); overflow: hidden; font-size: .8125rem; white-space: nowrap }
+.notch .row { display: flex; align-items: center; gap: 10px }
+.notch .time { font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums }
+.notch .muted { color: #8c8c88 }
+.notch canvas { display: block }
+.cover { width: 20px; height: 20px; border-radius: 4px; background: linear-gradient(135deg, var(--cover), #6b2f1f) }
+.eq { display: flex; gap: 2px; align-items: flex-end; height: 12px }
+.eq i { width: 3px; background: var(--cover); animation: eq .9s ease-in-out infinite alternate }
+.eq i:nth-child(2) { animation-delay: -.3s } .eq i:nth-child(3) { animation-delay: -.6s } .eq i:nth-child(4) { animation-delay: -.15s }
+@keyframes eq { from { height: 3px } to { height: 12px } }
+.lyric { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: .75rem; color: var(--dim); white-space: nowrap; transition: opacity .3s }
+.states { display: flex; flex-wrap: wrap; gap: .25rem .5rem; justify-content: center; margin-top: .75rem }
+.states button { font-family: var(--font-mono); font-size: .75rem; background: none; border: 1px solid transparent; color: var(--dim); padding: .25rem .6rem; cursor: pointer }
+.states button[aria-pressed="true"] { border-color: var(--line); color: var(--fg) }
+
+/* Sections */
+section { padding-block: 4.5rem; border-top: 1px solid var(--line) }
+.section-head { display: grid; gap: .75rem; max-width: 40rem; margin-bottom: 2.75rem }
+.section-head p { color: var(--dim); font-size: var(--step-1); line-height: 1.5 }
+
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 2.5rem 3rem }
+.feature { display: grid; gap: .5rem; align-content: start; min-width: 0 }
+.feature p { color: var(--dim) }
+
+/* The raven */
+.raven { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 3rem; align-items: center }
+.raven .copy { display: grid; gap: 1rem; min-width: 0 }
+.raven .copy p { color: var(--dim); max-width: 34rem }
+.kanji { font-family: var(--font-display); font-size: var(--step-1); letter-spacing: .3em }
+.sun { width: 100%; max-width: 100%; aspect-ratio: 8 / 5; display: block }
+.repertoire { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: 3rem }
+.repertoire figure { margin: 0; background: var(--bg); padding: 1.25rem .75rem 1rem; display: grid; gap: .75rem; justify-items: center; text-align: center }
+.repertoire figcaption { font-size: .875rem; color: var(--dim); line-height: 1.4 }
+@media (max-width: 760px) {
+  .raven { grid-template-columns: 1fr }
+  .repertoire { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+  .repertoire figure:last-child { grid-column: span 2 }
+}
+
+/* Privacy */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line) }
+table { width: 100%; border-collapse: collapse; min-width: 40rem }
+th, td { text-align: left; padding: .9rem 1rem; border-bottom: 1px solid var(--line); vertical-align: top }
+tr:last-child td { border-bottom: 0 }
+th { font-family: var(--font-mono); font-weight: 400; font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--dim) }
+td:first-child { font-weight: 500 }
+td.sends { color: var(--dim) }
+.pill { display: inline-block; font-family: var(--font-mono); font-size: .75rem; padding: .1rem .5rem; border: 1px solid var(--line); white-space: nowrap }
+.pill.on { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr)); gap: 2rem 3rem; margin-top: 3rem }
+.facts div { display: grid; gap: .4rem; min-width: 0 }
+.facts p { color: var(--dim) }
+
+/* Download */
+.download { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; align-items: start }
+.download ul { list-style: none; padding: 0; margin: 0; display: grid; gap: .9rem }
+.download li { display: grid; grid-template-columns: 1.25rem 1fr; gap: .5rem; color: var(--dim) }
+.download li::before { content: "→"; font-family: var(--font-mono); color: var(--fg) }
+.download .go { display: grid; gap: 1.25rem; justify-items: start }
+code { font-family: var(--font-mono); font-size: .875em; background: var(--panel); padding: .1em .4em }
+@media (max-width: 760px) { .download { grid-template-columns: 1fr } }
+
+/* Long-form pages (privacy policy) */
+.doc { max-width: 42rem; padding-block: 2.5rem 5rem; display: grid; gap: 1.1rem }
+.doc h1 { font-size: var(--step-2); margin-bottom: .25rem }
+.doc h2 { font-size: var(--step-1); margin-top: 1.75rem }
+.doc h3 { margin-top: .75rem }
+.doc ul { margin: 0; padding-left: 1.25rem; display: grid; gap: .5rem }
+.doc p, .doc li { color: var(--dim) }
+.doc strong { color: var(--fg); font-weight: 500 }
+.doc > * { min-width: 0 }
+.doc code { overflow-wrap: anywhere }
+.doc .updated { font-family: var(--font-mono); font-size: var(--step--1); color: var(--dim) }
+
+footer { border-top: 1px solid var(--line) }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; padding-block: 2rem; color: var(--dim) }
+footer .logo svg { height: 22px }
+footer nav { gap: 1.25rem }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } .notch { transition: none } .eq i { animation: none; height: 8px } }

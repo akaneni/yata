@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Privacy policy · Yata</title>
+<meta name="description" content="What data Yata uses and where it goes. No account, no server, no telemetry.">
+<link rel="canonical" href="https://getyata.app/privacy">
+<link rel="alternate" hreflang="en" href="https://getyata.app/privacy">
+<link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/privacy">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- Mirrors PRIVACY.md (Portuguese, in the repository) and site/pt/privacy.html. Change all three together. -->
+<header>
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Main">
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="lang" role="group" aria-label="Language">
+        <a href="/privacy" hreflang="en" lang="en" aria-current="page">EN</a>
+        <a href="/pt/privacy" hreflang="pt-BR" lang="pt-BR">PT</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="doc">
+    <h1>Yata privacy policy</h1>
+    <p class="updated">Last updated: October 26, 2026</p>
+    <p>Yata is an open-source Windows app that shows a "notch" at the top of the screen. It has no account, no server and no telemetry. This policy explains what data Yata uses and where it goes.</p>
+
+    <h2>Data that stays on your computer</h2>
+    <p>Tasks, water log, shelf paths and settings are kept in <code>%LOCALAPPDATA%\Yata\data.json</code>. This data never leaves your PC, with one exception you choose: if you turn on Google Tasks sync, your tasks go to your list on Google (see below).</p>
+    <p>Yata also keeps a diagnostic log in <code>%LOCALAPPDATA%\Yata\logs</code>: the time, which part of the app acted and any errors that happened. It does not record song titles, task text, event titles, file names, location or account. Paths, web addresses and email addresses that appear in an error message are removed before writing. Each file is kept for 7 days, with at most 1 MB per day. If Yata closes because of an error, it writes a <code>crash-*.log</code> there and exits without triggering Windows Error Reporting. None of this is sent anywhere: you decide whether to attach it to an issue (Settings → Open log or Copy diagnostics).</p>
+
+    <h2>External services</h2>
+    <p>Yata only goes online in these cases:</p>
+    <ul>
+      <li><strong>LRCLIB</strong> (lrclib.net), to look up song lyrics: sends the artist, title and length of the track that is playing. Can be turned off in Settings.</li>
+      <li><strong>Open-Meteo</strong> (open-meteo.com), for the weather, only if you turn it on: sends the latitude and longitude of the chosen city, rounded to about 1 km. When you search for a city, it sends the name you typed. If you click "Use my location", Yata asks Windows for your position once, rounds it to about 1 km right away and discards the precise value. It does not track your location after that and never works out where you are from your IP. Settings keep only the chosen name and the rounded coordinates.</li>
+      <li><strong>Google Calendar</strong> and <strong>Google Tasks</strong>, only if you connect your account and enable each one (see below).</li>
+    </ul>
+
+    <h2>Google Calendar</h2>
+    <p>When you connect, you authorize Yata, on Google's own screen, to:</p>
+    <ul>
+      <li>see your email address, only to show which account is connected;</li>
+      <li>see the list of your calendars, so you can choose which ones appear;</li>
+      <li>see the events in the chosen calendars (<strong>read-only</strong>).</li>
+    </ul>
+    <p>How the data is used:</p>
+    <ul>
+      <li>Yata fetches <strong>today's and tomorrow's</strong> events to show them in the notch and in the Agenda tab, and to notify you before each one. From each event, the app uses the title, time, response status and call link (Meet, Zoom, Teams).</li>
+      <li>Events are kept <strong>in memory only</strong> and disappear when Yata closes. Nothing is written to disk except the list of calendars you chose.</li>
+      <li>The access granted by Google (<em>refresh token</em>) and your email are kept in <code>%LOCALAPPDATA%\Yata\google.dat</code>, <strong>encrypted with Windows data protection (DPAPI)</strong>: only your Windows user, on this computer, can read it.</li>
+      <li>Communication happens <strong>directly</strong> between your PC and Google's servers. No data goes through Yata's or anyone else's servers, because there are none.</li>
+      <li>Yata does <strong>not</strong> create, change or delete events, does <strong>not</strong> share your data with anyone, does <strong>not</strong> use it for advertising and does <strong>not</strong> use it to train AI models.</li>
+    </ul>
+
+    <h2>Google Tasks</h2>
+    <p>If you turn on <strong>Tasks</strong> in Settings, Yata asks Google for permission to <strong>see and edit your tasks</strong>. Editing is needed because the sync works both ways.</p>
+    <ul>
+      <li>Yata reads <strong>one list</strong> chosen by you (at first, "My Tasks"): open tasks and those completed today. It uses the title, status (open or completed) and date.</li>
+      <li>When you create, complete, reopen or remove a task in Yata, it does the same in that list. It does <strong>not</strong> touch other lists, notes or subtasks.</li>
+      <li>Synced tasks are kept in <code>%LOCALAPPDATA%\Yata\data.json</code>, together with local tasks, so the tab works offline. When you turn off sync or disconnect the account, the tasks that came from Google are deleted from that file (they stay on Google).</li>
+      <li>The time of a reminder ("Meeting 15:30") stays in Yata only. Google Tasks receives just the day.</li>
+      <li>As with the calendar, communication is direct between your PC and Google, and the data is not shared, used for advertising or used to train AI models.</li>
+    </ul>
+    <p>Yata's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+
+    <h3>How to remove access</h3>
+    <ul>
+      <li>In Yata: <strong>Settings → Google → Disconnect</strong>. Access (calendar and tasks) is revoked at Google and the local file is deleted.</li>
+      <li>At Google: <a href="https://myaccount.google.com/connections">myaccount.google.com/connections</a>, removing Yata.</li>
+      <li>Uninstalling Yata does not delete the <code>%LOCALAPPDATA%\Yata</code> folder. Delete it by hand if you want to remove everything.</li>
+    </ul>
+
+    <h2>This website</h2>
+    <p>getyata.app is a static page hosted on GitHub Pages. It sets no cookies and runs no analytics or trackers. Fonts load from Google Fonts. GitHub, as the host, may keep standard server logs.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or problems: open an issue at <a href="https://github.com/akaneni/yata/issues">github.com/akaneni/yata/issues</a>.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Footer">
+      <a href="/privacy" aria-current="page">Privacy policy</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="mono">MIT license · made by akaneni</span>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

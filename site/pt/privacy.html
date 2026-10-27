@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Política de privacidade · Yata</title>
+<meta name="description" content="Quais dados o Yata usa e para onde eles vão. Sem conta, sem servidor e sem telemetria.">
+<link rel="canonical" href="https://getyata.app/pt/privacy">
+<link rel="alternate" hreflang="en" href="https://getyata.app/privacy">
+<link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/privacy">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- Espelha o PRIVACY.md e o site/privacy.html (inglês). Altere os três juntos. -->
+<header>
+  <div class="wrap">
+    <a class="logo" href="/pt/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Principal">
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="lang" role="group" aria-label="Idioma">
+        <a href="/privacy" hreflang="en" lang="en">EN</a>
+        <a href="/pt/privacy" hreflang="pt-BR" lang="pt-BR" aria-current="page">PT</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="doc">
+    <h1>Política de privacidade do Yata</h1>
+    <p class="updated">Última atualização: 26 de outubro de 2026</p>
+    <p>O Yata é um app de código aberto para Windows que mostra um "notch" no topo da tela. Ele não tem conta, servidor nem telemetria. Esta política explica quais dados o Yata usa e para onde eles vão.</p>
+
+    <h2>Dados que ficam no seu computador</h2>
+    <p>Tarefas, registro de água, caminhos da prateleira e configurações ficam em <code>%LOCALAPPDATA%\Yata\data.json</code>. Esses dados nunca são enviados para fora do PC, com uma exceção que você escolhe: se ligar a sincronização com o Google Tasks, as tarefas vão para a sua lista no Google (veja abaixo).</p>
+    <p>O Yata também mantém um registro de diagnóstico em <code>%LOCALAPPDATA%\Yata\logs</code>: horário, qual parte do app agiu e os erros que aconteceram. Ele não guarda títulos de músicas, textos de tarefas, títulos de eventos, nomes de arquivos, localização nem conta; caminhos, endereços web e e-mails que apareçam numa mensagem de erro são apagados antes de gravar. Cada arquivo é guardado por 7 dias e tem no máximo 1 MB por dia. Se o Yata fechar por um erro, ele grava um <code>crash-*.log</code> ali e encerra sem acionar o Relatório de Erros do Windows. Nada disso é enviado: você decide se quer anexar a uma issue (Configurações → Abrir registro ou Copiar diagnóstico).</p>
+
+    <h2>Serviços externos</h2>
+    <p>O Yata só acessa a internet nestes casos:</p>
+    <ul>
+      <li><strong>LRCLIB</strong> (lrclib.net), para buscar letras de músicas: envia artista, título e duração da faixa que está tocando. Pode ser desligado nas Configurações.</li>
+      <li><strong>Open-Meteo</strong> (open-meteo.com), para o tempo, somente se você ligar: envia a latitude e a longitude da cidade escolhida, arredondadas para cerca de 1 km. Ao buscar a cidade, envia o nome digitado. Se você clicar em "Usar minha localização", o Yata pede ao Windows a posição uma única vez, arredonda para cerca de 1 km na hora e descarta o valor preciso. Ele não acompanha a localização depois disso e nunca descobre onde você está pelo IP. Guarda nas configurações só o nome escolhido e as coordenadas arredondadas.</li>
+      <li><strong>Google Agenda</strong> e <strong>Google Tasks</strong>, somente se você conectar sua conta e liberar cada um (veja abaixo).</li>
+    </ul>
+
+    <h2>Google Agenda</h2>
+    <p>Ao conectar, você autoriza o Yata, na tela do próprio Google, a:</p>
+    <ul>
+      <li>ver seu endereço de e-mail, só para mostrar qual conta está conectada;</li>
+      <li>ver a lista das suas agendas, para você escolher quais aparecem;</li>
+      <li>ver os eventos das agendas escolhidas (<strong>somente leitura</strong>).</li>
+    </ul>
+    <p>Como os dados são usados:</p>
+    <ul>
+      <li>O Yata busca os eventos <strong>de hoje e de amanhã</strong> para mostrá-los no notch e na aba Agenda e para avisar antes de cada um. Do evento, o app usa título, horário, status de resposta e link da chamada (Meet, Zoom, Teams).</li>
+      <li>Os eventos ficam <strong>só na memória</strong> e somem quando o Yata fecha. Nada é gravado em disco, exceto a lista de agendas que você escolheu.</li>
+      <li>O acesso concedido pelo Google (<em>refresh token</em>) e seu e-mail ficam em <code>%LOCALAPPDATA%\Yata\google.dat</code>, <strong>cifrados com a proteção de dados do Windows (DPAPI)</strong>: só o seu usuário do Windows, neste computador, consegue ler.</li>
+      <li>A comunicação é feita <strong>diretamente</strong> entre o seu PC e os servidores do Google. Nenhum dado passa por servidores do Yata ou de terceiros, porque eles não existem.</li>
+      <li>O Yata <strong>não</strong> cria, altera nem apaga eventos, <strong>não</strong> compartilha seus dados com ninguém, <strong>não</strong> os usa para publicidade e <strong>não</strong> os usa para treinar modelos de IA.</li>
+    </ul>
+
+    <h2>Google Tasks</h2>
+    <p>Se você liga <strong>Tarefas</strong> nas Configurações, o Yata pede ao Google permissão para <strong>ver e editar suas tarefas</strong>. A edição é necessária porque a sincronização vale nos dois sentidos.</p>
+    <ul>
+      <li>O Yata lê <strong>uma lista</strong> escolhida por você (de início, "Minhas tarefas"): as tarefas abertas e as concluídas hoje. Usa título, situação (aberta ou concluída) e data.</li>
+      <li>Quando você cria, conclui, reabre ou remove uma tarefa no Yata, ele faz o mesmo nessa lista. Ele <strong>não</strong> mexe em outras listas nem em notas e subtarefas.</li>
+      <li>As tarefas sincronizadas ficam em <code>%LOCALAPPDATA%\Yata\data.json</code>, junto com as tarefas locais, para a aba funcionar sem internet. Ao desligar a sincronização ou desconectar a conta, as tarefas vindas do Google são apagadas desse arquivo (elas continuam no Google).</li>
+      <li>O horário de um lembrete ("Reunião 15:30") fica só no Yata. O Google Tasks recebe apenas o dia.</li>
+      <li>Como na agenda, a comunicação é direta entre o seu PC e o Google, e os dados não são compartilhados, usados para publicidade ou para treinar modelos de IA.</li>
+    </ul>
+    <p>O uso e a transferência, pelo Yata, de informações recebidas das APIs do Google seguem a <a href="https://developers.google.com/terms/api-services-user-data-policy">Política de dados do usuário dos serviços de API do Google</a>, incluindo os requisitos de Uso Limitado (<em>Limited Use</em>).</p>
+
+    <h3>Como remover o acesso</h3>
+    <ul>
+      <li>No Yata: <strong>Configurações → Google → Desconectar</strong>. O acesso (agenda e tarefas) é revogado no Google e o arquivo local é apagado.</li>
+      <li>No Google: <a href="https://myaccount.google.com/connections">myaccount.google.com/connections</a>, removendo o Yata.</li>
+      <li>Desinstalar o Yata não apaga a pasta <code>%LOCALAPPDATA%\Yata</code>. Apague a pasta manualmente se quiser remover tudo.</li>
+    </ul>
+
+    <h2>Este site</h2>
+    <p>O getyata.app é uma página estática hospedada no GitHub Pages. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes vêm do Google Fonts. O GitHub, como hospedagem, pode manter registros comuns de servidor.</p>
+
+    <h2>Contato</h2>
+    <p>Dúvidas ou problemas: abra uma issue em <a href="https://github.com/akaneni/yata/issues">github.com/akaneni/yata/issues</a>.</p>
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="/pt/" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Rodapé">
+      <a href="/pt/privacy" aria-current="page">Política de privacidade</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="mono">licença MIT · feito por akaneni</span>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

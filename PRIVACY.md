@@ -52,6 +52,10 @@ O uso e a transferência, pelo Yata, de informações recebidas das APIs do Goog
 - No Google: <https://myaccount.google.com/connections>, removendo o Yata.
 - Desinstalar o Yata não apaga a pasta `%LOCALAPPDATA%\Yata`. Apague a pasta manualmente se quiser remover tudo.
 
+## Este site
+
+O [getyata.app](https://getyata.app) é uma página estática hospedada no GitHub Pages. Não grava cookies e não tem análise de acesso nem rastreadores. As fontes vêm do Google Fonts. O GitHub, como hospedagem, pode manter registros comuns de servidor. A mesma política está no site em [inglês](https://getyata.app/privacy) e [português](https://getyata.app/pt/privacy).
+
 ## Contato
 
 Dúvidas ou problemas: abra uma issue em <https://github.com/akaneni/yata/issues>.
