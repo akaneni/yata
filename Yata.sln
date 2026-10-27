@@ -11,6 +11,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yata.Tests", "tests\Yata.Tests\Yata.Tests.csproj", "{C3BDB517-75E9-48DE-ACDC-4A4CC7E0C64A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yata.Cli", "src\Yata.Cli\Yata.Cli.csproj", "{B507724B-73D2-4A15-8477-D87D39353BEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,18 @@ Global
 		{C3BDB517-75E9-48DE-ACDC-4A4CC7E0C64A}.Release|x64.Build.0 = Release|Any CPU
 		{C3BDB517-75E9-48DE-ACDC-4A4CC7E0C64A}.Release|x86.ActiveCfg = Release|Any CPU
 		{C3BDB517-75E9-48DE-ACDC-4A4CC7E0C64A}.Release|x86.Build.0 = Release|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Debug|x64.Build.0 = Debug|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Debug|x86.Build.0 = Debug|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Release|x64.ActiveCfg = Release|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Release|x64.Build.0 = Release|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Release|x86.ActiveCfg = Release|Any CPU
+		{B507724B-73D2-4A15-8477-D87D39353BEF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,5 +66,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{069C4CAE-8E6B-4E1B-B56D-20D334ED09F7} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{C3BDB517-75E9-48DE-ACDC-4A4CC7E0C64A} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{B507724B-73D2-4A15-8477-D87D39353BEF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal

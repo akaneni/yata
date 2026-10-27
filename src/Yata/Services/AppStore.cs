@@ -83,7 +83,7 @@ public sealed class SettingsData
     public bool HudPrivacy { get; set; } = true;
 
     // Activities: other programs on this PC (scripts, builds, AI agents) showing progress in the
-    // notch through a local pipe (Yata.exe activity). Nothing goes over the network.
+    // notch through a local pipe (yata-cli activity). Nothing goes over the network.
     public bool ActivitiesEnabled { get; set; } = true;
 
     // Focus

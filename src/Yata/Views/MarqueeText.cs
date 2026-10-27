@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Yata.Helpers;
 
@@ -43,6 +44,7 @@ public sealed class MarqueeText : Decorator
             return;
 
         _scrolling = true;
+        OpacityMask = EdgeFade(ActualWidth);
         InvalidateMeasure();
 
         var travel = TimeSpan.FromSeconds(overflow / Speed);
@@ -71,7 +73,29 @@ public sealed class MarqueeText : Decorator
         _scrolling = false;
         BeginAnimation(OffsetProperty, null);
         Offset = 0;
+        OpacityMask = null;
         InvalidateMeasure();
+    }
+
+    /// <summary>
+    /// While scrolling, the text fades out at both edges instead of being cut mid-letter. In absolute
+    /// units: relative to the bounding box the mask would stretch over the whole scrolled text.
+    /// </summary>
+    private static Brush EdgeFade(double width)
+    {
+        const double edge = 10;
+        var mask = new LinearGradientBrush
+        {
+            MappingMode = BrushMappingMode.Absolute,
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(width, 0),
+        };
+        mask.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
+        mask.GradientStops.Add(new GradientStop(Colors.Black, edge / width));
+        mask.GradientStops.Add(new GradientStop(Colors.Black, 1 - edge / width));
+        mask.GradientStops.Add(new GradientStop(Colors.Transparent, 1));
+        mask.Freeze();
+        return mask;
     }
 
     protected override Size MeasureOverride(Size constraint)

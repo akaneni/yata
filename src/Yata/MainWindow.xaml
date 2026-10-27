@@ -26,12 +26,12 @@
                     <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
                 </Path.Effect>
             </Path>
-            <Grid Width="22" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
+            <Grid x:Name="BubbleContent" Width="22" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Ellipse x:Name="BubbleTrack" Stroke="{DynamicResource TrackBrush}" StrokeThickness="2"/>
                 <Path x:Name="BubbleArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
                 <TextBlock x:Name="BubbleGlyph" FontFamily="{StaticResource IconFont}" FontSize="10"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <!-- Minutes to the next meeting -->
+                <!-- Minutes to the next meeting, or left in a focus session -->
                 <TextBlock x:Name="BubbleLabel" FontSize="10" FontWeight="SemiBold" Typography.NumeralAlignment="Tabular"
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>

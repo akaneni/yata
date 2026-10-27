@@ -1,10 +1,8 @@
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Yata.Helpers;
@@ -12,10 +10,10 @@ using Yata.Helpers;
 namespace Yata.Services;
 
 /// <summary>
-/// The local door other programs use to put activities in the notch (<c>Yata.exe activity ...</c>).
+/// The local door other programs use to put activities in the notch (<c>yata-cli activity ...</c>).
 /// A named pipe only this Windows user can open, refused to the network; one short JSON line in,
 /// one word back. Nothing else is listened to, and nothing is ever read from the other side's
-/// process — only the line it sends.
+/// process — only the line it sends. The sending side is <see cref="ActivityClient"/>.
 /// </summary>
 internal sealed class ActivityPipe : IDisposable
 {
@@ -31,15 +29,8 @@ internal sealed class ActivityPipe : IDisposable
     public ActivityPipe(Func<string, Task<string>> handle, string? name = null)
     {
         _handle = handle;
-        _name = name ?? DefaultName;
+        _name = name ?? ActivityClient.DefaultName;
     }
-
-    /// <summary>
-    /// Per user and per Windows session, like the notch itself: pipe names are machine-wide, and
-    /// another signed-in user (or another session of the same one) has a Yata of their own.
-    /// </summary>
-    public static string DefaultName { get; } =
-        $"Yata.{WindowsIdentity.GetCurrent().User?.Value}.{Process.GetCurrentProcess().SessionId}";
 
     public bool IsRunning => _cts != null;
 
@@ -122,9 +113,9 @@ internal sealed class ActivityPipe : IDisposable
             {
                 using var timeout = CancellationTokenSource.CreateLinkedTokenSource(token);
                 timeout.CancelAfter(ReadTimeout);
-                string? line = await ReadLine(server, ActivityRequest.MaxBytes, timeout.Token);
+                string? line = await ActivityClient.ReadLine(server, ActivityRequest.MaxBytes, timeout.Token);
                 string reply = line == null ? "error: request too long or empty" : await _handle(line);
-                await WriteLine(server, reply, timeout.Token);
+                await ActivityClient.WriteLine(server, reply, timeout.Token);
             }
             catch (Exception ex) when (ex is IOException or OperationCanceledException or ObjectDisposedException)
             {
@@ -134,60 +125,6 @@ internal sealed class ActivityPipe : IDisposable
             {
                 Log.Warn("activities", "Falha ao atender um pedido de atividade", ex);
             }
-        }
-    }
-
-    /// <summary>One line, at most <paramref name="max"/> bytes; null if longer or empty.</summary>
-    internal static async Task<string?> ReadLine(Stream stream, int max, CancellationToken token)
-    {
-        var buffer = new byte[max + 1];
-        int length = 0;
-        while (length < buffer.Length)
-        {
-            int read = await stream.ReadAsync(buffer.AsMemory(length, buffer.Length - length), token);
-            if (read == 0)
-                break;
-            int end = Array.IndexOf(buffer, (byte)'\n', length, read);
-            length += read;
-            if (end >= 0)
-            {
-                length = end;
-                break;
-            }
-        }
-        if (length == 0 || length > max)
-            return null;
-        return Encoding.UTF8.GetString(buffer, 0, length).TrimEnd('\r');
-    }
-
-    internal static async Task WriteLine(Stream stream, string text, CancellationToken token)
-    {
-        await stream.WriteAsync(Encoding.UTF8.GetBytes(text + "\n"), token);
-        await stream.FlushAsync(token);
-    }
-
-    /// <summary>
-    /// Sends one request to the running Yata and returns its answer, or null if no Yata is
-    /// listening. The pipe must belong to this same user, so another account can't pose as Yata.
-    /// </summary>
-    public static async Task<string?> SendAsync(string json, string? name = null, int timeoutMs = 2000)
-    {
-        await using var client = new NamedPipeClientStream(".", name ?? DefaultName, PipeDirection.InOut,
-            PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-        using var timeout = new CancellationTokenSource(timeoutMs);
-        try
-        {
-            await client.ConnectAsync(timeout.Token);
-            await WriteLine(client, json, timeout.Token);
-            return await ReadLine(client, 1024, timeout.Token) ?? "error: no answer";
-        }
-        catch (OperationCanceledException)
-        {
-            return client.IsConnected ? "error: no answer" : null;
-        }
-        catch (IOException)
-        {
-            return null;
         }
     }
 }

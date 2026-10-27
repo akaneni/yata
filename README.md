@@ -56,8 +56,8 @@ Open source, no account and no telemetry.
   - **Demo** from the tray menu (or `Yata.exe --demo`) to see every state in ~30 s.
 - **Settings** (the gear in the notch, the menu or a double-click on the tray icon): language, start with Windows, hide in full screen, hover delay, album art color or black and white, lyrics on/off, each kind of notice, Pomodoro times, water goal and reminders, and Yata's behavior. Everything applies immediately.
 - Reminders that arrive while the notch is open or in full screen wait and show up afterwards, one at a time, instead of being lost. A status blip (volume, Caps Lock) shows at once and the reminder it interrupted comes back right after.
-- **Bubble beside the notch**: like the iPhone's island splitting in two, a second small notch carries what doesn't fit in the first — another program's activity, or the next meeting while music has the notch. Hover it to see what it is.
-- **Activities from other programs** (scripts, builds, AI agents): they can show their progress in the bubble with `Yata.exe activity`. See [Activities](#activities) below. Can be turned off in Settings.
+- **Bubble beside the notch**: like the iPhone's island splitting in two, a second small notch carries what doesn't fit in the first: while music has the notch, the focus countdown (a ring emptying around the minutes left) and the next meeting move there, and so do other programs' activities. One at a time, by priority (what needs you, the meeting, focus, activities); hover it to see what it is and how many others are waiting.
+- **Activities from other programs** (scripts, builds, AI agents): they can show their progress in the bubble with `yata-cli`. See [Activities](#activities) below. Can be turned off in Settings.
 - **Hides in full screen** (videos, games, presentations).
 - Doesn't steal focus and doesn't show in Alt+Tab or the taskbar. Quit from the tray icon.
 
@@ -93,21 +93,24 @@ dotnet test
 
 ### Activities
 
-Any script or program running as you on this PC can put an activity beside the notch:
+Any script or program running as you on this PC can put an activity beside the notch with `yata-cli.exe`, installed next to `Yata.exe` (`%LOCALAPPDATA%\Programs\Yata`). The installer can add that folder to your PATH (an option, off by default) so `yata-cli` works from any terminal:
 
 ```powershell
-Yata.exe activity set build --title "Build" --text "compiling" --progress 40% --icon code
-Yata.exe activity set build --progress 0.8
-Yata.exe activity done build --text "ok"          # a check, then it goes away
-Yata.exe activity attention agent --title "Claude Code" --text "waiting for you" --icon agent
-Yata.exe activity end agent
+yata-cli activity set build --title "Build" --text "compiling" --progress 40% --icon code
+yata-cli activity set build --title "Build" --progress 0.8
+yata-cli activity done build --title "Build" --text "ok"     # a check, then it goes away
+yata-cli activity attention agent --title "Claude Code" --text "waiting for you" --icon agent
+yata-cli activity end agent
 ```
 
-- Actions: `set` (running), `attention` (needs you: warning color, and a notice that waits to be seen), `done`, `fail`, `end`.
+It's a console program, so PowerShell, cmd, bash and AI agents wait for it and get its exit code and error messages; `Yata.exe` itself doesn't take commands. `yata-cli --help` lists everything.
+
+- Actions: `set` (running), `attention` (needs you: warning color, and a notice that waits to be seen), `done`, `fail` (failed: warning color), `end`.
+- **Send `--title` every time.** A running activity nobody updates goes away after 10 minutes (`--ttl` changes it, up to 24 h), and an id that's gone needs its title to come back. `attention` and `fail` stay until ended (up to 1 h); `done` stays 12 s. `end` on an id that's already gone is fine.
 - Icons: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. A fixed set: programs can't send images or arbitrary glyphs.
 - Text is one plain line (titles up to 60 characters, text up to 120); control, invisible and direction-changing characters are removed.
-- An activity nobody updates goes away after 10 minutes (`--ttl` changes it, up to 24 h); `done` stays 12 s. At most 8 at a time, and 30 requests per 10 s.
-- Exit codes for scripts: 0 shown, 1 bad arguments, 2 Yata isn't running, 3 refused (the reason is printed when run from a console).
+- At most 8 activities at a time, and 30 requests per 10 s. Nothing is printed on success.
+- Exit codes: 0 shown, 1 bad arguments (unknown option, icon or value), 2 Yata isn't running, 3 refused by Yata (the reason is printed).
 - How it works: a named pipe that only your Windows user can open and that refuses network access. Activities live in memory only; their text isn't logged.
 
 Open the notch on a tab without using the mouse, for N seconds (previews, screenshots and UI tests):
@@ -170,7 +173,8 @@ src/Yata/
   Services/UpdateInstaller.cs "Update and restart": download, SHA-256 check, silent setup
   Services/HudQueue.cs        which notice shows, and reminders waiting their turn
   Services/Activities.cs      other programs' activities: request, cleaning, the board
-  Services/ActivityPipe.cs    the local pipe (this user only) and Yata.exe activity
+  Services/ActivityPipe.cs    the local pipe (this user only); ActivityClient.cs, the sending side
+src/Yata.Cli/                 yata-cli.exe: console side for scripts and agents (compiles Yata's activity files)
   Services/AppStore.cs        local storage (JSON)
   Services/FocusTimer.cs      Pomodoro
   Services/WaterTracker.cs    water and reminders

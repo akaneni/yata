@@ -12,7 +12,7 @@ public enum ActivityState { Running, Attention, Done, Failed }
 
 /// <summary>
 /// Something another program on this PC is doing (a build, a download, an AI agent at work), shown
-/// in the bubble beside the closed notch. Sent with <c>Yata.exe activity</c>; kept in memory only.
+/// in the bubble beside the closed notch. Sent with <c>yata-cli activity</c>; kept in memory only.
 /// </summary>
 public sealed record Activity(
     string Id,
@@ -215,6 +215,9 @@ internal sealed class ActivityBoard
     public static readonly TimeSpan DefaultTtl = TimeSpan.FromMinutes(10);
     // Finished work stays a moment so it can be seen, then gets out of the way.
     public static readonly TimeSpan DoneTtl = TimeSpan.FromSeconds(12);
+    // What needs the user (an agent waiting for a permission, a failed build) stays until it's ended,
+    // however long the user takes to come back, within reason.
+    public static readonly TimeSpan WarningTtl = TimeSpan.FromHours(1);
 
     private readonly List<Activity> _items = new();
 
@@ -247,7 +250,12 @@ internal sealed class ActivityBoard
         if (title == null)
             return (ActivityChange.NeedsTitle, null);
 
-        var ttl = request.State == ActivityState.Done ? DoneTtl : request.Ttl ?? DefaultTtl;
+        var ttl = request.State switch
+        {
+            ActivityState.Done => DoneTtl,
+            ActivityState.Attention or ActivityState.Failed => WarningTtl,
+            _ => request.Ttl ?? DefaultTtl,
+        };
         var activity = new Activity(
             request.Id,
             title,

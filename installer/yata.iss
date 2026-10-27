@@ -54,6 +54,8 @@ MinVersion=10.0.19041
 ; Close a running Yata so the exe can be replaced on upgrade.
 CloseApplications=force
 RestartApplications=no
+; The "yata-cli in PATH" task changes the user's PATH: tell open windows about it.
+ChangesEnvironment=yes
 
 [Languages]
 ; What leaves the PC, shown before installing (a SignPath Foundation requirement); full policy in PRIVACY.md.
@@ -63,6 +65,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"; InfoBeforeFile: "privacy-
 [CustomMessages]
 brazilianportuguese.AutoStart=Iniciar o Yata com o Windows
 english.AutoStart=Start Yata with Windows
+brazilianportuguese.AddToPath=Pôr o yata-cli no PATH (para scripts e agentes de IA chamarem só "yata-cli")
+english.AddToPath=Add yata-cli to PATH (so scripts and AI agents can just call "yata-cli")
 brazilianportuguese.RuntimeInstalling=Instalando o .NET 10 Desktop Runtime (Microsoft)...
 english.RuntimeInstalling=Installing the .NET 10 Desktop Runtime (Microsoft)...
 brazilianportuguese.RuntimeFailed=Não foi possível instalar o .NET 10 Desktop Runtime. Instale-o manualmente em https://dotnet.microsoft.com/download/dotnet/10.0 e rode este instalador de novo.
@@ -71,9 +75,13 @@ english.RuntimeFailed=Could not install the .NET 10 Desktop Runtime. Install it 
 [Tasks]
 Name: "autostart"; Description: "{cm:AutoStart}"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; Flags: unchecked
+; Off unless asked: it changes something outside Yata's own folder.
+Name: "addtopath"; Description: "{cm:AddToPath}"; Flags: unchecked
 
 [Files]
 Source: "{#PublishDir}\Yata.exe"; DestDir: "{app}"; Flags: ignoreversion
+; Console side, for scripts and agents (yata-cli activity ...).
+Source: "{#PublishDir}\yata-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
@@ -143,4 +151,66 @@ begin
   except
     Result := CustomMessage('RuntimeFailed') + #13#10#13#10 + GetExceptionMessage;
   end;
+end;
+
+// The user's PATH without Yata's folder, however it was spelled there.
+function PathWithout(Path, Dir: String): String;
+var
+  Rest, Part: String;
+  P: Integer;
+begin
+  Result := '';
+  Rest := Path;
+  while Rest <> '' do
+  begin
+    P := Pos(';', Rest);
+    if P = 0 then
+    begin
+      Part := Rest;
+      Rest := '';
+    end
+    else
+    begin
+      Part := Copy(Rest, 1, P - 1);
+      Delete(Rest, 1, P);
+    end;
+    if (Part <> '') and (CompareText(RemoveBackslashUnlessRoot(Part), RemoveBackslashUnlessRoot(Dir)) <> 0) then
+    begin
+      if Result <> '' then
+        Result := Result + ';';
+      Result := Result + Part;
+    end;
+  end;
+end;
+
+// Adds or removes Yata's folder in the user's own PATH (HKCU, never the machine's). Written back as
+// an expandable string, so entries like %USERPROFILE%in stay as they were.
+procedure SetUserPath(Add: Boolean);
+var
+  Path, NewPath: String;
+begin
+  if not RegQueryStringValue(HKCU, 'Environment', 'Path', Path) then
+    Path := '';
+  NewPath := PathWithout(Path, ExpandConstant('{app}'));
+  if Add then
+  begin
+    if NewPath <> '' then
+      NewPath := NewPath + ';';
+    NewPath := NewPath + ExpandConstant('{app}');
+  end;
+  if NewPath <> Path then
+    RegWriteExpandStringValue(HKCU, 'Environment', 'Path', NewPath);
+end;
+
+// Unticking the task on a later install takes the folder back out.
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  if CurStep = ssPostInstall then
+    SetUserPath(WizardIsTaskSelected('addtopath'));
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usPostUninstall then
+    SetUserPath(False);
 end;

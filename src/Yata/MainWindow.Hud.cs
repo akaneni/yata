@@ -30,6 +30,8 @@ public partial class MainWindow
 {
     private readonly DispatcherTimer _hudRavenLand = new() { Interval = TimeSpan.FromMilliseconds(1100) };
     private readonly HudQueue _hudQueue = new();
+    // The notice's content plus padding: a long text with a bar needs more than the usual width.
+    private double _hudWidth;
 
     // Not while open, hidden (full screen) or busy with the "while you were away" news.
     private bool CanShowHud => IsVisible && !_expanded && !_newsActive;
@@ -88,10 +90,28 @@ public partial class MainWindow
                 new DoubleAnimation(Math.Clamp(level, 0, 1) * HudBar.Width, TimeSpan.FromMilliseconds(120)));
         }
 
+        _hudWidth = MeasureHud() + 2 * HudPadding;
         _hudActive = true;
         _hudTimer.Stop();
         _hudTimer.Start();
         UpdateTargets();
+    }
+
+    /// <summary>
+    /// Width of what the notice shows. Measured part by part: the panel itself is collapsed while
+    /// faded out, and a collapsed element measures as nothing.
+    /// </summary>
+    private double MeasureHud()
+    {
+        double width = 0;
+        foreach (UIElement part in HudView.Children)
+        {
+            if (part.Visibility == Visibility.Collapsed)
+                continue;
+            part.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            width += part.DesiredSize.Width;
+        }
+        return width;
     }
 
     /// <summary>The notch can show notices again: the reminders that waited come one at a time.</summary>

@@ -113,6 +113,17 @@ public class ActivityTests
         Assert.True(board.Prune(Now + ActivityBoard.DefaultTtl));
     }
 
+    [Theory]
+    [InlineData(ActivityState.Attention)]
+    [InlineData(ActivityState.Failed)]
+    public void What_needs_the_user_stays_up_to_an_hour_whatever_the_ttl(ActivityState state)
+    {
+        var board = new ActivityBoard();
+        board.Apply(new ActivityRequest(ActivityOp.Set, "agent", "Claude Code", State: state, Ttl: TimeSpan.FromSeconds(5)), Now);
+        Assert.False(board.Prune(Now + ActivityBoard.DefaultTtl));
+        Assert.True(board.Prune(Now + ActivityBoard.WarningTtl));
+    }
+
     [Fact]
     public void Needing_the_user_comes_first_then_the_latest()
     {
@@ -178,10 +189,37 @@ public class ActivityTests
     [InlineData("set x --colour red")]
     [InlineData("set x --progress 140%")]
     [InlineData("set x --ttl soon")]
+    [InlineData("set x --icon skull")]
     public void Bad_arguments_say_what_is_wrong(string line)
     {
         Assert.Null(ActivityCommand.Build(line.Split(' ', StringSplitOptions.RemoveEmptyEntries), out string? error));
         Assert.False(string.IsNullOrEmpty(error));
+    }
+
+    [Fact]
+    public async Task Exit_codes_tell_scripts_what_happened()
+    {
+        string name = $"Yata.Tests.{Guid.NewGuid():N}";
+        var errors = new List<string>();
+        Assert.Equal(1, await ActivityCommand.RunAsync(new[] { "set" }, errors.Add, name));
+        Assert.Equal(2, await ActivityCommand.RunAsync(new[] { "end", "x" }, errors.Add, name));
+        Assert.Contains("isn't running", errors[^1]);
+
+        string reply = "ok";
+        using var pipe = new ActivityPipe(_ => Task.FromResult(reply), name);
+        pipe.Start();
+        Assert.Equal(0, await ActivityCommand.RunAsync(new[] { "end", "x" }, errors.Add, name));
+        reply = "error: nope";
+        Assert.Equal(3, await ActivityCommand.RunAsync(new[] { "end", "x" }, errors.Add, name));
+        Assert.Equal("error: nope", errors[^1]);
+    }
+
+    [Fact]
+    public async Task Help_is_not_an_error()
+    {
+        string? shown = null;
+        Assert.Equal(0, await ActivityCommand.RunAsync(new[] { "--help" }, text => shown = text));
+        Assert.Contains("yata-cli activity set", shown);
     }
 
     [Theory]
@@ -201,7 +239,7 @@ public class ActivityTests
         using var pipe = new ActivityPipe(line => { received = line; return Task.FromResult("ok"); }, name);
         pipe.Start();
 
-        string? reply = await ActivityPipe.SendAsync("""{"op":"end","id":"x"}""", name);
+        string? reply = await ActivityClient.SendAsync("""{"op":"end","id":"x"}""", name);
         Assert.Equal("ok", reply);
         Assert.Equal("""{"op":"end","id":"x"}""", received);
     }
@@ -209,13 +247,13 @@ public class ActivityTests
     [Fact]
     public async Task Nobody_listening_is_reported_as_null()
     {
-        Assert.Null(await ActivityPipe.SendAsync("{}", $"Yata.Tests.{Guid.NewGuid():N}", timeoutMs: 300));
+        Assert.Null(await ActivityClient.SendAsync("{}", $"Yata.Tests.{Guid.NewGuid():N}", timeoutMs: 300));
     }
 
     [Fact]
     public async Task An_oversized_request_is_refused()
     {
         using var stream = new System.IO.MemoryStream(System.Text.Encoding.UTF8.GetBytes(new string('x', 5000) + "\n"));
-        Assert.Null(await ActivityPipe.ReadLine(stream, ActivityRequest.MaxBytes, CancellationToken.None));
+        Assert.Null(await ActivityClient.ReadLine(stream, ActivityRequest.MaxBytes, CancellationToken.None));
     }
 }

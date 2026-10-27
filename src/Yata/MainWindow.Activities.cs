@@ -16,7 +16,8 @@ namespace Yata;
 
 // Activities from other programs, and the bubble beside the closed notch. Like the iPhone's island
 // splitting in two: the notch keeps what it shows, and a second, smaller one carries what
-// doesn't fit (another program's progress, the next meeting while music plays).
+// doesn't fit (another program's progress, the next meeting while music plays). Programs send
+// activities with yata-cli.exe (src/Yata.Cli), through ActivityPipe.
 public partial class MainWindow
 {
     private const double BubbleSize = 32;
@@ -36,7 +37,10 @@ public partial class MainWindow
     private CalendarEvent? _upcomingEvent;
 
     /// <summary>What the bubble shows, and the notice hovering it brings up.</summary>
-    private sealed record BubbleItem(string? Glyph, string? Label, double? Progress, bool Warning, HudMessage Detail);
+    private sealed record BubbleItem(string? Glyph, string? Label, double? Progress, bool Warning, HudMessage Detail,
+        bool Dim = false);
+
+    private const string PauseGlyph = "";
 
     private bool BubbleShown => _bubbleItem != null && !_expanded;
 
@@ -102,7 +106,7 @@ public partial class MainWindow
             case ActivityChange.Full:
                 return $"full: at most {ActivityBoard.MaxActivities} activities at a time";
             case ActivityChange.NeedsTitle:
-                return "error: a new activity needs a title";
+                return "error: no activity with this id (it may have ended or expired); send --title to create it";
             case ActivityChange.Unknown:
                 return "ok"; // Ending something already gone is what the caller wanted anyway.
         }
@@ -126,11 +130,9 @@ public partial class MainWindow
         ShowHud(ActivityNotice(activity, important));
     }
 
-    private static HudMessage ActivityNotice(Activity activity, bool important, int others = 0)
+    private static HudMessage ActivityNotice(Activity activity, bool important)
     {
         string? value = activity.Progress is double p ? Percent(p) : null;
-        if (others > 0)
-            value = value == null ? $"+{others}" : $"{value} · +{others}";
         return new HudMessage(activity.Glyph, activity.Line, value, activity.Progress, activity.Warning,
             DurationMs: important ? 4500 : 2500, Important: important, Kind: HudKind.Activity);
     }
@@ -157,6 +159,7 @@ public partial class MainWindow
         var item = PickBubble(DateTime.Now);
         if (item == _bubbleItem)
             return;
+        bool appearing = (item == null) != (_bubbleItem == null);
         _bubbleItem = item;
         if (item != null)
         {
@@ -164,42 +167,83 @@ public partial class MainWindow
             BubbleGlyph.Visibility = item.Glyph == null ? Visibility.Collapsed : Visibility.Visible;
             BubbleGlyph.SetResourceReference(TextBlock.ForegroundProperty, item.Warning ? "WarningBrush" : "TextPrimary");
             BubbleLabel.Text = item.Label ?? "";
+            // "57s" needs a smaller size than "25" to keep clear of the ring.
+            BubbleLabel.FontSize = item.Label?.Length > 2 ? 8 : 10;
             BubbleLabel.Visibility = item.Label == null ? Visibility.Collapsed : Visibility.Visible;
             BubbleTrack.Visibility = item.Progress == null ? Visibility.Collapsed : Visibility.Visible;
             BubbleArc.Data = item.Progress is double progress ? FocusPage.BuildArc(progress, 22, 2) : null;
             BubbleArc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, item.Warning ? "WarningBrush" : "TextPrimary");
+            // Paused reads differently from running at a glance, as in the notch: dimmed.
+            BubbleContent.Opacity = item.Dim ? 0.55 : 1;
             System.Windows.Automation.AutomationProperties.SetName(Bubble, item.Detail.Text);
         }
-        UpdateTargets();
+        // The countdown changes the bubble every second; only showing or hiding it moves the notch.
+        if (appearing)
+            UpdateTargets();
     }
 
     /// <summary>
-    /// What needs the user wins; then the next meeting, which the closed notch can't show while
-    /// media has it; then the latest activity.
+    /// One bubble, like the iPhone's island, so things take turns: what needs the user wins; then,
+    /// while media has the notch, the next meeting and the focus countdown it pushed out; then the
+    /// latest activity. Hovering says how many others are waiting ("+2"), so nothing is hidden silently.
     /// </summary>
     private BubbleItem? PickBubble(DateTime now)
     {
         var activities = _activities.Items;
+        bool eventWaits = _state != null && _upcomingEvent != null;
+        bool focusWaits = _state != null && _focus.IsActive;
+        int others = activities.Count + (eventWaits ? 1 : 0) + (focusWaits ? 1 : 0) - 1;
+
         var top = activities.FirstOrDefault();
-        if (top is { Warning: true })
-            return FromActivity(top, activities.Count - 1);
-
-        if (_state != null && _upcomingEvent is CalendarEvent next)
-        {
-            var left = next.Start - now;
-            int minutes = Math.Max(0, (int)Math.Ceiling(left.TotalMinutes));
-            // The ring fills as the meeting gets closer.
-            double progress = Math.Clamp(1 - left / UpcomingWindow, 0, 1);
-            var detail = new HudMessage(Glyphs.Calendar, $"{next.Title} {CalendarReminders.Until(next.Start, now)}",
-                DurationMs: 3000);
-            return new BubbleItem(null, minutes.ToString(CultureInfo.InvariantCulture), progress, false, detail);
-        }
-
-        return top == null ? null : FromActivity(top, activities.Count - 1);
+        var item = top is { Warning: true } ? FromActivity(top)
+                 : eventWaits ? EventBubble(_upcomingEvent!, now)
+                 : focusWaits ? FocusBubble()
+                 : top != null ? FromActivity(top)
+                 : null;
+        if (item == null || others <= 0)
+            return item;
+        string more = $"+{others}";
+        return item with { Detail = item.Detail with { Value = item.Detail.Value == null ? more : $"{item.Detail.Value} · {more}" } };
     }
 
-    private static BubbleItem FromActivity(Activity activity, int others) =>
-        new(activity.Glyph, null, activity.Progress, activity.Warning, ActivityNotice(activity, false, others));
+    /// <summary>The ring fills as the meeting gets closer, around the minutes left.</summary>
+    private static BubbleItem EventBubble(CalendarEvent next, DateTime now)
+    {
+        var left = next.Start - now;
+        int minutes = Math.Max(0, (int)Math.Ceiling(left.TotalMinutes));
+        double progress = Math.Clamp(1 - left / UpcomingWindow, 0, 1);
+        var detail = new HudMessage(Glyphs.Calendar, $"{next.Title} {CalendarReminders.Until(next.Start, now)}",
+            DurationMs: 3000);
+        return new BubbleItem(null, minutes.ToString(CultureInfo.InvariantCulture), progress, false, detail);
+    }
+
+    /// <summary>
+    /// The ring empties as the phase runs out, around the minutes left (the seconds, in the last
+    /// minute). Hovering gives the exact time.
+    /// </summary>
+    private BubbleItem FocusBubble()
+    {
+        var remaining = _focus.Remaining;
+        string phase = _focus.Phase switch
+        {
+            FocusPhase.ShortBreak => Strings.Focus_ShortBreak,
+            FocusPhase.LongBreak => Strings.Focus_LongBreak,
+            _ => Strings.Focus_Focus,
+        };
+        string exact = $"{(int)remaining.TotalMinutes:00}:{remaining.Seconds:00}";
+        var detail = new HudMessage(_focus.IsPaused ? PauseGlyph : Glyphs.Timer, $"{phase} · {exact}", DurationMs: 3000);
+        if (_focus.IsPaused)
+            return new BubbleItem(PauseGlyph, null, 1 - _focus.Progress, false, detail, Dim: true);
+        int minutes = (int)Math.Ceiling(remaining.TotalMinutes);
+        // At most a couple of characters fit inside the ring: hours past 99 minutes, seconds at the end.
+        string label = remaining < TimeSpan.FromMinutes(1) ? $"{Math.Max(0, (int)Math.Ceiling(remaining.TotalSeconds))}s"
+                     : minutes > 99 ? $"{(int)Math.Round(remaining.TotalHours)}h"
+                     : minutes.ToString(CultureInfo.InvariantCulture);
+        return new BubbleItem(null, label, 1 - _focus.Progress, false, detail);
+    }
+
+    private static BubbleItem FromActivity(Activity activity) =>
+        new(activity.Glyph, null, activity.Progress, activity.Warning, ActivityNotice(activity, false));
 
     /// <summary>Hovering (or clicking) the bubble says what it is, in the notch beside it.</summary>
     private void OnBubbleMouseEnter(object sender, MouseEventArgs e)

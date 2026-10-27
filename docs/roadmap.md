@@ -1,6 +1,6 @@
 # Roadmap: ideias para as próximas versões
 
-Registro das melhorias levantadas na análise de outubro de 2026 (código do Yata, a Dynamic Island da Apple e o mercado de apps de notch no Mac e no Windows). A fila de avisos, a bolha ao lado do notch e as atividades de outros programas (`Yata.exe activity`) já foram feitas. O resto fica aqui, em ordem aproximada de valor.
+Registro das melhorias levantadas na análise de outubro de 2026 (código do Yata, a Dynamic Island da Apple e o mercado de apps de notch no Mac e no Windows). A fila de avisos, a bolha ao lado do notch e as atividades de outros programas (`yata-cli activity`) já foram feitas. O resto fica aqui, em ordem aproximada de valor.
 
 ## Contexto do mercado (out/2026)
 
@@ -11,7 +11,7 @@ Registro das melhorias levantadas na análise de outubro de 2026 (código do Yat
 ## Próximos passos
 
 ### Integração com o Claude Code
-Os hooks do Claude Code (`Notification`, `Stop`, etc.) já podem chamar `Yata.exe activity attention|done` hoje. O passo seguinte é **aprovar ou negar permissões pelo notch**: um pedido que espera resposta pelo pipe (uma operação nova, como `ask`, com botões na bolha e tempo-limite). Nenhum app de Windows faz isso direito; no Mac há mais de 8.
+Os hooks do Claude Code (`Notification`, `Stop`, etc.) já podem chamar `yata-cli activity attention|done` hoje. O passo seguinte é **aprovar ou negar permissões pelo notch**: um pedido que espera resposta pelo pipe (uma operação nova, como `ask`, com botões na bolha e tempo-limite). Nenhum app de Windows faz isso direito; no Mac há mais de 8.
 
 ### Prova pública de desempenho
 Publicar no site, a cada versão, a CPU e a memória medidas pelo `tools/measure.ps1` (parado, música, aberto, foco). Ataca a queixa nº 1 do mercado e dá prova ao "o notch em que você pode confiar".
@@ -43,7 +43,7 @@ O Windows está voltando a permitir a barra de tarefas no topo da tela. Verifica
 O `UserNotificationListener` exige identidade de pacote (MSIX ou pacote esparso), o que traz junto a distribuição pela Microsoft Store e a assinatura. É a função mais sensível à privacidade: só opt-in, filtrada por app e sem guardar o conteúdo.
 
 ### Progresso de downloads e cópias
-Não há API limpa para o navegador nem para o Explorer. O caminho viável é pelas próprias atividades (um script, ou uma extensão de navegador que chame `Yata.exe activity`).
+Não há API limpa para o navegador nem para o Explorer. O caminho viável é pelas próprias atividades (um script, ou uma extensão de navegador que chame o `yata-cli`).
 
 ### Histórico da área de transferência e cotas de IA
 Há demanda no Mac (Atoll, Notchpoint), mas o histórico da área de transferência guarda senhas e dados pessoais; só faria sentido em memória, opt-in e com exclusões.
