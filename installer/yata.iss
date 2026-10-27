@@ -2,7 +2,7 @@
 ; Per-user install, no admin rights — except installing the .NET runtime when it's missing.
 
 #ifndef AppVersion
-  #define AppVersion "0.2.1"
+  #define AppVersion "0.3.0"
 #endif
 #ifndef PublishDir
   #define PublishDir "..\publish"
