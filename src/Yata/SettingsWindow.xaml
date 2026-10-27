@@ -4,7 +4,7 @@
         xmlns:views="clr-namespace:Yata.Views"
         xmlns:y="clr-namespace:Yata"
         Title="{x:Static y:Strings.Settings_Title}"
-        Width="580" Height="760" MinWidth="500" MinHeight="420"
+        Width="780" Height="760" MinWidth="640" MinHeight="420"
         WindowStartupLocation="CenterScreen"
         Icon="pack://application:,,,/Assets/yata.ico"
         Background="{DynamicResource WindowBackground}" Foreground="{DynamicResource TextPrimary}"
@@ -135,20 +135,58 @@
             <Setter Property="Height" Value="1"/>
             <Setter Property="Background" Value="{DynamicResource DividerBrush}"/>
         </Style>
+        <!-- One per section in the sidebar; checked follows the section in view -->
+        <Style x:Key="NavItem" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,2"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="Sections"/>
+            <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg" CornerRadius="8" Padding="12,7" Background="Transparent">
+                            <ContentPresenter RecognizesAccessKey="False"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SubtleFill}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SelectedFill}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
 
-    <!-- Not a tab stop itself: focusing a control scrolls it into view -->
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
-        <StackPanel Margin="28,22,28,28">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="190"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
-            <!-- Header -->
-            <StackPanel Orientation="Horizontal">
-                <views:RavenSprite PixelSize="3" VerticalAlignment="Center"/>
-                <StackPanel Margin="16,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="Yata" FontFamily="{StaticResource DisplayFont}" FontSize="24" FontWeight="SemiBold"/>
-                    <TextBlock x:Name="VersionText" FontSize="12" Foreground="{DynamicResource TextHint}"/>
-                </StackPanel>
+        <!-- Sidebar: who we are, then the sections (built from their titles in code) -->
+        <StackPanel Margin="18,22,8,22">
+            <StackPanel Orientation="Horizontal" Margin="4,0,0,0">
+                <views:RavenSprite PixelSize="2" VerticalAlignment="Center"/>
+                <TextBlock Text="Yata" Margin="12,0,0,0" VerticalAlignment="Center"
+                           FontFamily="{StaticResource DisplayFont}" FontSize="20" FontWeight="SemiBold"/>
             </StackPanel>
+            <!-- Under the name, where it has the sidebar's width to wrap in -->
+            <TextBlock x:Name="VersionText" Margin="4,6,8,22" FontSize="11" Foreground="{DynamicResource TextHint}"
+                       TextWrapping="Wrap"/>
+            <StackPanel x:Name="SectionNav" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+        </StackPanel>
+
+    <!-- Not a tab stop itself: focusing a control scrolls it into view -->
+    <ScrollViewer x:Name="Scroll" Grid.Column="1" VerticalScrollBarVisibility="Auto" Focusable="False"
+                  ScrollChanged="OnScrollChanged">
+        <StackPanel x:Name="Sections" Margin="12,0,28,28">
 
             <!-- General -->
             <TextBlock Text="{x:Static y:Strings.Settings_General}" Style="{StaticResource Section}"/>
@@ -607,4 +645,5 @@
             </views:SettingRow>
         </StackPanel>
     </ScrollViewer>
+    </Grid>
 </Window>

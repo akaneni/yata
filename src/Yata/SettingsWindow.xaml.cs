@@ -69,6 +69,75 @@ public partial class SettingsWindow : Window
         };
         ShowGoogle();
         ShowWeatherPlace();
+        BuildSectionNav();
+    }
+
+    // ---- Sections -----------------------------------------------------------------------
+
+    private readonly List<(TextBlock Title, RadioButton Item)> _sections = new();
+    private bool _scrollingToSection;
+    private bool _followingScroll;
+
+    /// <summary>One sidebar entry per section title, so the two can't drift apart.</summary>
+    private void BuildSectionNav()
+    {
+        var style = (Style)FindResource("Section");
+        foreach (var title in Sections.Children.OfType<TextBlock>().Where(t => t.Style == style))
+        {
+            var item = new RadioButton { Content = title.Text, Style = (Style)FindResource("NavItem") };
+            // On Checked, not Click, so screen readers that select the entry also get there.
+            item.Checked += (_, _) =>
+            {
+                if (!_followingScroll)
+                    ScrollToSection(title);
+            };
+            // Navigation, not a setting: keep it from the window-level Click handler that saves.
+            item.Click += (_, e) => e.Handled = true;
+            SectionNav.Children.Add(item);
+            _sections.Add((title, item));
+        }
+        if (_sections.Count > 0)
+            Follow(_sections[0].Item);
+    }
+
+    /// <summary>Checks an entry because of scrolling, without scrolling again.</summary>
+    private void Follow(RadioButton item)
+    {
+        _followingScroll = true;
+        item.IsChecked = true;
+        _followingScroll = false;
+    }
+
+    private void ScrollToSection(TextBlock title)
+    {
+        // A little room above the title, like the gap it has under the previous card.
+        double top = title.TranslatePoint(new Point(0, 0), Sections).Y - 18;
+        double target = Math.Clamp(top, 0, Scroll.ScrollableHeight);
+        if (Math.Abs(target - Scroll.VerticalOffset) < 1)
+            return;
+        // The clicked entry stays checked even when the last sections can't reach the top.
+        _scrollingToSection = true;
+        Scroll.ScrollToVerticalOffset(target);
+    }
+
+    /// <summary>Checks the entry of the last section whose title has scrolled up to the top.</summary>
+    private void OnScrollChanged(object sender, ScrollChangedEventArgs e)
+    {
+        if (_scrollingToSection)
+        {
+            _scrollingToSection = false;
+            return;
+        }
+        if (e.VerticalChange == 0 || _sections.Count == 0)
+            return;
+
+        var current = _sections[0];
+        foreach (var section in _sections)
+        {
+            if (section.Title.IsVisible && section.Title.TranslatePoint(new Point(0, 0), Sections).Y <= Scroll.VerticalOffset + 40)
+                current = section;
+        }
+        Follow(current.Item);
     }
 
     // ---- Screen readers ---------------------------------------------------------------
