@@ -41,6 +41,19 @@ public sealed class GoogleTasks
     public string? Error { get; private set; }
 
     public event Action? Changed;
+    /// <summary>A sync started or ended (the ↻ spins meanwhile).</summary>
+    public event Action? BusyChanged;
+
+    private readonly ManualGate _manual = new();
+
+    /// <summary>When the list last synced with Google, or null if it hasn't yet.</summary>
+    public DateTime? LastSynced => _lastSync == DateTime.MinValue ? null : _lastSync;
+
+    public bool IsSyncing => _syncing;
+
+    /// <summary>"Sync now" or the ↻ in the Tasks tab: syncs at once, unless it just did.</summary>
+    public Task SyncNowAsync() =>
+        IsOn && !_syncing && _manual.TryPass() ? SyncAsync() : Task.CompletedTask;
 
     public GoogleTasks(AppStore store, GoogleAccount account, TaskList tasks)
     {
@@ -154,6 +167,7 @@ public sealed class GoogleTasks
     {
         _syncing = true;
         _nextSync = DateTime.Now + RetryAfter;
+        BusyChanged?.Invoke();
         try
         {
             await LoadListsAsync();
@@ -190,6 +204,7 @@ public sealed class GoogleTasks
         finally
         {
             _syncing = false;
+            BusyChanged?.Invoke();
             Changed?.Invoke();
         }
     }

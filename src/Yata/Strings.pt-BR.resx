@@ -35,6 +35,27 @@
   <data name="Settings_UpdateAvailable" xml:space="preserve"><value>Versão {0} disponível</value></data>
   <data name="Settings_OpenDownload" xml:space="preserve"><value>Abrir página de download</value></data>
   <data name="Settings_UpdateNow" xml:space="preserve"><value>Atualizar e reiniciar</value></data>
+  <data name="Settings_ThisVersion" xml:space="preserve"><value>Yata {0}</value></data>
+  <data name="Settings_CheckNow" xml:space="preserve"><value>Procurar agora</value></data>
+  <data name="Settings_Checking" xml:space="preserve"><value>Procurando…</value></data>
+  <data name="Settings_CheckFailed" xml:space="preserve"><value>Não foi possível consultar o GitHub. Tente de novo daqui a pouco.</value></data>
+  <data name="Settings_LastChecked" xml:space="preserve"><value>Última verificação: {0}</value></data>
+  <data name="Settings_NeverChecked" xml:space="preserve"><value>Ainda não verificado</value></data>
+  <data name="Settings_SyncLabel" xml:space="preserve"><value>Sincronizar com o Google</value></data>
+  <data name="Settings_SyncNow" xml:space="preserve"><value>Sincronizar agora</value></data>
+  <data name="Settings_Syncing" xml:space="preserve"><value>Sincronizando…</value></data>
+  <data name="Settings_LastSynced" xml:space="preserve"><value>Última sincronização: {0}</value></data>
+  <data name="Settings_NotSynced" xml:space="preserve"><value>Ainda não sincronizado</value></data>
+  <data name="Settings_Forecast" xml:space="preserve"><value>Previsão</value></data>
+  <data name="Settings_RefreshNow" xml:space="preserve"><value>Atualizar agora</value></data>
+  <data name="Settings_Refreshing" xml:space="preserve"><value>Atualizando…</value></data>
+  <data name="Settings_ForecastFrom" xml:space="preserve"><value>Atualizada {0}</value></data>
+  <data name="Settings_NoForecast" xml:space="preserve"><value>Ainda sem previsão</value></data>
+  <data name="Time_TodayAt" xml:space="preserve"><value>hoje às {0}</value></data>
+  <data name="Time_DayAt" xml:space="preserve"><value>{0} às {1}</value></data>
+  <data name="Tray_CheckUpdates" xml:space="preserve"><value>Procurar atualização</value></data>
+  <data name="Hud_UpToDate" xml:space="preserve"><value>O Yata está atualizado</value></data>
+  <data name="Hud_CheckFailed" xml:space="preserve"><value>Não foi possível procurar atualização</value></data>
   <data name="Update_Downloading" xml:space="preserve"><value>Baixando e conferindo o instalador…</value></data>
   <data name="Update_Installing" xml:space="preserve"><value>Instalando. O Yata abre de novo em instantes.</value></data>
   <data name="Update_UpToDate" xml:space="preserve"><value>Esta já é a versão mais nova.</value></data>

@@ -14,7 +14,7 @@ Open source, no account and no telemetry.
 
 **Network access:** only what you turn on, and nothing about the PC is sent:
 - lyrics lookup on [LRCLIB](https://lrclib.net) (an open, free service), sending only the artist, title and length of the song. Lyrics are cached in `%LOCALAPPDATA%\Yata\lyrics`. Can be turned off in Settings.
-- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs.
+- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. **Check now** (Settings → Updates, or the tray menu) asks right away, on or off. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs.
 - **weather** from [Open-Meteo](https://open-meteo.com) (open, no account or key), only if you turn it on: sends the chosen city's coordinates, rounded to ~1 km. The city search sends only the name you type.
 - **Google Calendar and Google Tasks**, only if you connect your account and allow each one: reading your calendars and today's and tomorrow's events, and syncing one task list, directly between the PC and Google. The access is encrypted with DPAPI in `%LOCALAPPDATA%\Yata\google.dat` and events stay in memory only. Details in [PRIVACY.md](PRIVACY.md).
 
@@ -55,6 +55,7 @@ Open source, no account and no telemetry.
   - **Automatic focus pause** after 5 min away (giving back the unattended time), unless media is playing.
   - **Demo** from the tray menu (or `Yata.exe --demo`) to see every state in ~30 s.
 - **Settings** (the gear in the notch, the menu or a double-click on the tray icon): language, start with Windows, hide in full screen, hover delay, album art color or black and white, lyrics on/off, each kind of notice, Pomodoro times, water goal and reminders, and Yata's behavior. Everything applies immediately.
+- **Now, not at the next round**: **Check now** for a new version (Settings → Updates, or the tray menu, even with the daily check off); **↻** on the Agenda and Tasks tabs and **Sync now** in Settings read Google at once; **Refresh now** fetches the forecast. Each shows when it last ran, and a second click within 15 seconds doesn't go online again.
 - Reminders that arrive while the notch is open or in full screen wait and show up afterwards, one at a time, instead of being lost. A status blip (volume, Caps Lock) shows at once and the reminder it interrupted comes back right after.
 - **Bubble beside the notch**: like the iPhone's island splitting in two, a second small notch carries what doesn't fit in the first: while music has the notch, the focus countdown (a ring emptying around the minutes left) and the next meeting move there, and so do other programs' activities. One at a time, by priority (what needs you, the meeting, focus, activities); hover it to see what it is and how many others are waiting.
 - **Activities from other programs** (scripts, builds, AI agents): they can show their progress in the bubble with `yata-cli`. See [Activities](#activities) below. Can be turned off in Settings.

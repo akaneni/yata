@@ -53,6 +53,19 @@ public sealed class GoogleCalendar
 
     public event Action? Changed;
     public event Action<HudMessage>? Message;
+    /// <summary>A read from Google started or ended (the ↻ spins meanwhile).</summary>
+    public event Action? BusyChanged;
+
+    private readonly ManualGate _manual = new();
+
+    /// <summary>When the events were last read from Google.</summary>
+    public DateTime? LastFetched { get; private set; }
+
+    public bool IsFetching => _fetching;
+
+    /// <summary>"Sync now" or the ↻ in the Agenda tab: reads Google at once, unless it just did.</summary>
+    public Task RefreshNowAsync() =>
+        Status == CalendarStatus.Connected && _manual.TryPass() ? RefreshAsync() : Task.CompletedTask;
 
     public GoogleCalendar(AppStore store, GoogleAccount account)
     {
@@ -141,6 +154,7 @@ public sealed class GoogleCalendar
 
         _fetching = true;
         _nextFetch = DateTime.Now + RetryAfter;
+        BusyChanged?.Invoke();
         try
         {
             var calendars = await FetchCalendarsAsync();
@@ -159,6 +173,7 @@ public sealed class GoogleCalendar
             _sent.RemoveWhere(k => !keys.Contains(k[..k.LastIndexOf('|')]));
             _fetchedDay = today;
             _nextFetch = DateTime.Now + RefreshEvery;
+            LastFetched = DateTime.Now;
             _error = null;
             Changed?.Invoke();
             CheckReminders(DateTime.Now);
@@ -186,6 +201,7 @@ public sealed class GoogleCalendar
         finally
         {
             _fetching = false;
+            BusyChanged?.Invoke();
         }
     }
 

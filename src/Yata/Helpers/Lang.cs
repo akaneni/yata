@@ -38,6 +38,15 @@ internal static class Lang
         Culture = CultureInfo.GetCultureInfo(language == "en" ? "en-US" : language);
     }
 
+    /// <summary>"today at 16:42", or "27/10 at 16:42" for another day: when something last happened.</summary>
+    public static string When(DateTime at, DateTime now)
+    {
+        string time = at.ToString("HH:mm", Culture);
+        return at.Date == now.Date
+            ? string.Format(Strings.Time_TodayAt, time)
+            : string.Format(Strings.Time_DayAt, at.ToString(Culture.DateTimeFormat.MonthDayPattern, Culture), time);
+    }
+
     /// <summary>Each language in its own words, as language pickers do.</summary>
     public static string Name(string language) => language == "pt-BR" ? "Português" : "English";
 }
