@@ -89,6 +89,8 @@ Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: 
 
 [Run]
 Filename: "{app}\Yata.exe"; Description: "{cm:LaunchProgram,Yata}"; Flags: nowait postinstall skipifsilent
+; "Update and restart" in Yata runs this setup with /SILENT /UPDATE=1: open Yata again when done.
+Filename: "{app}\Yata.exe"; Flags: nowait; Check: IsUpdate
 
 [UninstallRun]
 Filename: "{sys}\taskkill.exe"; Parameters: "/IM Yata.exe /F"; Flags: runhidden; RunOnceId: "StopYata"
@@ -96,6 +98,11 @@ Filename: "{sys}\taskkill.exe"; Parameters: "/IM Yata.exe /F"; Flags: runhidden;
 ; Note: %LOCALAPPDATA%\Yata (tasks, water log, shelf, lyrics cache) is kept on uninstall on purpose.
 
 [Code]
+function IsUpdate: Boolean;
+begin
+  Result := ExpandConstant('{param:UPDATE|0}') = '1';
+end;
+
 function IsDesktopRuntimeInstalled: Boolean;
 var
   FindRec: TFindRec;

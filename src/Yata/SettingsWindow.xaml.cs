@@ -471,6 +471,31 @@ public partial class SettingsWindow : Window
         UpdateText.Text = string.Format(Strings.Settings_UpdateAvailable, latest);
     }
 
+    private async void OnUpdateNow(object sender, RoutedEventArgs e)
+    {
+        UpdateButton.IsEnabled = false;
+        ShowUpdateStatus(Strings.Update_Downloading);
+        try
+        {
+            string installer = await new UpdateInstaller().DownloadAsync(CancellationToken.None);
+            ShowUpdateStatus(Strings.Update_Installing);
+            UpdateInstaller.Launch(installer);
+            // The installer replaces Yata's files and opens it again once Yata is gone.
+            Application.Current.Shutdown();
+        }
+        catch (UpdateException ex)
+        {
+            ShowUpdateStatus(ex.Message);
+            UpdateButton.IsEnabled = true;
+        }
+    }
+
+    private void ShowUpdateStatus(string text)
+    {
+        UpdateStatus.Text = text;
+        UpdateStatus.Visibility = Visibility.Visible;
+    }
+
     private void OnOpenReleases(object sender, RoutedEventArgs e)
     {
         try

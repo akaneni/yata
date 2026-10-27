@@ -61,7 +61,7 @@
   "t.r3": "Google Agenda e Tasks",
   "t.r3s": "Vai direto entre o seu PC e o Google. O acesso fica cifrado no disco com o DPAPI do Windows.",
   "t.r4": "Aviso de versão nova",
-  "t.r4s": "Nada. Lê a página pública de versões uma vez por dia.",
+  "t.r4s": "Nada. Lê a página pública de versões uma vez por dia e só baixa o instalador quando você clica em Atualizar.",
   "t.r5": "Todo o resto",
   "t.r5s": "Nada",
   "p1.t": "Ele nunca vê o que você digita",

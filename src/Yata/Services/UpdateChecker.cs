@@ -10,12 +10,13 @@ namespace Yata.Services;
 
 /// <summary>
 /// Opt-in check for a newer release: at most once a day, one anonymous request to GitHub's
-/// public releases API. Nothing about the PC or its use is sent; installing stays manual.
+/// public releases API. Nothing about the PC or its use is sent. Installing happens only when the user
+/// clicks "Update and restart" (UpdateInstaller).
 /// </summary>
 public sealed class UpdateChecker
 {
     public const string ReleasesPage = "https://github.com/akaneni/yata/releases/latest";
-    private const string LatestApi = "https://api.github.com/repos/akaneni/yata/releases/latest";
+    internal const string LatestApi = "https://api.github.com/repos/akaneni/yata/releases/latest";
     private static readonly TimeSpan Interval = TimeSpan.FromDays(1);
     private static readonly HttpClient Http = CreateClient();
 
@@ -113,7 +114,7 @@ public sealed class UpdateChecker
         }
     }
 
-    private static HttpClient CreateClient()
+    internal static HttpClient CreateClient()
     {
         var client = HttpPool.Client(TimeSpan.FromSeconds(10));
         client.DefaultRequestHeaders.Accept.ParseAdd("application/vnd.github+json");
