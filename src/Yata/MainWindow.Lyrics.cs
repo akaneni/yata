@@ -30,7 +30,6 @@ public partial class MainWindow
 {
     // Highlight a line slightly early so it doesn't feel late against the audio.
     private static readonly TimeSpan LyricLead = TimeSpan.FromMilliseconds(200);
-    private static readonly Color LyricDimColor = Color.FromArgb(0x59, 0xFF, 0xFF, 0xFF);
     private const double LyricZoom = 1.04;
     private static readonly TimeSpan LyricMinWait = TimeSpan.FromMilliseconds(15);
     private static readonly TimeSpan LyricResync = TimeSpan.FromSeconds(5);
@@ -86,7 +85,8 @@ public partial class MainWindow
                     TextWrapping = TextWrapping.Wrap,
                     // Right margin leaves room for the current line's slight zoom.
                     Margin = new Thickness(0, 4, 14, 4),
-                    Foreground = new SolidColorBrush(LyricDimColor),
+                    // Its own brush (not the shared resource): each line's color is animated.
+                    Foreground = new SolidColorBrush(PaletteColor("LyricDimBrush")),
                     RenderTransformOrigin = new Point(0, 0.5),
                     RenderTransform = new ScaleTransform(),
                     Cursor = Cursors.Hand,
@@ -145,10 +145,10 @@ public partial class MainWindow
     {
         var brush = (SolidColorBrush)line.Foreground;
         var scale = (ScaleTransform)line.RenderTransform;
-        Color color = current ? Colors.White : LyricDimColor;
+        Color color = PaletteColor(current ? "TextPrimary" : "LyricDimBrush");
         double size = current ? LyricZoom : 1;
 
-        if (ExpandedView.Visibility != Visibility.Visible)
+        if (ExpandedView.Visibility != Visibility.Visible || Motion.Reduced)
         {
             brush.BeginAnimation(SolidColorBrush.ColorProperty, null);
             scale.BeginAnimation(ScaleTransform.ScaleXProperty, null);
@@ -165,6 +165,8 @@ public partial class MainWindow
         scale.BeginAnimation(ScaleTransform.ScaleYProperty, new DoubleAnimation(size, duration) { EasingFunction = ease });
     }
 
+    private Color PaletteColor(string key) => ((SolidColorBrush)FindResource(key)).Color;
+
     private void ScrollLyrics(bool animate)
     {
         if (LyricsLines.Children.Count == 0 || LyricsPanel.ActualHeight <= 0)
@@ -177,7 +179,7 @@ public partial class MainWindow
         double center = line.TranslatePoint(new Point(0, 0), LyricsLines).Y + line.ActualHeight / 2;
         double target = LyricsPanel.ActualHeight / 2 - center;
 
-        if (animate)
+        if (animate && !Motion.Reduced)
         {
             LyricsScroll.BeginAnimation(TranslateTransform.YProperty, new DoubleAnimation(target, TimeSpan.FromMilliseconds(450))
             {

@@ -12,7 +12,7 @@
         <StackPanel x:Name="EmptyText" HorizontalAlignment="Center" VerticalAlignment="Center">
             <local:RavenSprite Frame="Sleep" PixelSize="2" HorizontalAlignment="Center" Opacity="0.7"/>
             <TextBlock Margin="0,4,0,0" Text="Nenhuma tarefa por aqui" FontSize="13"
-                       Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Center"/>
+                       Foreground="{DynamicResource TextSecondary}" HorizontalAlignment="Center"/>
         </StackPanel>
 
         <ScrollViewer VerticalScrollBarVisibility="Hidden" Focusable="False">
@@ -28,15 +28,15 @@
                             </Grid.ColumnDefinitions>
 
                             <Button x:Name="Check" Style="{StaticResource IconButton}" Width="30" Height="30" FontSize="15"
-                                    Content="&#xE739;" Click="OnToggle"/>
+                                    Content="&#xE739;" ToolTip="Concluir" Click="OnToggle"/>
                             <TextBlock x:Name="Label" Grid.Column="1" Margin="6,0" Text="{Binding Text}" FontSize="13"
                                        VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                             <Border x:Name="DueChip" Grid.Column="2" CornerRadius="8" Padding="7,1" Margin="0,0,4,0"
-                                    VerticalAlignment="Center" Background="{StaticResource SurfaceBrush}" Visibility="Collapsed">
+                                    VerticalAlignment="Center" Background="{DynamicResource SurfaceBrush}" Visibility="Collapsed">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="&#xEA8F;" FontFamily="{StaticResource IconFont}" FontSize="10"
-                                               VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{StaticResource TextSecondary}"/>
-                                    <TextBlock Text="{Binding DueText}" FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                                               VerticalAlignment="Center" Margin="0,0,4,0" Foreground="{DynamicResource TextSecondary}"/>
+                                    <TextBlock Text="{Binding DueText}" FontSize="11" Foreground="{DynamicResource TextSecondary}"/>
                                 </StackPanel>
                             </Border>
                             <Button Grid.Column="3" Style="{StaticResource IconButton}" Width="26" Height="26" FontSize="10"
@@ -45,7 +45,8 @@
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding Done}" Value="True">
                                 <Setter TargetName="Check" Property="Content" Value="&#xE73A;"/>
-                                <Setter TargetName="Label" Property="Foreground" Value="{StaticResource TextSecondary}"/>
+                                <Setter TargetName="Check" Property="ToolTip" Value="Reabrir"/>
+                                <Setter TargetName="Label" Property="Foreground" Value="{DynamicResource TextSecondary}"/>
                                 <Setter TargetName="Label" Property="TextDecorations" Value="Strikethrough"/>
                             </DataTrigger>
                             <MultiDataTrigger>
@@ -61,17 +62,17 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <Border Grid.Row="1" Height="34" Margin="0,8,0,0" CornerRadius="10" Background="#14FFFFFF">
+        <Border Grid.Row="1" Height="34" Margin="0,8,0,0" CornerRadius="10" Background="{DynamicResource SubtleFill}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock x:Name="Placeholder" Margin="12,0" VerticalAlignment="Center" FontSize="13" IsHitTestVisible="False"
-                           Foreground="#66FFFFFF" Text="Nova tarefa (ex.: Reunião 15:30)"/>
+                           Foreground="{DynamicResource TextPlaceholder}" Text="Nova tarefa (ex.: Reunião 15:30)"/>
                 <TextBox x:Name="Input" Margin="9,0" VerticalAlignment="Center" FontSize="13"
-                         Background="Transparent" BorderThickness="0" Foreground="White" CaretBrush="White"
-                         SelectionBrush="#66FFFFFF" MaxLength="200"
+                         Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimary}" CaretBrush="{DynamicResource TextPrimary}"
+                         SelectionBrush="{DynamicResource SelectionHighlight}" MaxLength="200"
                          PreviewMouseLeftButtonDown="OnInputMouseDown" KeyDown="OnInputKeyDown"
                          TextChanged="OnInputTextChanged" LostKeyboardFocus="OnInputLostFocus"/>
                 <Button Grid.Column="1" Style="{StaticResource IconButton}" Width="30" Height="30" FontSize="13"

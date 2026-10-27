@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 
 namespace Yata.Views;
@@ -22,6 +23,10 @@ public partial class Stepper : UserControl
 
     public static readonly DependencyProperty SuffixProperty = DependencyProperty.Register(
         nameof(Suffix), typeof(string), typeof(Stepper), new PropertyMetadata("", (d, _) => ((Stepper)d).Refresh()));
+
+    /// <summary>What the number is, for screen readers ("Diminuir Pausa curta, 5 min").</summary>
+    public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
+        nameof(Label), typeof(string), typeof(Stepper), new PropertyMetadata("", (d, _) => ((Stepper)d).Refresh()));
 
     public int Value
     {
@@ -53,6 +58,12 @@ public partial class Stepper : UserControl
         set => SetValue(SuffixProperty, value);
     }
 
+    public string Label
+    {
+        get => (string)GetValue(LabelProperty);
+        set => SetValue(LabelProperty, value);
+    }
+
     public Stepper()
     {
         InitializeComponent();
@@ -68,7 +79,16 @@ public partial class Stepper : UserControl
         if (ValueText == null)
             return;
         ValueText.Text = Value + Suffix;
+        // At a limit the button turns off; keep keyboard focus on the one that still works.
+        if (Minus.IsKeyboardFocused && Value <= Minimum)
+            Plus.Focus();
+        else if (Plus.IsKeyboardFocused && Value >= Maximum)
+            Minus.Focus();
         Minus.IsEnabled = Value > Minimum;
         Plus.IsEnabled = Value < Maximum;
+
+        string what = Label.Length > 0 ? $"{Label}, " : "";
+        AutomationProperties.SetName(Minus, $"Diminuir {what}{ValueText.Text}");
+        AutomationProperties.SetName(Plus, $"Aumentar {what}{ValueText.Text}");
     }
 }

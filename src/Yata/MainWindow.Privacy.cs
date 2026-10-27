@@ -77,12 +77,13 @@ public partial class MainWindow
     {
         if (PrivacyText.Inlines.Count > 0)
             PrivacyText.Inlines.Add(new Run("    "));
-        PrivacyText.Inlines.Add(new Run(glyph)
+        var icon = new Run(glyph)
         {
             FontFamily = (FontFamily)FindResource("IconFont"),
-            Foreground = (Brush)FindResource(brushKey),
             BaselineAlignment = BaselineAlignment.Center,
-        });
+        };
+        icon.SetResourceReference(TextElement.ForegroundProperty, brushKey);
+        PrivacyText.Inlines.Add(icon);
         PrivacyText.Inlines.Add(new Run(" " + string.Join(", ", apps)));
     }
 }

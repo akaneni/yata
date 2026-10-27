@@ -1,0 +1,58 @@
+<!-- Every color in the app, by what it's for. Reference them with DynamicResource, so that a
+     light palette (or High Contrast) can later replace this dictionary while the app runs. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#99FFFFFF"/>
+    <!-- Section titles and hints in the settings window -->
+    <SolidColorBrush x:Key="TextHint" Color="#FF8C8C8C"/>
+    <SolidColorBrush x:Key="TextPlaceholder" Color="#66FFFFFF"/>
+    <SolidColorBrush x:Key="PillForeground" Color="#CCFFFFFF"/>
+    <SolidColorBrush x:Key="LyricDimBrush" Color="#59FFFFFF"/>
+    <SolidColorBrush x:Key="SelectionHighlight" Color="#66FFFFFF"/>
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="NotchBrush" Color="#FF000000"/>
+    <SolidColorBrush x:Key="WindowBackground" Color="#FF0E0E0E"/>
+    <SolidColorBrush x:Key="CardBackground" Color="#FF161616"/>
+    <SolidColorBrush x:Key="SurfaceBrush" Color="#1FFFFFFF"/>
+    <!-- Inputs, list rows on hover, the row that's on now -->
+    <SolidColorBrush x:Key="SubtleFill" Color="#14FFFFFF"/>
+    <SolidColorBrush x:Key="SelectedFill" Color="#26FFFFFF"/>
+    <SolidColorBrush x:Key="DividerBrush" Color="#1FFFFFFF"/>
+    <SolidColorBrush x:Key="TrackBrush" Color="#33FFFFFF"/>
+
+    <!-- Controls -->
+    <SolidColorBrush x:Key="HoverFill" Color="#1FFFFFFF"/>
+    <SolidColorBrush x:Key="PressedFill" Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="PillFill" Color="#1AFFFFFF"/>
+    <SolidColorBrush x:Key="PillFillHover" Color="#29FFFFFF"/>
+    <SolidColorBrush x:Key="PillFillPressed" Color="#3DFFFFFF"/>
+    <!-- The one obvious action: the text color as background -->
+    <SolidColorBrush x:Key="InverseFill" Color="#FFFFFFFF"/>
+    <SolidColorBrush x:Key="InverseFillHover" Color="#FFE6E6E6"/>
+    <SolidColorBrush x:Key="InverseFillPressed" Color="#FFC8C8C8"/>
+    <SolidColorBrush x:Key="InverseText" Color="#FF000000"/>
+    <SolidColorBrush x:Key="SwitchThumbOff" Color="#B3FFFFFF"/>
+    <SolidColorBrush x:Key="OverlayButtonFill" Color="#CC333333"/>
+    <SolidColorBrush x:Key="ScrollThumb" Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="ScrollThumbHover" Color="#66FFFFFF"/>
+    <SolidColorBrush x:Key="ScrollThumbPressed" Color="#80FFFFFF"/>
+    <SolidColorBrush x:Key="FocusRingBrush" Color="#FFFFFFFF"/>
+
+    <!-- Drop target on the shelf -->
+    <SolidColorBrush x:Key="OutlineBrush" Color="#33FFFFFF"/>
+    <SolidColorBrush x:Key="OutlineStrongBrush" Color="#B3FFFFFF"/>
+    <SolidColorBrush x:Key="DropFill" Color="#0FFFFFFF"/>
+
+    <!-- Status: the only colors besides the album art -->
+    <!-- Privacy indicators keep the colors people know from phones and laptops -->
+    <SolidColorBrush x:Key="CameraBrush" Color="#FF34C759"/>
+    <SolidColorBrush x:Key="MicrophoneBrush" Color="#FFFF9F0A"/>
+    <SolidColorBrush x:Key="WarningBrush" Color="#FFFF6B6B"/>
+    <SolidColorBrush x:Key="WaterBrush" Color="#FF5AB8FF"/>
+    <SolidColorBrush x:Key="WaterPastBrush" Color="#595AB8FF"/>
+    <SolidColorBrush x:Key="WaterSubtleFill" Color="#1A5AB8FF"/>
+</ResourceDictionary>

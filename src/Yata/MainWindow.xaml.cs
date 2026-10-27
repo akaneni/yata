@@ -793,6 +793,15 @@ public partial class MainWindow : Window
             return; // Rendering can fire more than once per frame.
         _lastFrame = now;
 
+        if (Motion.Reduced)
+        {
+            _width.Snap();
+            _height.Snap();
+            _radius.Snap();
+            _expand.Snap();
+            _hud.Snap();
+            _ambient.Snap();
+        }
         bool moving = _width.Step(dt) | _height.Step(dt) | _radius.Step(dt) | _expand.Step(dt) | _hud.Step(dt) |
                       _ambient.Step(dt);
         ApplyFrame();

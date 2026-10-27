@@ -75,7 +75,7 @@ public partial class MainWindow
         _ambientLeaving = true;
         SetZzz(false);
         _ambientRaven.Fly();
-        var flight = new DoubleAnimation(0, 150, TimeSpan.FromMilliseconds(700))
+        var flight = new DoubleAnimation(0, 150, Motion.Ms(700))
         {
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseIn },
         };
@@ -158,7 +158,7 @@ public partial class MainWindow
         NewsRaven.Letter = true;
         _newsRaven.Fly();
         NewsRaven.FacingLeft = true;
-        var flight = new DoubleAnimation(NewsWidth, 0, TimeSpan.FromMilliseconds(750))
+        var flight = new DoubleAnimation(NewsWidth, 0, Motion.Ms(750))
         {
             EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
         };
@@ -168,9 +168,9 @@ public partial class MainWindow
                 _newsRaven.Land();
         };
         NewsRavenShift.BeginAnimation(TranslateTransform.XProperty, flight);
-        NewsBody.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(400))
+        NewsBody.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, Motion.Ms(400))
         {
-            BeginTime = TimeSpan.FromMilliseconds(450),
+            BeginTime = Motion.Ms(450),
         });
     }
 
