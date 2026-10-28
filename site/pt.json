@@ -57,7 +57,7 @@
   "f6.src": "/img/shots/pt/fechado-volume.png",
   "f7.k": "Agentes de IA",
   "f7.t": "Seu agente de código, num relance",
-  "f7.d": "Claude Code, Cursor e Codex aparecem no notch enquanto trabalham, quando precisam de você e quando terminam, com o logo e o projeto. Um clique leva à janela do agente. Ligue em Configurações → Agentes de IA; scripts e builds usam a mesma bolha com o <code>yata-cli</code>.",
+  "f7.d": "Compatível com Claude Code, Cursor e Codex: eles aparecem no notch enquanto trabalham, quando precisam de você e quando terminam, com o logo e o projeto. Um clique leva à janela do agente. Ligue em Configurações → Agentes de IA; scripts e builds usam a mesma bolha com o <code>yata-cli</code>.",
   "f7.alt": "Claude Code concluído: o logo com um ✓ no notch e numa pílula ao lado",
   "f7.src": "/img/shots/pt/fechado-agente-aviso.png",
   "f8.k": "Chamadas",
@@ -117,7 +117,7 @@
   "q8.q": "Com quais apps de música ele funciona?",
   "q8.a": "Qualquer app que use os controles de mídia do Windows: Spotify, YouTube e outros sites no navegador, e mais. As letras sincronizadas vêm do LRCLIB e podem ser desligadas.",
   "q11.q": "Funciona com Claude Code, Cursor e Codex?",
-  "q11.a": "Sim. Em Configurações → Agentes de IA, um botão por agente encontrado no PC põe os hooks do Yata nas configurações do próprio agente, e desligar tira só o que ele pôs (o Claude Code também tem um plugin e funciona no WSL). O notch mostra quando o agente está trabalhando, esperando sua permissão ou resposta, e quando termina, com o logo e o projeto; um clique leva à janela dele. Só o estado chega ao notch, nunca seus prompts, comandos ou as respostas do agente, e o hook nunca bloqueia nem muda o agente.",
+  "q11.a": "Sim. Em Configurações → Agentes de IA, um botão por agente encontrado no PC põe os hooks do Yata nas configurações do próprio agente, e desligar tira só o que ele pôs (o Claude Code também tem um plugin e funciona no WSL). O notch mostra quando o agente está trabalhando, esperando sua permissão ou resposta, e quando termina, com o logo e o projeto; um clique leva à janela dele. Só o estado chega ao notch, nunca seus prompts, comandos ou as respostas do agente, e o hook nunca bloqueia nem muda o agente. É só compatibilidade: o Yata não tem ligação com a Anthropic, a Anysphere ou a OpenAI, nem é patrocinado ou endossado por elas.",
   "q9.q": "Meus scripts ou agentes de IA podem usar o notch?",
   "q9.a": "Sim. <code>yata-cli activity set build --title \"Build\" --progress 40%</code> mostra o andamento de um build, um download ou um agente numa bolha ao lado do notch, e <code>attention</code> avisa quando ele está esperando você. É um canal local que só o seu usuário do Windows abre; nada passa pela rede.",
   "q10.q": "O notch aparece quando eu compartilho a tela?",
@@ -134,6 +134,7 @@
   "footer.signing": "Política de assinatura",
   "footer.changelog": "Novidades",
   "footer.made": "licença MIT · feito por akaneni",
+  "footer.marks": "Claude, Cursor e Codex são marcas dos seus donos, citadas aqui só para dizer com quais ferramentas o Yata funciona. O Yata não é produto oficial nem parceiro da Anthropic, da Anysphere ou da OpenAI.",
   "changelog.title": "Novidades · Yata",
   "changelog.description": "O que mudou em cada versão do Yata, o notch de código aberto para o Windows."
 }
