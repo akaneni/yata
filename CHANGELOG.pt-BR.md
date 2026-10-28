@@ -2,6 +2,16 @@
 
 O que mudou em cada versão do Yata. As notas completas (instalação, como conferir o arquivo e limitações conhecidas) ficam nas [versões do GitHub](https://github.com/akaneni/yata/releases).
 
+## 0.7.0 — 2026-10-28
+
+- **Dá para ver qual agente é.** Claude, Cursor e Codex aparecem com o próprio logo no aviso do notch, na bolha e na lista de atividades.
+- **Selo de estado.** Concluído, falhou e precisa de você viram um selo pequeno (✓, ✗, !) no canto do ícone, em vez de substituí-lo.
+- **A bolha virou pílula.** O ícone de origem numa ponta e o anel, os minutos ou o selo na outra, também para reunião e foco.
+- **Título mais claro.** A atividade de um agente leva o nome do programa e do projeto, como `Orca · yata`.
+- **IA na política de privacidade.** Uma seção nova diz com todas as letras: o Yata não usa nenhum modelo ou serviço de IA, e os dados do Google nunca vão para um.
+
+[Notas completas](https://github.com/akaneni/yata/releases/tag/v0.7.0)
+
 ## 0.6.0 — 2026-10-28
 
 - **Mais fluido.** O notch abre, troca de aba e fecha na frequência da sua tela: num monitor de 120 Hz, abrir passou de uns 36 para 115 quadros por segundo, com a mesma memória. Fechar é mais rápido que abrir, e o notch não fica mais vazio no meio da transição.

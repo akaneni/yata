@@ -2,6 +2,16 @@
 
 What changed in each version of Yata. The full notes (installing, checking the file and known limitations) are on [GitHub releases](https://github.com/akaneni/yata/releases), in Portuguese.
 
+## 0.7.0 — 2026-10-28
+
+- **You can tell which agent it is.** Claude, Cursor and Codex show up with their own logo in the notch alert, the bubble and the activity list.
+- **A status badge.** Done, failed and needs you now show as a small badge (✓, ✗, !) in the corner of the icon, instead of replacing it.
+- **The bubble is a pill.** The source icon on one end and the ring, minutes or badge on the other, for meetings and focus too.
+- **A clearer title.** An agent's activity is named after the program and the project, like `Orca · yata`.
+- **AI in the privacy policy.** A new section says it plainly: Yata uses no AI model or service, and data from Google never goes to one.
+
+[Full notes](https://github.com/akaneni/yata/releases/tag/v0.7.0)
+
 ## 0.6.0 — 2026-10-28
 
 - **Smoother.** The notch opens, switches tabs and closes at your screen's refresh rate: on a 120 Hz monitor, opening went from about 36 to 115 frames per second, with the same memory. Closing is quicker than opening, and the notch no longer goes blank halfway through.
