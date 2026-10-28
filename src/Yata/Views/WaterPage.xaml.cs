@@ -45,43 +45,8 @@ public partial class WaterPage : UserControl
     {
         var days = _water!.LastDays(ChartDays);
         double max = Math.Max(_water.GoalMl, days.Max(d => d.Ml));
-
-        Chart.Children.Clear();
-        Chart.ColumnDefinitions.Clear();
-        for (int i = 0; i < days.Count; i++)
-        {
-            var (day, ml) = days[i];
-            Chart.ColumnDefinitions.Add(new ColumnDefinition());
-
-            var cell = new Grid { Margin = new Thickness(3, 0, 3, 0) };
-            cell.RowDefinitions.Add(new RowDefinition());
-            cell.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            var bar = new Rectangle
-            {
-                Height = Math.Max(3, 30 * ml / max),
-                RadiusX = 2,
-                RadiusY = 2,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                ToolTip = $"{day.ToString(Strings.Format_DayMonth, Lang.Culture)}: {ml} ml",
-            };
-            bar.SetResourceReference(Shape.FillProperty, i == days.Count - 1 ? "WaterBrush" : "WaterPastBrush");
-            cell.Children.Add(bar);
-
-            var label = new TextBlock
-            {
-                Text = day.ToString("ddd", Lang.Culture)[..1].ToUpper(Lang.Culture),
-                FontSize = 10,
-                Margin = new Thickness(0, 3, 0, 0),
-                HorizontalAlignment = HorizontalAlignment.Center,
-            };
-            label.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondary");
-            Grid.SetRow(label, 1);
-            cell.Children.Add(label);
-
-            Grid.SetColumn(cell, i);
-            Chart.Children.Add(cell);
-        }
+        Chart.Show(days.Select(d => (d.Day, (double)d.Ml)).ToList(), max,
+            (day, ml) => $"{day.ToString(Strings.Format_DayMonth, Lang.Culture)}: {ml} ml");
     }
 
     private void OnDrink(object sender, RoutedEventArgs e) => _water?.Drink();

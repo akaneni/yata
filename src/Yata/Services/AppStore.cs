@@ -16,6 +16,7 @@ public sealed class StoreData
 
     public SettingsData Settings { get; set; } = new();
     public WaterData Water { get; set; } = new();
+    public FocusData Focus { get; set; } = new();
     public List<TaskData> Tasks { get; set; } = new();
     /// <summary>Google Tasks ids removed here while offline, still to be deleted in Google.</summary>
     public List<string> TaskDeletes { get; set; } = new();
@@ -36,6 +37,7 @@ public sealed class StoreData
         string before = JsonSerializer.Serialize(this);
         Settings ??= new SettingsData();
         Water ??= new WaterData();
+        Focus ??= new FocusData();
         Updates ??= new UpdateData();
         Tasks = (Tasks ?? new()).Where(t => t != null).ToList();
         foreach (var task in Tasks)
@@ -43,6 +45,7 @@ public sealed class StoreData
         TaskDeletes = (TaskDeletes ?? new()).Where(id => !string.IsNullOrEmpty(id)).ToList();
         Shelf = (Shelf ?? new()).Where(path => !string.IsNullOrWhiteSpace(path)).ToList();
         Water.Days ??= new();
+        Focus.Days ??= new();
 
         // The same limits as the settings window's steppers.
         var s = Settings;
@@ -52,6 +55,7 @@ public sealed class StoreData
         s.ShortBreakMinutes = Math.Clamp(s.ShortBreakMinutes, 1, 30);
         s.LongBreakMinutes = Math.Clamp(s.LongBreakMinutes, 5, 60);
         s.SessionsPerCycle = Math.Clamp(s.SessionsPerCycle, 2, 8);
+        s.FocusGoalMinutes = Math.Clamp(s.FocusGoalMinutes, 15, 600);
         s.CompanionIdleMinutes = Math.Clamp(s.CompanionIdleMinutes, 1, 30);
         s.CompanionSleepMinutes = Math.Clamp(s.CompanionSleepMinutes, 2, 120);
         Water.GoalMl = Math.Clamp(Water.GoalMl, 500, 5000);
@@ -145,6 +149,8 @@ public sealed class SettingsData
     public int LongBreakMinutes { get; set; } = 15;
     public int SessionsPerCycle { get; set; } = 4;
     public bool PauseFocusWhenAway { get; set; } = true;
+    /// <summary>Focus a day the Focus page measures against ("1h 40 of 2h").</summary>
+    public int FocusGoalMinutes { get; set; } = 120;
 
     // Yata
     public bool CompanionEnabled { get; set; } = true;
@@ -165,6 +171,14 @@ public sealed class SettingsData
         HudKind.Activity => ActivitiesEnabled,
         _ => true,
     };
+}
+
+public sealed class FocusData
+{
+    /// <summary>Seconds focused per day, keyed "yyyy-MM-dd": sessions stopped halfway count for what ran.</summary>
+    public Dictionary<string, int> Days { get; set; } = new();
+    /// <summary>The task picked on the Focus page, if any (a <see cref="TaskData"/> id).</summary>
+    public Guid? TaskId { get; set; }
 }
 
 public sealed class WaterData

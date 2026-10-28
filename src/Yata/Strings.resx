@@ -164,6 +164,7 @@
   <data name="Settings_ShortBreak" xml:space="preserve"><value>Short break</value></data>
   <data name="Settings_LongBreak" xml:space="preserve"><value>Long break</value></data>
   <data name="Settings_SessionsPerCycle" xml:space="preserve"><value>Sessions before the long break</value></data>
+  <data name="Settings_FocusGoal" xml:space="preserve"><value>Daily focus goal</value></data>
   <data name="Settings_PauseWhenAway" xml:space="preserve"><value>Pause when you step away</value></data>
   <data name="Settings_PauseWhenAwayHint" xml:space="preserve"><value>After 5 idle minutes, giving back the unattended time.</value></data>
   <data name="Settings_Water" xml:space="preserve"><value>Water</value></data>
@@ -272,6 +273,21 @@
   <data name="Focus_MinutesLeft" xml:space="preserve"><value>{0} min left</value></data>
   <data name="Focus_BreakTime" xml:space="preserve"><value>Break time</value></data>
   <data name="Focus_BackToFocus" xml:space="preserve"><value>Back to focus</value></data>
+  <data name="Focus_BreakAt" xml:space="preserve"><value> · break at {0}</value></data>
+  <data name="Focus_EventDuring" xml:space="preserve"><value>Before it ends: {1} · {0}</value></data>
+  <data name="Focus_EventNoFit" xml:space="preserve"><value>No room for a session before {1} · {0}</value></data>
+  <data name="Focus_EventFitsOne" xml:space="preserve"><value>Room for 1 session before {1} · {0}</value></data>
+  <data name="Focus_EventFitsMany" xml:space="preserve"><value>Room for {2} sessions before {1} · {0}</value></data>
+  <data name="Focus_Today" xml:space="preserve"><value>Today</value></data>
+  <data name="Focus_OfGoal" xml:space="preserve"><value>of {0}</value></data>
+  <data name="Focus_GoalMet" xml:space="preserve"><value>Goal met</value></data>
+  <data name="Focus_PickTaskShort" xml:space="preserve"><value>Pick a task</value></data>
+  <data name="Focus_PickTask" xml:space="preserve"><value>Focus on</value></data>
+  <data name="Focus_ClosePicker" xml:space="preserve"><value>Close</value></data>
+  <data name="Focus_NoTask" xml:space="preserve"><value>No task</value></data>
+  <data name="Focus_NoOpenTasks" xml:space="preserve"><value>No open tasks. Add them on the Tasks tab.</value></data>
+  <data name="Focus_MarkDone" xml:space="preserve"><value>Mark as done</value></data>
+  <data name="Focus_Finished" xml:space="preserve"><value>Done?</value></data>
   <data name="Shelf_DropHere" xml:space="preserve"><value>Drag files here</value></data>
   <data name="Shelf_Unavailable" xml:space="preserve"><value>Unavailable right now: its drive or server isn't answering.</value></data>
   <data name="Shelf_Remove" xml:space="preserve"><value>Remove from shelf</value></data>

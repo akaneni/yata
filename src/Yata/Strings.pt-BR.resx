@@ -164,6 +164,7 @@
   <data name="Settings_ShortBreak" xml:space="preserve"><value>Pausa curta</value></data>
   <data name="Settings_LongBreak" xml:space="preserve"><value>Pausa longa</value></data>
   <data name="Settings_SessionsPerCycle" xml:space="preserve"><value>Sessões até a pausa longa</value></data>
+  <data name="Settings_FocusGoal" xml:space="preserve"><value>Meta diária de foco</value></data>
   <data name="Settings_PauseWhenAway" xml:space="preserve"><value>Pausar quando você sai</value></data>
   <data name="Settings_PauseWhenAwayHint" xml:space="preserve"><value>Após 5 min sem uso, devolvendo o tempo não acompanhado.</value></data>
   <data name="Settings_Water" xml:space="preserve"><value>Água</value></data>
@@ -272,6 +273,21 @@
   <data name="Focus_MinutesLeft" xml:space="preserve"><value>faltam {0} min</value></data>
   <data name="Focus_BreakTime" xml:space="preserve"><value>Hora da pausa</value></data>
   <data name="Focus_BackToFocus" xml:space="preserve"><value>De volta ao foco</value></data>
+  <data name="Focus_BreakAt" xml:space="preserve"><value> · pausa às {0}</value></data>
+  <data name="Focus_EventDuring" xml:space="preserve"><value>Antes do fim: {1} · {0}</value></data>
+  <data name="Focus_EventNoFit" xml:space="preserve"><value>Não cabe uma sessão até {1} · {0}</value></data>
+  <data name="Focus_EventFitsOne" xml:space="preserve"><value>Cabe 1 sessão até {1} · {0}</value></data>
+  <data name="Focus_EventFitsMany" xml:space="preserve"><value>Cabem {2} sessões até {1} · {0}</value></data>
+  <data name="Focus_Today" xml:space="preserve"><value>Hoje</value></data>
+  <data name="Focus_OfGoal" xml:space="preserve"><value>de {0}</value></data>
+  <data name="Focus_GoalMet" xml:space="preserve"><value>Meta batida</value></data>
+  <data name="Focus_PickTaskShort" xml:space="preserve"><value>Escolher tarefa</value></data>
+  <data name="Focus_PickTask" xml:space="preserve"><value>Focar em</value></data>
+  <data name="Focus_ClosePicker" xml:space="preserve"><value>Fechar</value></data>
+  <data name="Focus_NoTask" xml:space="preserve"><value>Sem tarefa</value></data>
+  <data name="Focus_NoOpenTasks" xml:space="preserve"><value>Nenhuma tarefa pendente. Adicione na aba Tarefas.</value></data>
+  <data name="Focus_MarkDone" xml:space="preserve"><value>Marcar como feita</value></data>
+  <data name="Focus_Finished" xml:space="preserve"><value>Terminou?</value></data>
   <data name="Shelf_DropHere" xml:space="preserve"><value>Arraste arquivos para cá</value></data>
   <data name="Shelf_Unavailable" xml:space="preserve"><value>Indisponível agora: a unidade ou o servidor não responde.</value></data>
   <data name="Shelf_Remove" xml:space="preserve"><value>Tirar da prateleira</value></data>
