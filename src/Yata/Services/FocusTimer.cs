@@ -18,9 +18,13 @@ public sealed class FocusTimer
 {
     private readonly SettingsData _settings;
     private readonly Func<DateTime> _now;
+    // A tick this late means the PC slept (ticks come every second while running).
+    internal static readonly TimeSpan SleepGap = TimeSpan.FromSeconds(30);
+
     private readonly DispatcherTimer _tick = new();
     private TimeSpan _pausedRemaining;
     private DateTime _endsAt;
+    private DateTime _lastTick;
 
     public FocusPhase Phase { get; private set; } = FocusPhase.Focus;
     public FocusState State { get; private set; } = FocusState.Ready;
@@ -58,13 +62,14 @@ public sealed class FocusTimer
     public event Action? Changed;
     public event Action<HudMessage>? Message;
 
-    /// <param name="clock">Time source; tests pass a fake one.</param>
+    /// <param name="clock">Time source; tests pass a fake one. UTC by default: a time zone change
+    /// or daylight saving must not shorten or stretch a session.</param>
     public FocusTimer(SettingsData settings, Func<DateTime>? clock = null)
     {
         _settings = settings;
-        _now = clock ?? (() => DateTime.Now);
+        _now = clock ?? (() => DateTime.UtcNow);
         _pausedRemaining = PhaseLength;
-        _tick.Tick += (_, _) => Poll();
+        _tick.Tick += (_, _) => Tick();
     }
 
     /// <summary>
@@ -138,6 +143,46 @@ public sealed class FocusTimer
         return true;
     }
 
+    /// <summary>
+    /// The timer's tick. One that comes far later than a second means the PC slept (the lid
+    /// closed on the way out of the dock): see <see cref="Slept"/>. Tests call it directly.
+    /// </summary>
+    internal void Tick()
+    {
+        var now = _now();
+        var last = _lastTick;
+        _lastTick = now;
+        if (State == FocusState.Running && now - last > SleepGap)
+            Slept(last, now);
+        else
+            Poll();
+    }
+
+    /// <summary>
+    /// The PC slept from <paramref name="from"/> to <paramref name="to"/>. A focus session pauses
+    /// where it was when the PC went to sleep, instead of counting the sleep as focus and starting
+    /// the break on its own; it waits for Continue. A break the sleep outlasted counts as taken.
+    /// </summary>
+    private void Slept(DateTime from, DateTime to)
+    {
+        var left = _endsAt - from;
+        if (Phase == FocusPhase.Focus && left > TimeSpan.Zero)
+        {
+            Freeze(left < PhaseLength ? left : PhaseLength);
+            Message?.Invoke(new HudMessage(Glyphs.Timer, Strings.Focus_PausedAsleep,
+                string.Format(Lang.Culture, Strings.Focus_MinutesLeft, Math.Ceiling(left.TotalMinutes)),
+                DurationMs: 4000, Important: true, Tag: "focus"));
+        }
+        else if (Phase != FocusPhase.Focus && to >= _endsAt)
+        {
+            Advance(notify: false);
+        }
+        else
+        {
+            Poll();
+        }
+    }
+
     /// <summary>Checks for the end of the phase. Called by the internal tick; tests call it directly.</summary>
     internal void Poll()
     {
@@ -163,7 +208,8 @@ public sealed class FocusTimer
 
     private void Run()
     {
-        _endsAt = _now() + _pausedRemaining;
+        _lastTick = _now();
+        _endsAt = _lastTick + _pausedRemaining;
         State = FocusState.Running;
         ScheduleTick();
         _tick.Start();
@@ -190,7 +236,7 @@ public sealed class FocusTimer
             _pausedRemaining = PhaseLength;
             if (notify)
                 Notify(Strings.Focus_BreakTime, $"{PhaseLength.TotalMinutes:0} min", celebrate: true,
-                    expires: _now() + PhaseLength);
+                    expires: DateTime.Now + PhaseLength); // Notices expire on the wall clock.
             Run(); // Breaks start on their own.
         }
         else

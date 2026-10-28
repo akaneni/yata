@@ -73,6 +73,44 @@ public sealed class AppStoreTests : IDisposable
         Assert.False(store.RecoveredFromDamage);
         Assert.Contains("50", File.ReadAllText(DataFile));
     }
+
+    [Fact]
+    public void Missing_parts_and_out_of_range_numbers_dont_crash_the_start()
+    {
+        File.WriteAllText(DataFile, """
+            {"Settings":null,"Tasks":[null,{"Text":null}],"Shelf":null,"Water":{"Days":null,"GoalMl":-1},
+             "TaskDeletes":null,"Updates":null}
+            """);
+        var store = AppStore.Load(DataFile);
+
+        Assert.NotNull(store.Settings);
+        Assert.Equal("", Assert.Single(store.Data.Tasks).Text);
+        Assert.Empty(store.Data.Shelf);
+        Assert.Empty(store.Data.TaskDeletes);
+        Assert.NotNull(store.Data.Water.Days);
+        Assert.Equal(500, store.Data.Water.GoalMl);
+        Assert.NotNull(store.Data.Updates);
+        Assert.Equal(StoreData.CurrentSchema, store.Data.SchemaVersion);
+    }
+
+    [Fact]
+    public void Numbers_go_back_into_the_settings_ranges()
+    {
+        File.WriteAllText(DataFile, """{"Settings":{"HoverDelayMs":-5,"FocusMinutes":0,"SessionsPerCycle":99}}""");
+        var settings = AppStore.Load(DataFile).Settings;
+
+        Assert.Equal(0, settings.HoverDelayMs);
+        Assert.Equal(5, settings.FocusMinutes);
+        Assert.Equal(8, settings.SessionsPerCycle);
+    }
+
+    [Fact]
+    public void A_file_from_before_the_schema_version_gets_it_and_nothing_else_changes()
+    {
+        var data = new StoreData { SchemaVersion = 0 };
+        Assert.False(data.Normalize());
+        Assert.Equal(StoreData.CurrentSchema, data.SchemaVersion);
+    }
 }
 
 /// <summary>The diagnostics text helps with an issue without saying anything about the user.</summary>

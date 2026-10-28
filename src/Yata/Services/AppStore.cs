@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Windows.Threading;
 using Yata.Helpers;
@@ -9,6 +10,10 @@ namespace Yata.Services;
 
 public sealed class StoreData
 {
+    /// <summary>Format of data.json, for a migration some day. 0 = written before it existed.</summary>
+    public const int CurrentSchema = 1;
+    public int SchemaVersion { get; set; } = CurrentSchema;
+
     public SettingsData Settings { get; set; } = new();
     public WaterData Water { get; set; } = new();
     public List<TaskData> Tasks { get; set; } = new();
@@ -17,6 +22,44 @@ public sealed class StoreData
     /// <summary>Paths parked on the shelf (references only, files are never copied).</summary>
     public List<string> Shelf { get; set; } = new();
     public UpdateData Updates { get; set; } = new();
+
+    /// <summary>
+    /// After loading: a hand-edited or half-old file can't crash Yata at every start. Missing parts
+    /// (null) become the defaults, numbers go back into the ranges the settings allow, and empty
+    /// entries go. Returns whether anything changed.
+    /// </summary>
+    internal bool Normalize()
+    {
+        // A file from before SchemaVersion existed isn't damaged; only what follows counts as a fix.
+        if (SchemaVersion < CurrentSchema)
+            SchemaVersion = CurrentSchema;
+        string before = JsonSerializer.Serialize(this);
+        Settings ??= new SettingsData();
+        Water ??= new WaterData();
+        Updates ??= new UpdateData();
+        Tasks = (Tasks ?? new()).Where(t => t != null).ToList();
+        foreach (var task in Tasks)
+            task.Text ??= "";
+        TaskDeletes = (TaskDeletes ?? new()).Where(id => !string.IsNullOrEmpty(id)).ToList();
+        Shelf = (Shelf ?? new()).Where(path => !string.IsNullOrWhiteSpace(path)).ToList();
+        Water.Days ??= new();
+
+        // The same limits as the settings window's steppers.
+        var s = Settings;
+        s.HoverDelayMs = Math.Clamp(s.HoverDelayMs, 0, 1000);
+        s.CalendarReminderMinutes = Math.Clamp(s.CalendarReminderMinutes, 0, 30);
+        s.FocusMinutes = Math.Clamp(s.FocusMinutes, 5, 120);
+        s.ShortBreakMinutes = Math.Clamp(s.ShortBreakMinutes, 1, 30);
+        s.LongBreakMinutes = Math.Clamp(s.LongBreakMinutes, 5, 60);
+        s.SessionsPerCycle = Math.Clamp(s.SessionsPerCycle, 2, 8);
+        s.CompanionIdleMinutes = Math.Clamp(s.CompanionIdleMinutes, 1, 30);
+        s.CompanionSleepMinutes = Math.Clamp(s.CompanionSleepMinutes, 2, 120);
+        Water.GoalMl = Math.Clamp(Water.GoalMl, 500, 5000);
+        Water.CupMl = Math.Clamp(Water.CupMl, 50, 1000);
+        Water.ReminderMinutes = Math.Clamp(Water.ReminderMinutes, 15, 240);
+
+        return JsonSerializer.Serialize(this) != before;
+    }
 }
 
 /// <summary>What the (opt-in) update check last saw.</summary>
@@ -194,8 +237,10 @@ public sealed class AppStore
         {
             if (!File.Exists(path))
                 return new AppStore(path, new StoreData()) { IsNew = true };
-            var data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(path), Options);
-            return new AppStore(path, data ?? new StoreData());
+            var data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(path), Options) ?? new StoreData();
+            if (data.Normalize())
+                Log.Warn("store", "data.json tinha partes faltando ou fora da faixa; corrigidas com os padrões");
+            return new AppStore(path, data);
         }
         catch (JsonException ex)
         {

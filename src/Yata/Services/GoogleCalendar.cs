@@ -31,6 +31,8 @@ public sealed class GoogleCalendar
     private readonly HashSet<string> _sent = new();
     private DateTime _nextFetch = DateTime.MinValue;
     private DateTime _fetchedDay;
+    // The new day already got its immediate fetch; failures from then on wait RetryAfter like any other.
+    private DateTime _dayPrompted;
     private bool _fetching;
     private string? _error;
 
@@ -139,10 +141,21 @@ public sealed class GoogleCalendar
     public bool IsIncluded(CalendarInfo calendar) =>
         Settings.CalendarIds?.Contains(calendar.Id) ?? (calendar.SelectedInGoogle || calendar.Primary);
 
+    /// <summary>
+    /// The PC woke up or the network came back: fetch at the next tick (within 20 s, by when the
+    /// connection has usually settled) instead of at the next round.
+    /// </summary>
+    public void Wake() => _nextFetch = DateTime.MinValue;
+
     private void Tick()
     {
         var now = DateTime.Now;
-        if (Status == CalendarStatus.Connected && (now >= _nextFetch || now.Date != _fetchedDay))
+        if (now.Date != _fetchedDay && now.Date != _dayPrompted)
+        {
+            _dayPrompted = now.Date;
+            _nextFetch = now;
+        }
+        if (Status == CalendarStatus.Connected && now >= _nextFetch)
             _ = RefreshAsync();
         CheckReminders(now);
     }

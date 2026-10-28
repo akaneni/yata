@@ -328,6 +328,20 @@ public sealed class TaskList
             item.Dirty = true;
     }
 
+    // Past this, the reminder says how late it is: the PC was asleep or off when it came due.
+    internal static readonly TimeSpan LateAfter = TimeSpan.FromMinutes(5);
+
+    /// <summary>"09:00", or "09:00 · 40 min late" when it comes well after its time.</summary>
+    internal static string ReminderValue(DateTime due, DateTime now)
+    {
+        string time = due.ToString("HH:mm");
+        var late = now - due;
+        if (late < LateAfter)
+            return time;
+        string by = late < TimeSpan.FromHours(1) ? $"{(int)late.TotalMinutes} min" : $"{(int)late.TotalHours} h";
+        return string.Format(Lang.Culture, Strings.Tasks_Late, time, by);
+    }
+
     /// <summary>One reminder check, as the timer does; for tests.</summary>
     internal void Poll() => CheckReminders();
 
@@ -338,7 +352,7 @@ public sealed class TaskList
         foreach (var item in due)
         {
             item.Reminded = true;
-            Message?.Invoke(new HudMessage(Glyphs.Bell, item.Text, item.Due!.Value.ToString("HH:mm"),
+            Message?.Invoke(new HudMessage(Glyphs.Bell, item.Text, ReminderValue(item.Due!.Value, now),
                 DurationMs: 6000, Important: true, Chime: true));
         }
 

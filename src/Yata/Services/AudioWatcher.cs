@@ -140,7 +140,7 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
     int IAudioEndpointVolumeCallback.OnNotify(IntPtr notifyData)
     {
         var data = Marshal.PtrToStructure<AudioVolumeNotificationData>(notifyData);
-        _dispatcher.InvokeAsync(() => Message?.Invoke(VolumeMessage(data.MasterVolume, data.Muted)));
+        _dispatcher.Post("audio", () => Message?.Invoke(VolumeMessage(data.MasterVolume, data.Muted)));
         return 0;
     }
 
@@ -148,7 +148,7 @@ internal sealed class AudioWatcher : IAudioEndpointVolumeCallback, IMMNotificati
     {
         // Fires once per role; react to one of them only.
         if (flow == EDataFlow.Render && role == ERole.Multimedia)
-            _dispatcher.InvokeAsync(() => BindDefaultDevice(announce: true));
+            _dispatcher.Post("audio", () => BindDefaultDevice(announce: true));
         return 0;
     }
 

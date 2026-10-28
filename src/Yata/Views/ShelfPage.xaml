@@ -56,6 +56,11 @@
                                     Content="&#xE711;" ToolTip="{x:Static y:Strings.Shelf_Remove}" Visibility="Hidden" Click="OnRemove"/>
                         </Grid>
                         <DataTemplate.Triggers>
+                            <!-- Its drive or server doesn't answer: dimmed, and the tooltip says why -->
+                            <DataTrigger Binding="{Binding IsAvailable}" Value="False">
+                                <Setter TargetName="Tile" Property="Opacity" Value="0.45"/>
+                                <Setter TargetName="Tile" Property="ToolTip" Value="{x:Static y:Strings.Shelf_Unavailable}"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding IsPicture}" Value="True">
                                 <Setter TargetName="IconImage" Property="Visibility" Value="Collapsed"/>
                                 <Setter TargetName="Thumbnail" Property="Visibility" Value="Visible"/>

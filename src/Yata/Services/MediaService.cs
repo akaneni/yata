@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -77,17 +78,17 @@ public sealed class MediaService
     public MediaService(Dispatcher dispatcher)
     {
         _dispatcher = dispatcher;
-        _onMediaProperties = (_, _) => _dispatcher.InvokeAsync(() => _ = ReadMediaPropertiesAsync());
-        _onPlaybackInfo = (_, _) => _dispatcher.InvokeAsync(() => { ReadPlaybackInfo(); Publish(); });
-        _onTimeline = (_, _) => _dispatcher.InvokeAsync(() => { ReadTimeline(); Publish(); });
-        _onAnyPlayback = (_, _) => _dispatcher.InvokeAsync(AttachBestSession);
+        _onMediaProperties = (_, _) => _dispatcher.Post("media", () => _ = ReadMediaPropertiesAsync());
+        _onPlaybackInfo = (_, _) => _dispatcher.Post("media", () => { ReadPlaybackInfo(); Publish(); });
+        _onTimeline = (_, _) => _dispatcher.Post("media", () => { ReadTimeline(); Publish(); });
+        _onAnyPlayback = (_, _) => _dispatcher.Post("media", AttachBestSession);
     }
 
     public async Task InitializeAsync()
     {
         _manager = await GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
-        _manager.CurrentSessionChanged += (_, _) => _dispatcher.InvokeAsync(AttachBestSession);
-        _manager.SessionsChanged += (_, _) => _dispatcher.InvokeAsync(() => { WatchSessions(); AttachBestSession(); });
+        _manager.CurrentSessionChanged += (_, _) => _dispatcher.Post("media", AttachBestSession);
+        _manager.SessionsChanged += (_, _) => _dispatcher.Post("media", () => { WatchSessions(); AttachBestSession(); });
         WatchSessions();
         AttachBestSession();
     }
@@ -271,7 +272,15 @@ public sealed class MediaService
         if (_session == null)
             return;
 
-        var info = _session.GetPlaybackInfo();
+        GlobalSystemMediaTransportControlsSessionPlaybackInfo info;
+        try
+        {
+            info = _session.GetPlaybackInfo();
+        }
+        catch (Exception ex) when (ex is COMException or InvalidOperationException)
+        {
+            return; // The player closed this session meanwhile; SessionsChanged brings the next one.
+        }
         bool isPlaying = info.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
         // Freeze the extrapolated position on pause; many players don't send a timeline update.
@@ -290,7 +299,15 @@ public sealed class MediaService
         if (_session == null)
             return;
 
-        var timeline = _session.GetTimelineProperties();
+        GlobalSystemMediaTransportControlsSessionTimelineProperties timeline;
+        try
+        {
+            timeline = _session.GetTimelineProperties();
+        }
+        catch (Exception ex) when (ex is COMException or InvalidOperationException)
+        {
+            return; // Same: a session that just closed.
+        }
         _position = timeline.Position - timeline.StartTime;
         _duration = timeline.EndTime - timeline.StartTime;
         _positionUpdatedAt = timeline.LastUpdatedTime;

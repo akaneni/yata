@@ -178,6 +178,7 @@ public partial class MainWindow : Window
         _brightness.Message += ShowHud;
         _power.Message += ShowHud;
         _network.Message += ShowHud;
+        _network.Connected += WakeNetworkServices;
         _keyboard.Message += ShowHud;
         _privacy = new PrivacyWatcher(Dispatcher);
         _privacy.Changed += OnPrivacyChanged;
@@ -191,6 +192,7 @@ public partial class MainWindow : Window
         _tasks = new TaskList(_store);
         _shelf = new Shelf(_store);
         ShelfPage.Attach(_shelf);
+        _ = _shelf.LoadAsync(); // Off the UI thread: a shelved path on a server that doesn't answer can take seconds.
         _focus.Message += ShowHud;
         _water.Message += ShowHud;
         _tasks.Message += ShowHud;
@@ -222,7 +224,8 @@ public partial class MainWindow : Window
         _idleRaven = new RavenAnimator(IdleRaven);
         // Hidden for a full-screen app means someone is watching it, not away. Hidden because the
         // session is locked is the opposite, so that time counts as away.
-        _presence.IsSurelyPresent = () => _fullscreenApp && !IsVisible;
+        // A full-screen video, or a call: someone listening without touching the mouse isn't away.
+        _presence.IsSurelyPresent = () => (_fullscreenApp && !IsVisible) || _privacy.Current.Microphone.Count > 0;
         _presence.StateChanged += UpdateCompanion;
         _presence.WentAway += OnWentAway;
         _presence.Returned += OnReturned;
@@ -234,6 +237,8 @@ public partial class MainWindow : Window
         Closed += OnClosed;
         SystemEvents.DisplaySettingsChanged += OnDisplaySettingsChanged;
         SystemEvents.SessionSwitch += OnSessionSwitch;
+        SystemEvents.TimeChanged += OnTimeChanged;
+        SystemEvents.PowerModeChanged += OnPowerModeChanged;
         WatchMotionPreferences();
         DpiChanged += OnDpiChanged;
 
@@ -352,6 +357,8 @@ public partial class MainWindow : Window
     {
         SystemEvents.DisplaySettingsChanged -= OnDisplaySettingsChanged;
         SystemEvents.SessionSwitch -= OnSessionSwitch;
+        SystemEvents.TimeChanged -= OnTimeChanged;
+        SystemEvents.PowerModeChanged -= OnPowerModeChanged;
         UnwatchMotionPreferences();
         _fullscreen?.Dispose();
         _clockTimer.Stop();
@@ -394,7 +401,7 @@ public partial class MainWindow : Window
         return IntPtr.Zero;
     }
 
-    private void OnDisplaySettingsChanged(object? sender, EventArgs e) => Dispatcher.InvokeAsync(PositionWindow);
+    private void OnDisplaySettingsChanged(object? sender, EventArgs e) => Dispatcher.Post("app", PositionWindow);
 
     /// <summary>
     /// Centers the window at the top of the chosen display. Positioned in physical pixels, since
@@ -424,6 +431,32 @@ public partial class MainWindow : Window
     {
         _fullscreenApp = fullscreen;
         UpdateShown();
+    }
+
+    /// <summary>
+    /// The clock or the time zone changed (a trip, with automatic time zone). .NET keeps the time
+    /// zone it read first, so without this the clock and the reminders stay in the old one until
+    /// Yata restarts. A task "15:30" keeps ringing at 15:30 on the wall; events come again from Google.
+    /// </summary>
+    private void OnTimeChanged(object? sender, EventArgs e) => Dispatcher.Post("app", () =>
+    {
+        TimeZoneInfo.ClearCachedData();
+        Log.Info("app", "Relógio ou fuso horário mudou");
+        UpdateClock();
+        _calendar.Wake();
+    });
+
+    private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
+    {
+        if (e.Mode == PowerModes.Resume)
+            Dispatcher.Post("app", WakeNetworkServices);
+    }
+
+    // Back from sleep, or the network is back: what comes from the network is looked at again soon.
+    private void WakeNetworkServices()
+    {
+        _calendar.Wake();
+        _googleTasks.Wake();
     }
 
     private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
