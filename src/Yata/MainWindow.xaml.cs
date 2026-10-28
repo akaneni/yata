@@ -484,6 +484,19 @@ public partial class MainWindow : Window
 
     private void OnSettingsClick(object sender, RoutedEventArgs e) => OpenSettings();
 
+    /// <summary>
+    /// First start: the settings open on a welcome card with what the notch does and the choices
+    /// that are the user's (water reminders, update check). Saved right away, so it shows once.
+    /// </summary>
+    public void WelcomeIfNew()
+    {
+        if (!_store.IsNew || Bench != null)
+            return;
+        _store.SaveNow();
+        OpenSettings();
+        _settingsWindow?.ShowWelcome();
+    }
+
     /// <summary>Everything the settings window can change, re-applied live.</summary>
     private void OnSettingsChanged()
     {

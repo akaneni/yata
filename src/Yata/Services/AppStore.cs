@@ -127,7 +127,9 @@ public sealed class WaterData
     public int GoalMl { get; set; } = 2000;
     public int CupMl { get; set; } = 250;
     public int ReminderMinutes { get; set; } = 60;
-    public bool RemindersEnabled { get; set; } = true;
+    /// <summary>Off unless asked for (the welcome offers it): an hourly nudge nobody wanted is noise.
+    /// Existing data.json files keep what they have.</summary>
+    public bool RemindersEnabled { get; set; }
     public DateTime? LastDrink { get; set; }
     /// <summary>Milliliters per day, keyed "yyyy-MM-dd".</summary>
     public Dictionary<string, int> Days { get; set; } = new();
@@ -165,6 +167,9 @@ public sealed class AppStore
     /// <summary>data.json was damaged and set aside; the app started over with defaults.</summary>
     public bool RecoveredFromDamage { get; private init; }
 
+    /// <summary>There was no data.json: Yata's first start on this PC (for this user).</summary>
+    public bool IsNew { get; private init; }
+
     /// <summary>Raised after the settings window changed something; listeners re-apply.</summary>
     public event Action? SettingsChanged;
 
@@ -188,7 +193,7 @@ public sealed class AppStore
         try
         {
             if (!File.Exists(path))
-                return new AppStore(path, new StoreData());
+                return new AppStore(path, new StoreData()) { IsNew = true };
             var data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(path), Options);
             return new AppStore(path, data ?? new StoreData());
         }

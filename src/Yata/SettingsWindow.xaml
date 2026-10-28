@@ -188,6 +188,44 @@
                   ScrollChanged="OnScrollChanged">
         <StackPanel x:Name="Sections" Margin="12,0,28,28">
 
+            <!-- First run only: what the notch does, and the choices that are the user's to make -->
+            <Border x:Name="WelcomeCard" Style="{StaticResource Card}" Margin="0,22,0,0" Padding="18,14,18,10"
+                    Visibility="Collapsed">
+                <StackPanel>
+                    <TextBlock Text="{x:Static y:Strings.Welcome_Title}" FontFamily="{StaticResource DisplayFont}"
+                               FontSize="18" Margin="0,0,0,8"/>
+                    <TextBlock Text="{x:Static y:Strings.Welcome_Tip1}" Style="{StaticResource Hint}" FontSize="13"/>
+                    <TextBlock Text="{x:Static y:Strings.Welcome_Tip2}" Style="{StaticResource Hint}" FontSize="13"/>
+                    <TextBlock Text="{x:Static y:Strings.Welcome_Tip3}" Style="{StaticResource Hint}" FontSize="13"/>
+                    <TextBlock Text="{x:Static y:Strings.Welcome_Tip4}" Style="{StaticResource Hint}" FontSize="13"
+                               Margin="0,2,16,6"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Welcome_Water}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Welcome_WaterHint}" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Water.RemindersEnabled}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_UpdateCheck}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Welcome_UpdatesHint}" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.UpdateCheckEnabled}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <TextBlock Text="{x:Static y:Strings.Welcome_Google}" Style="{StaticResource Hint}" FontSize="13"
+                                   VerticalAlignment="Center"/>
+                        <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Welcome_Done}"
+                                HorizontalAlignment="Right" Click="OnWelcomeDone"/>
+                    </views:SettingRow>
+                </StackPanel>
+            </Border>
+
             <!-- General -->
             <TextBlock Text="{x:Static y:Strings.Settings_General}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
@@ -223,16 +261,6 @@
                         </StackPanel>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.HotkeyEnabled}"/>
-                    </views:SettingRow>
-                    <Border Style="{StaticResource Divider}"/>
-                    <views:SettingRow Style="{StaticResource Row}">
-                        <StackPanel VerticalAlignment="Center" Margin="0,8">
-                            <TextBlock Text="{x:Static y:Strings.Settings_JumpHotkey}" Style="{StaticResource Label}"/>
-                            <TextBlock Text="{x:Static y:Strings.Settings_JumpHotkeyHint}"
-                                       Style="{StaticResource Hint}"/>
-                        </StackPanel>
-                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
-                                  IsChecked="{Binding Settings.JumpHotkeyEnabled}"/>
                     </views:SettingRow>
                     <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
@@ -606,76 +634,6 @@
                 </StackPanel>
             </Border>
 
-            <!-- Activities: other programs on this PC, through a local pipe -->
-            <TextBlock Text="{x:Static y:Strings.Settings_Activities}" Style="{StaticResource Section}"/>
-            <Border Style="{StaticResource Card}">
-                <views:SettingRow Style="{StaticResource Row}">
-                    <StackPanel VerticalAlignment="Center" Margin="0,8">
-                        <TextBlock Text="{x:Static y:Strings.Settings_ActivitiesEnabled}" Style="{StaticResource Label}"/>
-                        <TextBlock Style="{StaticResource Hint}"
-                                   Text="{x:Static y:Strings.Settings_ActivitiesHint}"/>
-                    </StackPanel>
-                    <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
-                              IsChecked="{Binding Settings.ActivitiesEnabled}"/>
-                </views:SettingRow>
-            </Border>
-
-            <!-- AI agents: their hooks, written into each agent's own settings (AgentSetup) -->
-            <TextBlock Text="{x:Static y:Strings.Settings_Agents}" Style="{StaticResource Section}"/>
-            <Border Style="{StaticResource Card}">
-                <StackPanel>
-                    <TextBlock Style="{StaticResource Hint}" Margin="0,14,0,6" TextWrapping="Wrap"
-                               Text="{x:Static y:Strings.Agents_Note}"/>
-                    <Border Style="{StaticResource Divider}"/>
-                    <views:SettingRow Style="{StaticResource Row}">
-                        <StackPanel VerticalAlignment="Center" Margin="0,8">
-                            <TextBlock Text="Claude Code" Style="{StaticResource Label}"/>
-                            <TextBlock x:Name="ClaudeAgentHint" Style="{StaticResource Hint}"/>
-                        </StackPanel>
-                        <CheckBox x:Name="ClaudeAgentSwitch" Tag="claude" Style="{StaticResource Switch}"
-                                  HorizontalAlignment="Right" Checked="OnAgentSwitch" Unchecked="OnAgentSwitch"/>
-                    </views:SettingRow>
-                    <Border Style="{StaticResource Divider}"/>
-                    <views:SettingRow Style="{StaticResource Row}">
-                        <StackPanel VerticalAlignment="Center" Margin="0,8">
-                            <TextBlock Text="Cursor" Style="{StaticResource Label}"/>
-                            <TextBlock x:Name="CursorAgentHint" Style="{StaticResource Hint}"/>
-                        </StackPanel>
-                        <CheckBox x:Name="CursorAgentSwitch" Tag="cursor" Style="{StaticResource Switch}"
-                                  HorizontalAlignment="Right" Checked="OnAgentSwitch" Unchecked="OnAgentSwitch"/>
-                    </views:SettingRow>
-                    <Border Style="{StaticResource Divider}"/>
-                    <views:SettingRow Style="{StaticResource Row}">
-                        <StackPanel VerticalAlignment="Center" Margin="0,8">
-                            <TextBlock Text="Codex" Style="{StaticResource Label}"/>
-                            <TextBlock x:Name="CodexAgentHint" Style="{StaticResource Hint}"/>
-                        </StackPanel>
-                        <CheckBox x:Name="CodexAgentSwitch" Tag="codex" Style="{StaticResource Switch}"
-                                  HorizontalAlignment="Right" Checked="OnAgentSwitch" Unchecked="OnAgentSwitch"/>
-                    </views:SettingRow>
-                    <Border Style="{StaticResource Divider}"/>
-                    <views:SettingRow Style="{StaticResource Row}">
-                        <StackPanel VerticalAlignment="Center" Margin="0,8">
-                            <TextBlock Text="{x:Static y:Strings.Agents_Wsl}" Style="{StaticResource Label}"/>
-                            <TextBlock x:Name="WslAgentHint" Style="{StaticResource Hint}"
-                                       AutomationProperties.LiveSetting="Polite"/>
-                        </StackPanel>
-                        <!-- Lists the distros with Claude Code; each one is turned on or off on its own -->
-                        <Button x:Name="WslChooseButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
-                                VerticalAlignment="Center" Content="{x:Static y:Strings.Agents_WslChoose}" Click="OnWslChoose"/>
-                    </views:SettingRow>
-                    <Border Style="{StaticResource Divider}"/>
-                    <views:SettingRow Style="{StaticResource Row}">
-                        <StackPanel VerticalAlignment="Center" Margin="0,8">
-                            <TextBlock Text="{x:Static y:Strings.Agents_Path}" Style="{StaticResource Label}"/>
-                            <TextBlock Text="{x:Static y:Strings.Agents_PathHint}" Style="{StaticResource Hint}"/>
-                        </StackPanel>
-                        <CheckBox x:Name="PathSwitch" Style="{StaticResource Switch}" HorizontalAlignment="Right"
-                                  Checked="OnPathSwitch" Unchecked="OnPathSwitch"/>
-                    </views:SettingRow>
-                </StackPanel>
-            </Border>
-
             <!-- Focus -->
             <TextBlock Text="{x:Static y:Strings.Settings_Focus}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
@@ -775,6 +733,89 @@
                                    VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
                                   IsChecked="{Binding Settings.AwaySummaryEnabled}"/>
+                    </views:SettingRow>
+                </StackPanel>
+            </Border>
+
+            <!-- For developers and scripts: last, out of the way of everyday settings -->
+            <!-- Activities: other programs on this PC, through a local pipe -->
+            <TextBlock Text="{x:Static y:Strings.Settings_Activities}" Style="{StaticResource Section}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_ActivitiesEnabled}" Style="{StaticResource Label}"/>
+                            <TextBlock Style="{StaticResource Hint}"
+                                       Text="{x:Static y:Strings.Settings_ActivitiesHint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.ActivitiesEnabled}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_JumpHotkey}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_JumpHotkeyHint}"
+                                       Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.JumpHotkeyEnabled}"/>
+                    </views:SettingRow>
+                </StackPanel>
+            </Border>
+
+            <!-- AI agents: their hooks, written into each agent's own settings (AgentSetup) -->
+            <TextBlock Text="{x:Static y:Strings.Settings_Agents}" Style="{StaticResource Section}"/>
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Hint}" Margin="0,14,0,6" TextWrapping="Wrap"
+                               Text="{x:Static y:Strings.Agents_Note}"/>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="Claude Code" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="ClaudeAgentHint" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="ClaudeAgentSwitch" Tag="claude" Style="{StaticResource Switch}"
+                                  HorizontalAlignment="Right" Checked="OnAgentSwitch" Unchecked="OnAgentSwitch"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="Cursor" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="CursorAgentHint" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="CursorAgentSwitch" Tag="cursor" Style="{StaticResource Switch}"
+                                  HorizontalAlignment="Right" Checked="OnAgentSwitch" Unchecked="OnAgentSwitch"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="Codex" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="CodexAgentHint" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="CodexAgentSwitch" Tag="codex" Style="{StaticResource Switch}"
+                                  HorizontalAlignment="Right" Checked="OnAgentSwitch" Unchecked="OnAgentSwitch"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Agents_Wsl}" Style="{StaticResource Label}"/>
+                            <TextBlock x:Name="WslAgentHint" Style="{StaticResource Hint}"
+                                       AutomationProperties.LiveSetting="Polite"/>
+                        </StackPanel>
+                        <!-- Lists the distros with Claude Code; each one is turned on or off on its own -->
+                        <Button x:Name="WslChooseButton" Style="{StaticResource PillButton}" HorizontalAlignment="Right"
+                                VerticalAlignment="Center" Content="{x:Static y:Strings.Agents_WslChoose}" Click="OnWslChoose"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Agents_Path}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Agents_PathHint}" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox x:Name="PathSwitch" Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  Checked="OnPathSwitch" Unchecked="OnPathSwitch"/>
                     </views:SettingRow>
                 </StackPanel>
             </Border>

@@ -7,6 +7,8 @@ public class WaterTrackerTests
 {
     private DateTime _now = new(2026, 10, 26, 10, 0, 0);
     private readonly AppStore _store = AppStore.InMemory();
+
+    public WaterTrackerTests() => _store.Data.Water.RemindersEnabled = true;
     private readonly List<HudMessage> _messages = new();
 
     private WaterTracker NewTracker()

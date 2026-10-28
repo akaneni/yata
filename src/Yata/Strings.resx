@@ -5,6 +5,17 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Welcome_Title" xml:space="preserve"><value>Welcome to Yata</value></data>
+  <data name="Welcome_Tip1" xml:space="preserve"><value>• Hover over the notch at the top of the screen to open it.</value></data>
+  <data name="Welcome_Tip2" xml:space="preserve"><value>• Ctrl+Alt+Y opens and closes it from anywhere.</value></data>
+  <data name="Welcome_Tip3" xml:space="preserve"><value>• Drag files onto the notch to keep them on the shelf.</value></data>
+  <data name="Welcome_Tip4" xml:space="preserve"><value>• In Tasks, a time at the end becomes a reminder: “Call Ana at 3pm”.</value></data>
+  <data name="Welcome_Water" xml:space="preserve"><value>Remind me to drink water</value></data>
+  <data name="Welcome_WaterHint" xml:space="preserve"><value>Every hour from 8 am to 10 pm, until you reach the day’s goal.</value></data>
+  <data name="Welcome_UpdatesHint" xml:space="preserve"><value>One look a day at GitHub’s releases page.</value></data>
+  <data name="Welcome_Google" xml:space="preserve"><value>Google Calendar and Tasks are further down, under Google.</value></data>
+  <data name="Welcome_Done" xml:space="preserve"><value>Done</value></data>
+  <data name="Tray_Open" xml:space="preserve"><value>Open Yata</value></data>
   <data name="Tray_Settings" xml:space="preserve"><value>Settings…</value></data>
   <data name="Tray_Demo" xml:space="preserve"><value>Yata demo</value></data>
   <data name="Tray_Quit" xml:space="preserve"><value>Quit</value></data>

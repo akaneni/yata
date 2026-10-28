@@ -31,6 +31,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 ## Funcionalidades (v0.1)
 
+- **Boas-vindas**: na primeira vez, as Configurações abrem com o que dá para fazer no notch e as escolhas que são suas (lembrete de água, aviso de versão nova). O menu da bandeja tem **Abrir o Yata**.
 - **Português e inglês**: segue o idioma do Windows (português em qualquer Windows em português, inglês nos demais), ou escolha em Configurações → Idioma.
 - **Notch compacto**: relógio quando nada toca; capa, título e equalizador animado quando há mídia.
 - **Expande ao passar o mouse** com animação de mola; recolhe ao sair.
@@ -44,7 +45,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Agenda (Google)**: conecte com sua conta Google (OAuth, só leitura) e escolha quais agendas aparecem. A aba mostra hoje e amanhã, destaca o evento em andamento e tem o botão **Entrar** para chamadas do Meet, Zoom e Teams. O notch fechado mostra "Daily em 8 min" nos 15 minutos antes, e chega um aviso (com som) alguns minutos antes, configurável, e outro quando o evento começa. Convites recusados não aparecem. Para cadastrar o app no Google, veja [docs/google-calendar.md](docs/google-calendar.md).
 - **Tempo** (desligado por padrão): você escolhe a cidade pelo nome ou, se preferir, com uma leitura única da localização do Windows (arredondada para ~1 km na hora, nunca guardada com precisão). Nada de geolocalização por IP. Ícones em pixel art 1-bit no estilo do Yata. O notch fechado mostra ícone e temperatura ao lado do relógio; aberto sem música, mostra condição, máxima/mínima e a chuva prevista. Chega um aviso quando a chance de chuva passa de 60% nas próximas 2 horas. Dados do tempo: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
 - **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
-- **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
+- **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete opcional de hora em hora (8h–22h) enquanto a meta não é batida (desligado até você ligar, nas boas-vindas ou nas Configurações).
 - **Tarefas**: lista com marcar/remover (remover pode ser desfeito por alguns segundos); um horário no fim do texto ("Reunião 15:30", "ligar às 9h", "Call Ana at 3pm") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
 - **Prateleira de arquivos**: arraste arquivos ou pastas até o notch para guardar e arraste de volta para qualquer app; clique duplo abre. Guarda só o caminho (nada é copiado) e itens apagados/movidos somem sozinhos. Imagens ganham miniatura. "Limpar" também pode ser desfeito por alguns segundos.
 - **O Yata (companheiro)**, a partir do tempo desde o último uso de mouse/teclado (`GetLastInputInfo` — só o horário, nunca o conteúdo):
