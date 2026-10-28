@@ -9,10 +9,11 @@ Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese
 - Now playing from any app that uses Windows media controls (Spotify, YouTube in the browser and others): cover, progress, controls and synced lyrics from LRCLIB.
 - Next meeting from Google Calendar (read-only), shown in the closed notch, with a Join button for Meet, Zoom or Teams.
 - Pomodoro timer (25 minutes of focus, 5 of rest, a long break every four) that pauses when you walk away.
-- Daily water goal with nudges, and a task list where "Call Ana 15:30" becomes a reminder, with optional two-way sync to Google Tasks.
+- Daily water goal with optional nudges, and a task list where "Call Ana 15:30" becomes a reminder, with optional two-way sync to Google Tasks.
 - A shelf: drop files on the notch and drag them out later. Only the path is kept.
 - System indicators: volume, brightness, battery, audio output, Caps Lock, keyboard layout, network, and a dot when an app is using the microphone.
 - Activities: scripts, builds and AI agents on the PC can show their progress in a bubble beside the notch with `yata-cli activity set|attention|done|fail|end` (a console tool installed next to Yata, optionally on PATH). Exit codes: 0 shown, 1 bad arguments, 2 Yata isn't running, 3 refused.
+- Stays out of calls: screen sharing, recordings, OBS and screenshots do not capture the notch (on by default). Reminders held back by a full-screen app chime when they show, and come without the chime while the microphone is in use or Windows asks not to be disturbed.
 - Ctrl+Alt+Y toggles the notch from anywhere. Works with multiple monitors and per-monitor scaling.
 
 ## Privacy
@@ -26,7 +27,7 @@ Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese
 ## Install
 
 - Free. Windows 10 (version 2004 or later) and Windows 11, x64. About 3 MB.
-- Installs per user without admin rights. If the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft, and that step asks for admin.
+- Installs per user without admin rights. If the .NET 10 Desktop Runtime is missing, the installer downloads it from Microsoft and checks Microsoft's signature before running it; that step asks for admin.
 - The installer is not code-signed yet, so SmartScreen may warn on first run (More info, then Run anyway). Each release is built by GitHub Actions from the public code and ships SHA256SUMS.txt; from v0.2.1 on it also carries a GitHub build provenance attestation.
 
 ## Links
