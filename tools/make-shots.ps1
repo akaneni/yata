@@ -22,10 +22,13 @@ if (-not $OutDir) { $OutDir = Join-Path $root "docs\screenshots" }
 if (-not $SiteDir) { $SiteDir = Join-Path $root "site\img\shots" }
 
 # What the site shows (site/index.html), and how wide: the big shot at twice its 554 px, the ones in
-# the feature cards at twice ~320 px.
+# the feature cards at twice ~320 px, and the closed notch in the hero at its full size (2x), since
+# it's shown there as big as Yata draws it.
 $siteShots = [ordered]@{
-    "aberto-musica" = 1108; "fechado-musica" = 640; "aberto-agenda" = 640; "aberto-foco" = 640
-    "aberto-tarefas" = 640; "aberto-prateleira" = 640; "fechado-volume" = 640; "fechado-atividade" = 640
+    "aberto-musica" = 1108; "aberto-agenda" = 640; "aberto-foco" = 640; "aberto-tarefas" = 640
+    "aberto-prateleira" = 640; "fechado-volume" = 640
+    "fechado-relogio" = 1000; "fechado-reuniao" = 1000; "fechado-musica" = 1000; "fechado-agente-aviso" = 1000
+    "fechado-fora" = 1000
 }
 
 function Save-Smaller([string]$from, [string]$to, [int]$width) {
@@ -114,7 +117,9 @@ function Write-Profile([string]$dir, [string]$language, $c) {
     $taskIds = @($c.Tasks | ForEach-Object { [guid]::NewGuid().ToString() })
     $tasks = for ($i = 0; $i -lt $c.Tasks.Count; $i++) {
         $task = [ordered]@{ Id = $taskIds[$i]; Text = $c.Tasks[$i]; Done = $false }
-        if ($i -eq 2) { $task.Due = $today.AddHours(15.5).ToString("s") } # "Call Ana" at 15:30
+        # "Call Ana" at 15:30, already announced: shots taken later in the day would otherwise all show
+        # it as overdue, the notice taking the place of what each one is about.
+        if ($i -eq 2) { $task.Due = $today.AddHours(15.5).ToString("s"); $task.Reminded = $true }
         $task
     }
     $tasks = @($tasks) + @([ordered]@{ Id = [guid]::NewGuid().ToString(); Text = $c.Done; Done = $true })
