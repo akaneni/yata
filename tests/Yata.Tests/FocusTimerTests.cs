@@ -293,4 +293,67 @@ public class FocusTimerTests
         timer.Start();
         Advance(timer, timer.Remaining);
     }
+
+    // ---- The PC slept ------------------------------------------------------------------
+
+    private void Tick(FocusTimer timer, TimeSpan by)
+    {
+        _now += by;
+        timer.Tick();
+    }
+
+    [Fact]
+    public void Ticks_a_second_apart_are_not_sleep()
+    {
+        var timer = NewTimer();
+        timer.Start();
+        for (int i = 0; i < 90; i++)
+            Tick(timer, TimeSpan.FromSeconds(1));
+
+        Assert.Equal(FocusState.Running, timer.State);
+        Assert.Equal(Min(23.5), timer.Remaining);
+    }
+
+    [Fact]
+    public void Sleeping_during_focus_pauses_where_it_was_and_waits()
+    {
+        var timer = NewTimer();
+        timer.Start();
+        for (int i = 0; i < 60; i++)
+            Tick(timer, TimeSpan.FromSeconds(1));
+        Tick(timer, TimeSpan.FromHours(1)); // Lid closed on the way to a meeting.
+
+        Assert.Equal(FocusPhase.Focus, timer.Phase);
+        Assert.Equal(FocusState.Paused, timer.State);
+        Assert.Equal(Min(24), timer.Remaining);
+        Assert.Equal(0, Chimes);
+        Assert.Equal("Foco pausado enquanto o PC dormia", _messages[^1].Text);
+        Assert.Equal("faltam 24 min", _messages[^1].Value);
+    }
+
+    [Fact]
+    public void A_break_the_sleep_outlasted_counts_as_taken()
+    {
+        var timer = NewTimer();
+        CompleteFocus(timer);
+        int chimes = Chimes;
+        Tick(timer, TimeSpan.FromSeconds(1));
+        Tick(timer, Min(30));
+
+        Assert.Equal(FocusPhase.Focus, timer.Phase);
+        Assert.Equal(FocusState.Ready, timer.State);
+        Assert.Equal(chimes, Chimes);
+    }
+
+    [Fact]
+    public void A_short_sleep_inside_a_break_keeps_the_break_going()
+    {
+        var timer = NewTimer();
+        CompleteFocus(timer);
+        Tick(timer, TimeSpan.FromSeconds(1));
+        Tick(timer, Min(2));
+
+        Assert.True(timer.IsBreak);
+        Assert.Equal(FocusState.Running, timer.State);
+    }
 }

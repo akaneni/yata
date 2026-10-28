@@ -91,7 +91,7 @@ internal sealed class PrivacyWatcher : IDisposable
                 return;
 
             var camera = ReadCamera();
-            _dispatcher.InvokeAsync(() =>
+            _dispatcher.Post("privacy", () =>
             {
                 _camera = camera;
                 Apply(Compose());

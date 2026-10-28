@@ -19,7 +19,7 @@ public partial class ShelfPage : UserControl
         IsVisibleChanged += (_, _) =>
         {
             if (IsVisible)
-                _shelf?.Prune();
+                _ = _shelf?.Prune();
         };
     }
 
@@ -47,7 +47,8 @@ public partial class ShelfPage : UserControl
 
     private void OnTileMouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (sender is not FrameworkElement { DataContext: ShelfItem item })
+        // Nothing to open or drag while its drive or server doesn't answer; the X still removes it.
+        if (sender is not FrameworkElement { DataContext: ShelfItem { IsAvailable: true } item })
             return;
 
         if (e.ClickCount == 2)
@@ -85,7 +86,7 @@ public partial class ShelfPage : UserControl
         }
 
         // A move by the target leaves the path dangling.
-        _shelf?.Prune();
+        _ = _shelf?.Prune();
     }
 
     private void OnRemove(object sender, RoutedEventArgs e)

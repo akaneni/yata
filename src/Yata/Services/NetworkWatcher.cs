@@ -15,6 +15,8 @@ internal sealed class NetworkWatcher : IDisposable
     private string? _name;
 
     public event Action<HudMessage>? Message;
+    /// <summary>Internet access is back (after it settled), for what fetches from the network.</summary>
+    public event Action? Connected;
 
     public NetworkWatcher(Dispatcher dispatcher)
     {
@@ -34,7 +36,7 @@ internal sealed class NetworkWatcher : IDisposable
         _settle.Stop();
     }
 
-    private void OnNetworkStatusChanged(object sender) => _dispatcher.InvokeAsync(() =>
+    private void OnNetworkStatusChanged(object sender) => _dispatcher.Post("network", () =>
     {
         _settle.Stop();
         _settle.Start();
@@ -46,8 +48,11 @@ internal sealed class NetworkWatcher : IDisposable
         if (connected == _connected && name == _name)
             return;
 
+        bool cameBack = connected && !_connected;
         _connected = connected;
         _name = name;
+        if (cameBack)
+            Connected?.Invoke();
         Message?.Invoke(connected
             ? new HudMessage(isWifi ? Glyphs.Wifi : Glyphs.Ethernet, string.IsNullOrEmpty(name) ? Strings.Hud_Connected : name, Kind: HudKind.Network)
             : new HudMessage(Glyphs.Offline, Strings.Hud_NoInternet, Warning: true, Kind: HudKind.Network));

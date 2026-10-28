@@ -172,4 +172,15 @@ public class TaskListTests
         Assert.Null(task.GoogleId);
         Assert.Empty(list.PendingDeletes);
     }
+
+    [Theory]
+    [InlineData(0, "09:00")]
+    [InlineData(4, "09:00")]
+    [InlineData(40, "09:00 · atrasado 40 min")]
+    [InlineData(150, "09:00 · atrasado 2 h")]
+    public void A_reminder_that_comes_late_says_so(int minutesLate, string value)
+    {
+        var due = new DateTime(2026, 10, 28, 9, 0, 0);
+        Assert.Equal(value, TaskList.ReminderValue(due, due.AddMinutes(minutesLate)));
+    }
 }

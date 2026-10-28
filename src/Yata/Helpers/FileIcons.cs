@@ -13,6 +13,9 @@ internal static class FileIcons
 {
     private const uint SHGFI_ICON = 0x100;
     private const uint SHGFI_LARGEICON = 0x0;
+    private const uint SHGFI_USEFILEATTRIBUTES = 0x10;
+    private const uint FILE_ATTRIBUTE_DIRECTORY = 0x10;
+    private const uint FILE_ATTRIBUTE_NORMAL = 0x80;
 
     private static readonly string[] PictureExtensions = { ".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp", ".tif", ".tiff" };
 
@@ -47,6 +50,16 @@ internal static class FileIcons
         return (LoadShellIcon(path), false);
     }
 
+    /// <summary>
+    /// The icon for the file's type, from its name alone: the file isn't touched, so a path on a
+    /// server that doesn't answer can't hang the notch.
+    /// </summary>
+    public static ImageSource? ForType(string path)
+    {
+        uint attributes = Path.HasExtension(path) ? FILE_ATTRIBUTE_NORMAL : FILE_ATTRIBUTE_DIRECTORY;
+        return LoadShellIcon(path, attributes, SHGFI_USEFILEATTRIBUTES);
+    }
+
     private static ImageSource? LoadThumbnail(string path)
     {
         try
@@ -67,10 +80,10 @@ internal static class FileIcons
         }
     }
 
-    private static ImageSource? LoadShellIcon(string path)
+    private static ImageSource? LoadShellIcon(string path, uint attributes = 0, uint flags = 0)
     {
         var info = new SHFILEINFO();
-        if (SHGetFileInfo(path, 0, ref info, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | SHGFI_LARGEICON) == IntPtr.Zero ||
+        if (SHGetFileInfo(path, attributes, ref info, (uint)Marshal.SizeOf<SHFILEINFO>(), SHGFI_ICON | SHGFI_LARGEICON | flags) == IntPtr.Zero ||
             info.hIcon == IntPtr.Zero)
             return null;
 

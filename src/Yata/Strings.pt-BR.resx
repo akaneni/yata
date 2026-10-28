@@ -266,14 +266,18 @@
   <data name="Focus_Resume" xml:space="preserve"><value>Continuar</value></data>
   <data name="Focus_SkipBreak" xml:space="preserve"><value>Pular pausa</value></data>
   <data name="Focus_Stop" xml:space="preserve"><value>Parar</value></data>
+  <data name="Focus_PausedAsleep" xml:space="preserve"><value>Foco pausado enquanto o PC dormia</value></data>
+  <data name="Focus_MinutesLeft" xml:space="preserve"><value>faltam {0} min</value></data>
   <data name="Focus_BreakTime" xml:space="preserve"><value>Hora da pausa</value></data>
   <data name="Focus_BackToFocus" xml:space="preserve"><value>De volta ao foco</value></data>
   <data name="Shelf_DropHere" xml:space="preserve"><value>Arraste arquivos para cá</value></data>
+  <data name="Shelf_Unavailable" xml:space="preserve"><value>Indisponível agora: a unidade ou o servidor não responde.</value></data>
   <data name="Shelf_Remove" xml:space="preserve"><value>Tirar da prateleira</value></data>
   <data name="Shelf_DropToKeep" xml:space="preserve"><value>Solte para guardar</value></data>
   <data name="Shelf_Clear" xml:space="preserve"><value>Limpar</value></data>
   <data name="Shelf_CountOne" xml:space="preserve"><value>1 item · arraste para usar</value></data>
   <data name="Shelf_Count" xml:space="preserve"><value>{0} itens · arraste para usar</value></data>
+  <data name="Tasks_Late" xml:space="preserve"><value>{0} · atrasado {1}</value></data>
   <data name="Tasks_Empty" xml:space="preserve"><value>Nenhuma tarefa por aqui</value></data>
   <data name="Tasks_Remove" xml:space="preserve"><value>Remover</value></data>
   <data name="Tasks_NewPlaceholder" xml:space="preserve"><value>Nova tarefa (ex.: Reunião 15:30)</value></data>

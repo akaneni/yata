@@ -72,7 +72,18 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
         if (_enumerator == null)
             return;
 
-        _enumerator.EnumAudioEndpoints(EDataFlow.Capture, DEVICE_STATE_ACTIVE, out var collectionPtr);
+        IntPtr collectionPtr;
+        try
+        {
+            _enumerator.EnumAudioEndpoints(EDataFlow.Capture, DEVICE_STATE_ACTIVE, out collectionPtr);
+        }
+        catch (COMException ex)
+        {
+            // A device coming or going mid-listing: try again at the next change.
+            Log.Warn("microphone", "Falha ao listar os microfones; nova tentativa na próxima mudança", ex);
+            _rebind = true;
+            return;
+        }
         var devices = (IMMDeviceCollection)Marshal.GetObjectForIUnknown(collectionPtr);
         Marshal.Release(collectionPtr);
         try
@@ -208,7 +219,7 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
         }
     }
 
-    private void ScheduleRefresh() => _dispatcher.InvokeAsync(() =>
+    private void ScheduleRefresh() => _dispatcher.Post("microphone", () =>
     {
         _settle.Stop();
         _settle.Start();

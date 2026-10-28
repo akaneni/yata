@@ -157,6 +157,9 @@ public sealed class GoogleTasks
             SyncSoon();
     }
 
+    /// <summary>The PC woke up or the network came back: sync at the next tick.</summary>
+    public void Wake() => _nextSync = DateTime.MinValue;
+
     private void Tick()
     {
         if (IsOn && !_syncing && DateTime.Now >= _nextSync)

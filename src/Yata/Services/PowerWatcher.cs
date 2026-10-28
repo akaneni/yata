@@ -2,6 +2,7 @@ using System;
 using System.Windows.Forms;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -47,7 +48,7 @@ internal sealed class PowerWatcher : IDisposable
     private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
         if (e.Mode == PowerModes.StatusChange)
-            _dispatcher.InvokeAsync(Check);
+            _dispatcher.Post("power", Check);
     }
 
     private void Check()

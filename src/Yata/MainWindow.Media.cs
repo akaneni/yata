@@ -221,7 +221,7 @@ public partial class MainWindow
         }
     }
 
-    private void OnEnergySaverChanged(object? sender, object e) => Dispatcher.InvokeAsync(RefreshMotion);
+    private void OnEnergySaverChanged(object? sender, object e) => Dispatcher.Post("app", RefreshMotion);
 
     private void RefreshMotion()
     {

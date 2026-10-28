@@ -56,7 +56,7 @@ internal sealed class BrightnessWatcher : IDisposable
         if (e.NewEvent["Brightness"] is not byte level)
             return;
 
-        _dispatcher.InvokeAsync(() =>
+        _dispatcher.Post("brightness", () =>
             Message?.Invoke(new HudMessage(Glyphs.Brightness, Strings.Hud_Brightness, $"{level}", level / 100.0, Kind: HudKind.Brightness)));
     }
 }
