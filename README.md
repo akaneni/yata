@@ -170,6 +170,8 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
+What changes in each version goes in [CHANGELOG.md](CHANGELOG.md) and [CHANGELOG.pt-BR.md](CHANGELOG.pt-BR.md), written in the version's PR (along with the new number in `Yata.csproj`). The site shows both at [getyata.app/changelog](https://getyata.app/changelog), and the site build fails if the `Yata.csproj` version has no entry in both.
+
 ## Translations
 
 Interface text lives in `src/Yata/Strings.resx` (English, the default) and `src/Yata/Strings.pt-BR.resx` (Portuguese). Use it as `Strings.Key` in C# and `{x:Static y:Strings.Key}` in XAML. A test fails when a language misses a key, has one left over or uses different `{0}` placeholders. `Helpers/Lang.cs` picks the language at startup. Log messages stay in Portuguese, since they're for whoever is debugging.

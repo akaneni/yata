@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - "site/**"
+      - "CHANGELOG.md"
+      - "CHANGELOG.pt-BR.md"
       - "docs/brand/**"
       - "tools/make-site.ps1"
       - "src/Yata/Assets/yata.ico"
