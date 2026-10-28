@@ -124,6 +124,19 @@ public partial class MainWindow
         await Shot(dir, "fechado-agente-aviso");
         await Task.Delay(6000);
         await Shot(dir, "fechado-agente");
+
+        // Back after a while: Yata brings the letter with what came up meanwhile, the agent among it.
+        HandleActivity(JsonSerializer.Serialize(new { op = "end", id = "vitrine-agent" }));
+        var now = DateTime.Now;
+        ShowNews(new AwayReport(TimeSpan.FromMinutes(42), new List<AwayItem>
+        {
+            new(Glyphs.Bell, Strings.Demo_Meeting, now.AddMinutes(-35)),
+            new(ActivityIcons.ClaudeMark, $"Windows Terminal · yata · {Strings.Activity_Done}", now.AddMinutes(-21)),
+            new(Glyphs.Water, $"{Strings.Water_Reminder} · 750/2000 ml", now.AddMinutes(-8)),
+        }));
+        await Task.Delay(2000); // The flight in, then the text.
+        await Shot(dir, "fechado-fora");
+        HideNews();
     }
 
     /// <summary>The day's events around now; all but the one about to start on the quarter hour, as real ones are.</summary>

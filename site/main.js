@@ -1,4 +1,4 @@
-// The live notch and the raven on getyata.app. Sprites are copied from
+// The notch (in Yata's screenshots) and the raven on getyata.app. Sprites are copied from
 // src/Yata/Views/RavenSprite.cs and tools/make-art.ps1.
 const F = {
   perch: ["................",".........####...","........######..","........##.####.","........########",".......#####....","......######....",".....#######....","....########....","...########.....","..#######.......",".####.#.#.......","##....#.#.......",".....##.##......"],
@@ -42,63 +42,48 @@ function play(canvas, steps, color, letter) {
   return () => clearTimeout(t);
 }
 
-const DEMO = {
-  en: { clock: "Clock", music: "Music", meeting: "Meeting", water: "Water", away: "Away", meet: "Standup in 8 min", goal: "Water goal reached", lyric: "and the city hums along" },
-  pt: { clock: "Hora", music: "Música", meeting: "Reunião", water: "Água", away: "Ausente", meet: "Daily em 8 min", goal: "Meta de água batida", lyric: "e a cidade cantarola junto" },
+// ---- The closed notch, in Yata's own screenshots (tools/make-shots.ps1) -------------------
+// Drawn at twice their size: each is shown at half its pixels, as big as Yata draws it.
+const STATES = {
+  en: [
+    ["Clock", "fechado-relogio", "Yata closed at the top of the screen, showing the time"],
+    ["Music", "fechado-musica", "Yata closed while a song plays: the cover, the line being sung and the equalizer, with the next meeting in a pill beside it"],
+    ["Meeting", "fechado-reuniao", "Yata closed with the next meeting: Team standup in 8 min"],
+    ["Agent", "fechado-agente-aviso", "Claude Code done: its logo with a check in the notch, and in a pill beside it"],
+    ["Away", "fechado-fora", "While you were away, 42 min: a team meeting, Claude Code done in the project, time to drink water"],
+  ],
+  pt: [
+    ["Hora", "fechado-relogio", "O Yata fechado no topo da tela, mostrando a hora"],
+    ["Música", "fechado-musica", "O Yata fechado com uma música tocando: a capa, a linha sendo cantada e o equalizador, com a próxima reunião numa pílula ao lado"],
+    ["Reunião", "fechado-reuniao", "O Yata fechado com a próxima reunião: Daily do time em 8 min"],
+    ["Agente", "fechado-agente-aviso", "Claude Code concluído: o logo com um ✓ no notch e numa pílula ao lado"],
+    ["Fora", "fechado-fora", "Enquanto você esteve fora, 42 min: reunião com o time, Claude Code concluído no projeto, hora de beber água"],
+  ],
 }[lang];
+const shot = document.getElementById("hero-shot"), statesEl = document.getElementById("states");
+const images = STATES.map(([, name]) => { const i = new Image(); i.src = `/img/shots/${lang}/${name}.png`; return i; });
+let current = 0, cycle;
 
-// ---- The live notch ----------------------------------------------------------------------
-const notch = document.getElementById("notch"), lyric = document.getElementById("lyric"), statesEl = document.getElementById("states");
-const ORDER = ["clock", "music", "meeting", "water", "away"];
-let current = "clock", stopSprite = () => {}, cycle;
-const white = () => "#f2f2ef";
-
-function build(state) {
-  const row = document.createElement("div"); row.className = "row";
-  const add = html => row.insertAdjacentHTML("beforeend", html);
-  let sprite;
-  stopSprite(); stopSprite = () => {};
-  lyric.style.opacity = 0;
-  if (state === "clock") add(`<span class="time">14:32</span><span class="muted mono">☁ 21°</span>`);
-  if (state === "music") {
-    add(`<span class="cover"></span><span>Paper Lanterns</span><span class="muted">Hana Ito</span><span class="eq"><i></i><i></i><i></i><i></i></span>`);
-    lyric.textContent = "♪ " + DEMO.lyric; lyric.style.opacity = 1;
-  }
-  if (state === "meeting") {
-    sprite = spriteCanvas(1.5); row.append(sprite); add(`<span>${DEMO.meet}</span>`);
-    stopSprite = play(sprite, [["caw", 260], ["perch", 260], ["caw", 260], ["perch", 1800]], white);
-  }
-  if (state === "water") {
-    sprite = spriteCanvas(1.5); row.append(sprite); add(`<span>${DEMO.goal}</span><span class="muted mono">2.0 L</span>`);
-    stopSprite = play(sprite, [["fluff", 120], ["splash", 120], ["fluff", 120], ["splash", 120], ["perch", 1600]], white);
-  }
-  if (state === "away") {
-    sprite = spriteCanvas(1.5); row.append(sprite); add(`<span class="time muted">14:51</span>`);
-    stopSprite = play(sprite, [["perch", 1400], ["blink", 140], ["perch", 900], ["lookUp", 700], ["perch", 900], ["sleep", 900], ["sleepIn", 900], ["sleep", 900], ["sleepIn", 900]], white);
-  }
-  return row;
+function show(index) {
+  current = index;
+  const [, , alt] = STATES[index], next = images[index];
+  const swap = () => {
+    shot.src = next.src; shot.alt = alt;
+    shot.width = next.naturalWidth / 2; shot.height = next.naturalHeight / 2;
+    shot.style.opacity = 1;
+  };
+  shot.style.opacity = 0;
+  setTimeout(() => next.complete ? swap() : next.addEventListener("load", swap, { once: true }), reduced ? 0 : 200);
+  statesEl.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", i === index));
 }
 
-function show(state) {
-  current = state;
-  const row = build(state);
-  // Measure the new content, then let the width spring to it.
-  const probe = notch.cloneNode(false); probe.style.cssText = "position:absolute;visibility:hidden;width:auto;transition:none";
-  probe.append(row.cloneNode(true)); notch.parentNode.append(probe);
-  const w = probe.getBoundingClientRect().width; probe.remove();
-  if (!notch.style.width) notch.style.width = w + "px";
-  notch.replaceChildren(row);
-  requestAnimationFrame(() => notch.style.width = w + "px");
-  statesEl.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.state === state));
-}
-
-statesEl.replaceChildren(...ORDER.map(s => {
-  const b = document.createElement("button"); b.type = "button"; b.id = "state-" + s; b.dataset.state = s; b.textContent = DEMO[s];
-  b.addEventListener("click", () => { clearInterval(cycle); show(s); });
+statesEl.replaceChildren(...STATES.map(([label], i) => {
+  const b = document.createElement("button"); b.type = "button"; b.textContent = label;
+  b.addEventListener("click", () => { clearInterval(cycle); show(i); });
   return b;
 }));
-show("clock");
-if (!reduced) cycle = setInterval(() => show(ORDER[(ORDER.indexOf(current) + 1) % ORDER.length]), 4200);
+statesEl.querySelector("button").setAttribute("aria-pressed", true);
+if (!reduced) cycle = setInterval(() => show((current + 1) % STATES.length), 4200);
 
 // ---- Raven and dithered sun ---------------------------------------------------------------
 function drawSun() {

@@ -1,6 +1,6 @@
 /* getyata.app. The page hangs from a screen edge, like the notch: one left-weighted column of
-   reading text, with the demos (the live notch, the raven) at full width. 1-bit throughout;
-   the only colour on the site is the album cover inside the demo. */
+   reading text, with the demos (the notch, the raven) at full width. 1-bit throughout; the only
+   colour on the site is in Yata's own screenshots. */
 /* Fonts are self-hosted: Latin subsets (DotGothic16 also keeps 八咫烏) cut from google/fonts with
    fontTools (subset, varLib.instancer for the weights below). SIL OFL 1.1, see fonts/OFL-*.txt. */
 @font-face { font-family: "DotGothic16"; src: url("/fonts/dotgothic16.woff2") format("woff2"); font-weight: 400; font-display: swap }
@@ -13,9 +13,6 @@
   --line: #262624;
   --panel: #141413;
   --dot: #2b2b29;         /* dithered wallpaper */
-  --notch: #000;
-  --notch-fg: #f2f2ef;
-  --cover: #d0703c;       /* only accent: the album art in the demo */
   --font-display: "DotGothic16", "MS Gothic", ui-monospace, monospace;
   --font-body: "Geist", "Segoe UI", system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
@@ -71,23 +68,12 @@ nav a:hover { color: var(--fg) }
 .trust { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; color: var(--dim) }
 .trust span::before { content: "■ "; font-size: .6em; vertical-align: .2em }
 
-/* The screen with the live notch */
+/* The screen with the notch: Yata's own screenshots, hanging from its top edge */
 .screen { position: relative; height: 15rem; max-width: 100%; border: 1px solid var(--line); border-top: 0; overflow: hidden;
+  display: flex; justify-content: center; align-items: flex-start;
   background-color: var(--panel); background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 6px 6px }
 .screen::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--fg); opacity: .35 }
-.notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); height: 38px; min-width: 120px; max-width: calc(100% - 24px);
-  background: var(--notch); color: var(--notch-fg); border-radius: 0 0 18px 18px; display: flex; align-items: center; justify-content: center;
-  padding: 0 16px; transition: width .55s cubic-bezier(.34, 1.45, .5, 1); overflow: hidden; font-size: .8125rem; white-space: nowrap }
-.notch .row { display: flex; align-items: center; gap: 10px }
-.notch .time { font-family: var(--font-mono); font-weight: 500; font-variant-numeric: tabular-nums }
-.notch .muted { color: #8c8c88 }
-.notch canvas { display: block }
-.cover { width: 20px; height: 20px; border-radius: 4px; background: linear-gradient(135deg, var(--cover), #6b2f1f) }
-.eq { display: flex; gap: 2px; align-items: flex-end; height: 12px }
-.eq i { width: 3px; background: var(--cover); animation: eq .9s ease-in-out infinite alternate }
-.eq i:nth-child(2) { animation-delay: -.3s } .eq i:nth-child(3) { animation-delay: -.6s } .eq i:nth-child(4) { animation-delay: -.15s }
-@keyframes eq { from { height: 3px } to { height: 12px } }
-.lyric { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: .75rem; color: var(--dim); white-space: nowrap; transition: opacity .3s }
+.hero-shot { display: block; max-width: calc(100% - 24px); height: auto; transition: opacity .2s }
 .states { display: flex; flex-wrap: wrap; gap: .25rem .5rem; justify-content: center; margin-top: .75rem }
 .states button { font-family: var(--font-mono); font-size: .75rem; background: none; border: 1px solid transparent; color: var(--dim); padding: .25rem .6rem; cursor: pointer }
 .states button[aria-pressed="true"] { border-color: var(--line); color: var(--fg) }
@@ -174,4 +160,4 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: cent
 footer .logo svg { height: 22px }
 footer nav { gap: 1.25rem }
 
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } .notch { transition: none } .eq i { animation: none; height: 8px } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } .hero-shot { transition: none } }
