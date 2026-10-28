@@ -74,6 +74,17 @@ public sealed class UpdateInstaller
                 Log.Warn("updates", $"SHA-256 do instalador {installer.Version} não confere com o publicado no GitHub");
                 throw new UpdateException(Strings.Update_BadFile);
             }
+
+            // The SHA-256 comes from GitHub, like the file: it catches a broken download, not a
+            // release made with a stolen token. A signed Yata also wants the same publisher's signature.
+            string? ours = Environment.ProcessPath is string self ? Authenticode.Publisher(self) : null;
+            if (!SamePublisher(ours, Authenticode.Publisher(path)))
+            {
+                Log.Warn("updates", $"Instalador {installer.Version} sem a assinatura do mesmo editor do Yata");
+                throw new UpdateException(Strings.Update_BadFile);
+            }
+            if (ours == null)
+                Log.Info("updates", "Yata sem assinatura digital: instalador conferido só pelo SHA-256");
             Log.Info("updates", $"Instalador {installer.Version} baixado e conferido");
             return path;
         }
@@ -89,6 +100,12 @@ public sealed class UpdateInstaller
             throw;
         }
     }
+
+    /// <summary>
+    /// An unsigned Yata (until code signing starts) takes any installer that passed the hash; a signed
+    /// one only an installer signed by the same publisher.
+    /// </summary>
+    internal static bool SamePublisher(string? ours, string? theirs) => ours == null || ours == theirs;
 
     /// <summary>
     /// Runs the downloaded installer silently (a progress window shows) and lets it reopen Yata;

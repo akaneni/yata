@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Yata.Helpers;
 
 namespace Yata.Services;
 
@@ -218,10 +219,8 @@ internal sealed class AgentSetup
         Directory.CreateDirectory(Path.GetDirectoryName(file)!);
         if (File.Exists(file))
             File.Copy(file, file + ".yata-backup", overwrite: true);
-        // Written next to it, then moved over: a crash midway can't leave half a file.
-        string temp = file + ".yata-tmp";
-        File.WriteAllText(temp, root.ToJsonString(Indented), new UTF8Encoding(false));
-        File.Move(temp, file, overwrite: true);
+        // The agent's own settings: a power cut must not leave them empty.
+        AtomicFile.Write(file, new UTF8Encoding(false).GetBytes(root.ToJsonString(Indented)), ".yata-tmp");
     }
 
     private static bool HasPlugin(JsonObject root) =>

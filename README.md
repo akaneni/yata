@@ -14,7 +14,7 @@ Open source, no account and no telemetry.
 
 **Network access:** only what you turn on, and nothing about the PC is sent:
 - lyrics lookup on [LRCLIB](https://lrclib.net) (an open, free service), sending only the artist, title and length of the song. Lyrics are cached in `%LOCALAPPDATA%\Yata\lyrics`. Can be turned off in Settings.
-- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. **Check now** (Settings → Updates, or the tray menu) asks right away, on or off. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs.
+- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. **Check now** (Settings → Updates, or the tray menu) asks right away, on or off. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs; once Yata is code-signed, it also has to carry the same publisher's signature.
 - **weather** from [Open-Meteo](https://open-meteo.com) (open, no account or key), only if you turn it on: sends the chosen city's coordinates, rounded to ~1 km. The city search sends only the name you type.
 - **Google Calendar and Google Tasks**, only if you connect your account and allow each one: reading your calendars and today's and tomorrow's events, and syncing one task list, directly between the PC and Google. The access is encrypted with DPAPI in `%LOCALAPPDATA%\Yata\google.dat` and events stay in memory only. Details in [PRIVACY.md](PRIVACY.md).
 
@@ -69,7 +69,7 @@ Open source, no account and no telemetry.
 Download `Yata-Setup-x.y.z.exe` from [Releases](https://github.com/akaneni/yata/releases) (~3 MB). The installer:
 
 - installs for your user only, without asking for administrator rights;
-- if the **.NET 10 Desktop Runtime** is missing, downloads it straight from Microsoft and installs it (that step asks for administrator rights);
+- if the **.NET 10 Desktop Runtime** is missing, downloads it straight from Microsoft, checks that Microsoft signed it, and installs it (that step asks for administrator rights);
 - offers to start with Windows and a desktop shortcut;
 - on uninstall, removes the app and the automatic start but **keeps your data** in `%LOCALAPPDATA%\Yata`.
 
