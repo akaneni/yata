@@ -71,7 +71,12 @@ Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/relea
 - oferece iniciar com o Windows e atalho na área de trabalho;
 - na desinstalação, remove o app e a inicialização automática, mas **mantém seus dados** em `%LOCALAPPDATA%\Yata`.
 
-Cada release traz um `SHA256SUMS.txt` para conferir o arquivo baixado. O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução. A assinatura gratuita pela SignPath Foundation está em andamento: veja a [política de assinatura de código](https://getyata.app/code-signing) e [docs/code-signing.md](docs/code-signing.md).
+O instalador ainda não é assinado digitalmente, então o Windows SmartScreen pode avisar na primeira execução: clique em **Mais informações** e depois em **Executar assim mesmo**. Para conferir o arquivo antes:
+
+- **Hash:** no PowerShell, `Get-FileHash .\Yata-Setup-x.y.z.exe` tem que bater com a linha do `SHA256SUMS.txt` da release.
+- **Origem:** todo instalador é gerado pelo GitHub Actions a partir deste repositório e traz uma comprovação de origem (build provenance attestation). Com o [GitHub CLI](https://cli.github.com), `gh attestation verify Yata-Setup-x.y.z.exe --repo akaneni/yata` confirma qual execução do workflow e qual commit o geraram.
+
+A SignPath Foundation, que assina de graça projetos de código aberto, recusou o Yata em outubro de 2026 por falta de visibilidade pública; o Yata vai pedir de novo conforme crescer. Veja a [política de assinatura de código](https://getyata.app/code-signing) e [docs/code-signing.md](docs/code-signing.md).
 
 ## Requisitos
 
