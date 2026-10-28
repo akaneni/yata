@@ -36,6 +36,8 @@ public sealed class SettingsData
     /// <summary>"en" or "pt-BR" (see Lang); null follows the Windows language.</summary>
     public string? Language { get; set; }
     public bool HideInFullscreen { get; set; } = true;
+    /// <summary>Screen captures, recordings and screen sharing see through the notch (you still see it).</summary>
+    public bool HideFromCapture { get; set; } = true;
     public int HoverDelayMs { get; set; } = 140;
     public bool UseArtworkAccent { get; set; } = true;
     /// <summary>Display the notch sits on (Windows device name); null follows the primary display.</summary>
@@ -75,6 +77,10 @@ public sealed class SettingsData
     public bool WeatherRainAlerts { get; set; } = true;
 
     // Notices
+    /// <summary>The chime that comes with reminders.</summary>
+    public bool SoundsEnabled { get; set; } = true;
+    /// <summary>No chime while the microphone is in use (a call).</summary>
+    public bool QuietDuringCalls { get; set; } = true;
     public bool HudVolume { get; set; } = true;
     public bool HudBrightness { get; set; } = true;
     public bool HudPower { get; set; } = true;

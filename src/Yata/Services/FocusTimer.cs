@@ -18,7 +18,6 @@ public sealed class FocusTimer
 {
     private readonly SettingsData _settings;
     private readonly Func<DateTime> _now;
-    private readonly Action _chime;
     private readonly DispatcherTimer _tick = new();
     private TimeSpan _pausedRemaining;
     private DateTime _endsAt;
@@ -60,12 +59,10 @@ public sealed class FocusTimer
     public event Action<HudMessage>? Message;
 
     /// <param name="clock">Time source; tests pass a fake one.</param>
-    /// <param name="chime">Sound at the end of a phase; tests pass a no-op.</param>
-    public FocusTimer(SettingsData settings, Func<DateTime>? clock = null, Action? chime = null)
+    public FocusTimer(SettingsData settings, Func<DateTime>? clock = null)
     {
         _settings = settings;
         _now = clock ?? (() => DateTime.Now);
-        _chime = chime ?? Chime.Play;
         _pausedRemaining = PhaseLength;
         _tick.Tick += (_, _) => Poll();
     }
@@ -192,7 +189,8 @@ public sealed class FocusTimer
             Phase = CompletedSessions >= SessionsPerCycle ? FocusPhase.LongBreak : FocusPhase.ShortBreak;
             _pausedRemaining = PhaseLength;
             if (notify)
-                Notify(Strings.Focus_BreakTime, $"{PhaseLength.TotalMinutes:0} min", celebrate: true);
+                Notify(Strings.Focus_BreakTime, $"{PhaseLength.TotalMinutes:0} min", celebrate: true,
+                    expires: _now() + PhaseLength);
             Run(); // Breaks start on their own.
         }
         else
@@ -209,9 +207,9 @@ public sealed class FocusTimer
         }
     }
 
-    private void Notify(string text, string value, bool celebrate = false)
-    {
-        _chime();
-        Message?.Invoke(new HudMessage(Glyphs.Timer, text, value, DurationMs: 4000, Important: true, Celebrate: celebrate));
-    }
+    // Tagged: the news of the next phase replaces the one still waiting. "Break time" is old news
+    // once the break is over.
+    private void Notify(string text, string value, bool celebrate = false, DateTime? expires = null) =>
+        Message?.Invoke(new HudMessage(Glyphs.Timer, text, value, DurationMs: 4000, Important: true, Celebrate: celebrate,
+            Tag: "focus", Chime: true, Expires: expires));
 }

@@ -7,11 +7,10 @@ public class TaskListTests
 {
     private DateTime _now = new(2026, 10, 26, 14, 0, 0);
     private readonly List<HudMessage> _messages = new();
-    private int _chimes;
 
     private TaskList NewList()
     {
-        var list = new TaskList(AppStore.InMemory(), () => _now, () => _chimes++);
+        var list = new TaskList(AppStore.InMemory(), () => _now);
         list.Message += _messages.Add;
         return list;
     }
@@ -106,7 +105,7 @@ public class TaskListTests
         Assert.Equal("Reunião", message.Text);
         Assert.Equal("14:30", message.Value);
         Assert.True(message.Important);
-        Assert.Equal(1, _chimes);
+        Assert.True(message.Chime);
     }
 
     [Fact]

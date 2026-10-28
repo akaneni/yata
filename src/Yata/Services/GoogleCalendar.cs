@@ -210,9 +210,11 @@ public sealed class GoogleCalendar
         var lead = TimeSpan.FromMinutes(Math.Max(0, Settings.CalendarReminderMinutes));
         foreach (var (e, starting) in CalendarReminders.Due(Events, now, lead, _sent))
         {
-            Chime.Play();
+            // "In 5 min" is only true until it starts, and "now" until it ends; "now" replaces the
+            // "in 5 min" still waiting.
             Message?.Invoke(new HudMessage(Glyphs.Calendar, e.Title,
-                starting ? Strings.Calendar_Now : CalendarReminders.Until(e.Start, now), DurationMs: 6000, Important: true));
+                starting ? Strings.Calendar_Now : CalendarReminders.Until(e.Start, now), DurationMs: 6000, Important: true,
+                Tag: "calendar|" + e.Key, Chime: true, Expires: starting ? e.End : e.Start));
         }
     }
 

@@ -252,6 +252,7 @@ public partial class MainWindow : Window
 
         PositionWindow();
         UpdateHotkey();
+        ApplyCaptureExclusion();
 
         _fullscreen = new FullscreenWatcher(hwnd);
         _fullscreen.Changed += OnFullscreenChanged;
@@ -505,6 +506,7 @@ public partial class MainWindow : Window
         UpdateClock();
         PositionWindow();
         UpdateHotkey();
+        ApplyCaptureExclusion();
         _ = _updates.CheckIfDueAsync(); // Just switched on: look now rather than within the hour.
         UpdateShown();
         UpdatePrivacy();
@@ -590,6 +592,8 @@ public partial class MainWindow : Window
             _ => TabMedia,
         };
         tab.IsChecked = true;
+        _capturable = true;
+        ApplyCaptureExclusion();
         _pinnedUntil = DateTime.Now.AddSeconds(Math.Clamp(seconds, 1, 300));
         _hoverTimer.Stop();
         SetExpanded(true);

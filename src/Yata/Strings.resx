@@ -28,6 +28,8 @@
   <data name="Settings_JumpHotkey" xml:space="preserve"><value>Go to the agent that needs you with Ctrl+Alt+J</value></data>
   <data name="Settings_JumpHotkeyHint" xml:space="preserve"><value>Goes to the window of the most pressing activity; pressed again, to the next.</value></data>
   <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Hide in full-screen apps</value></data>
+  <data name="Settings_HideFromCapture" xml:space="preserve"><value>Hide from recordings and screen sharing</value></data>
+  <data name="Settings_HideFromCaptureHint" xml:space="preserve"><value>People watching your screen in a call or recording don't see the notch. You still do.</value></data>
   <data name="Settings_HoverDelay" xml:space="preserve"><value>Open on hover after</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Album art color as accent</value></data>
   <data name="Settings_AccentHint" xml:space="preserve"><value>When off, everything stays black and white.</value></data>
@@ -133,6 +135,9 @@
   <data name="Agents_NoCli" xml:space="preserve"><value>yata-cli.exe isn't next to Yata (a development build?).</value></data>
   <data name="Agents_Unreadable" xml:space="preserve"><value>Couldn't read {0}. Fix it, or add the hooks by hand (yata-cli hook setup).</value></data>
   <data name="Agents_NotAnObject" xml:space="preserve"><value>{0} isn't a JSON object, so Yata leaves it alone.</value></data>
+  <data name="Settings_Sounds" xml:space="preserve"><value>Chime with reminders</value></data>
+  <data name="Settings_QuietDuringCalls" xml:space="preserve"><value>No chime during calls</value></data>
+  <data name="Settings_QuietDuringCallsHint" xml:space="preserve"><value>While the microphone is in use.</value></data>
   <data name="Settings_HudVolume" xml:space="preserve"><value>Volume</value></data>
   <data name="Settings_HudBrightness" xml:space="preserve"><value>Brightness</value></data>
   <data name="Settings_HudPower" xml:space="preserve"><value>Charger and low battery</value></data>

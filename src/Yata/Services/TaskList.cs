@@ -105,7 +105,6 @@ public sealed class TaskList
 
     private readonly AppStore _store;
     private readonly Func<DateTime> _clock;
-    private readonly Action _chime;
     private readonly DispatcherTimer _reminder = new() { Interval = TimeSpan.FromSeconds(15) };
 
     public ObservableCollection<TaskItem> Items { get; } = new();
@@ -119,12 +118,10 @@ public sealed class TaskList
     public event Action? LocalChanged;
 
     /// <param name="clock">Current time; tests pass a fake one.</param>
-    /// <param name="chime">Reminder sound; tests pass a silent one.</param>
-    public TaskList(AppStore store, Func<DateTime>? clock = null, Action? chime = null)
+    public TaskList(AppStore store, Func<DateTime>? clock = null)
     {
         _store = store;
         _clock = clock ?? (() => DateTime.Now);
-        _chime = chime ?? Chime.Play;
         foreach (var data in store.Data.Tasks)
         {
             Items.Add(new TaskItem
@@ -334,9 +331,8 @@ public sealed class TaskList
         foreach (var item in due)
         {
             item.Reminded = true;
-            _chime();
             Message?.Invoke(new HudMessage(Glyphs.Bell, item.Text, item.Due!.Value.ToString("HH:mm"),
-                DurationMs: 6000, Important: true));
+                DurationMs: 6000, Important: true, Chime: true));
         }
 
         if (due.Count > 0)

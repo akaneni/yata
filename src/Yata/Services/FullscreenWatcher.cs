@@ -41,6 +41,14 @@ public sealed class FullscreenWatcher : IDisposable
             NativeMethods.KeepTopmost(_ownWindow);
     }
 
+    /// <summary>
+    /// Windows says the user is busy or in quiet time ("Do not disturb" and the like): reminders come
+    /// without the chime.
+    /// </summary>
+    public static bool WindowsWantsQuiet() =>
+        NativeMethods.SHQueryUserNotificationState(out int state) == 0 &&
+        state is NativeMethods.QUNS_BUSY or NativeMethods.QUNS_QUIET_TIME;
+
     private bool DetectFullscreen()
     {
         if (NativeMethods.SHQueryUserNotificationState(out int state) == 0 &&

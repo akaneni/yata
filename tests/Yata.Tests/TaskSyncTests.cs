@@ -8,7 +8,7 @@ public class TaskSyncTests
 {
     private readonly DateTime _now = new(2026, 10, 26, 14, 0, 0);
 
-    private TaskList NewList() => new(AppStore.InMemory(), () => _now, () => { });
+    private TaskList NewList() => new(AppStore.InMemory(), () => _now);
 
     private static RemoteTask? Parse(string json)
     {
@@ -186,11 +186,11 @@ public class TaskSyncTests
     public void Sync_state_survives_a_restart()
     {
         var store = AppStore.InMemory();
-        var list = new TaskList(store, () => _now, () => { });
+        var list = new TaskList(store, () => _now);
         list.ApplyRemote(new[] { new RemoteTask("g1", "A", false, new DateTime(2026, 10, 30)) });
         list.Toggle(list.Items.Single());
 
-        var item = new TaskList(store, () => _now, () => { }).Items.Single();
+        var item = new TaskList(store, () => _now).Items.Single();
 
         Assert.Equal("g1", item.GoogleId);
         Assert.True(item.Dirty);
@@ -200,13 +200,14 @@ public class TaskSyncTests
     [Fact]
     public void Day_only_dues_have_no_reminder()
     {
-        int chimes = 0;
-        var list = new TaskList(AppStore.InMemory(), () => _now, () => chimes++);
+        var messages = new List<HudMessage>();
+        var list = new TaskList(AppStore.InMemory(), () => _now);
+        list.Message += messages.Add;
         list.ApplyRemote(new[] { new RemoteTask("g1", "Hoje", false, _now.Date) });
 
         list.Poll();
 
-        Assert.Equal(0, chimes);
+        Assert.Empty(messages);
         Assert.False(list.Items.Single().Reminded);
     }
 }

@@ -242,6 +242,16 @@
                     </views:SettingRow>
                     <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_HideFromCapture}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_HideFromCaptureHint}"
+                                       Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.HideFromCapture}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
                         <TextBlock Text="{x:Static y:Strings.Settings_HoverDelay}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <views:Stepper HorizontalAlignment="Right" Minimum="0" Maximum="1000" Step="20" Suffix=" ms"
                                        Value="{Binding Settings.HoverDelayMs}"/>
@@ -539,6 +549,21 @@
             <TextBlock Text="{x:Static y:Strings.Settings_Notices}" Style="{StaticResource Section}"/>
             <Border Style="{StaticResource Card}">
                 <StackPanel>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <TextBlock Text="{x:Static y:Strings.Settings_Sounds}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.SoundsEnabled}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_QuietDuringCalls}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_QuietDuringCallsHint}"
+                                       Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.QuietDuringCalls}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
                         <TextBlock Text="{x:Static y:Strings.Settings_HudVolume}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
                         <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right" IsChecked="{Binding Settings.HudVolume}"/>

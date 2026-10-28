@@ -30,6 +30,26 @@ public partial class MainWindow
 {
     private bool PrivacyShown => Settings.HudPrivacy && _privacy.Current.Any;
 
+    // --show is for previews and screenshots: the notch has to be in them.
+    private bool _capturable;
+    private bool? _excludedFromCapture;
+
+    /// <summary>
+    /// Screen sharing and recordings (Teams, Meet, OBS, Print Screen) see through the notch, so the
+    /// next meeting, the tasks and the agent's project don't end up in a call. You still see it.
+    /// </summary>
+    private void ApplyCaptureExclusion()
+    {
+        var hwnd = new WindowInteropHelper(this).Handle;
+        bool exclude = Settings.HideFromCapture && !_capturable;
+        if (hwnd == IntPtr.Zero || exclude == _excludedFromCapture)
+            return;
+        if (NativeMethods.SetWindowDisplayAffinity(hwnd, exclude ? NativeMethods.WDA_EXCLUDEFROMCAPTURE : NativeMethods.WDA_NONE))
+            _excludedFromCapture = exclude;
+        else
+            Log.Warn("privacy", $"SetWindowDisplayAffinity falhou ({System.Runtime.InteropServices.Marshal.GetLastWin32Error()})");
+    }
+
     private void OnPrivacyChanged(PrivacyState previous, PrivacyState current)
     {
         UpdatePrivacy();
