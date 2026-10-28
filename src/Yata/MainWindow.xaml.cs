@@ -41,17 +41,21 @@ public partial class MainWindow : Window
     // the notch gets for it; a short name gets less (EventCompact).
     private static readonly Size CompactEvent = new(300, 32);
     private static readonly Size CompactEventTimer = new(380, 32);
+    // Every page of the open notch is as wide: switching tabs only changes the height, so the header
+    // and its tabs stay put instead of jumping while the shape catches up.
+    private const double ExpandedWidth = 520;
     // Expanded heights include the 42px header with the page tabs.
-    private static readonly Size ExpandedIdle = new(420, 170);
+    private static readonly Size ExpandedIdle = new(ExpandedWidth, 170);
     // Room for the weather line under "Nothing playing".
-    private static readonly Size ExpandedIdleWeather = new(420, 190);
-    private static readonly Size ExpandedMedia = new(520, 196);
-    private static readonly Size ExpandedLyrics = new(880, 196);
-    private static readonly Size ExpandedFocus = new(440, 196);
-    private static readonly Size ExpandedWater = new(440, 196);
-    private static readonly Size ExpandedTasks = new(440, 270);
-    private static readonly Size ExpandedShelf = new(520, 250);
-    private static readonly Size ExpandedAgenda = new(460, 250);
+    private static readonly Size ExpandedIdleWeather = new(ExpandedWidth, 190);
+    private static readonly Size ExpandedMedia = new(ExpandedWidth, 196);
+    // The lyrics go under the player.
+    private static readonly Size ExpandedLyrics = new(ExpandedWidth, 300);
+    private static readonly Size ExpandedFocus = new(ExpandedWidth, 196);
+    private static readonly Size ExpandedWater = new(ExpandedWidth, 196);
+    private static readonly Size ExpandedTasks = new(ExpandedWidth, 270);
+    private static readonly Size ExpandedShelf = new(ExpandedWidth, 250);
+    private static readonly Size ExpandedAgenda = new(ExpandedWidth, 250);
     // How early the closed notch starts showing the next event.
     private static readonly TimeSpan UpcomingWindow = TimeSpan.FromMinutes(15);
     private static readonly Size CompactAmbient = new(130, 32);
