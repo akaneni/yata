@@ -9,6 +9,8 @@ Yata only goes online in these cases:
 - GitHub (api.github.com), for the new-version notice, only if you turn it on: once a day, asks which version is the latest. If you click "Update and restart", downloads the new installer from GitHub.
 - Google Calendar and Google Tasks, only if you connect your account. Data goes directly between your PC and Google.
 
+Yata uses no AI model or service. Data from Google is never sent to an AI provider or used to train any model.
+
 This installer also downloads the .NET 10 Desktop Runtime from Microsoft if it is missing.
 
 Full policy: https://getyata.app/privacy

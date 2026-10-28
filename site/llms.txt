@@ -22,6 +22,7 @@ Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese
 - Weather sends the chosen city, rounded to about 1 km, to Open-Meteo (off by default). Never IP location.
 - Google Calendar and Tasks talk directly between the PC and Google (off by default). Access is encrypted on disk with Windows DPAPI.
 - Activities from other programs arrive through a local named pipe only the current Windows user can open (network refused), and stay in memory only.
+- No AI: Yata uses no AI/ML model or service, and Google data is never sent to an AI provider or used to train models. Activities only flow into Yata; they cannot read events or tasks.
 - No keyboard hook: Caps Lock and layout are read from key state. The diagnostic log stays on the PC for 7 days.
 
 ## Install

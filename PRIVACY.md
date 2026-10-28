@@ -57,6 +57,12 @@ Yata's use and transfer of information received from Google APIs adheres to the 
 - At Google: <https://myaccount.google.com/connections>, removing Yata.
 - Uninstalling Yata does not delete the `%LOCALAPPDATA%\Yata` folder. Delete it by hand if you want to remove everything.
 
+## AI and machine learning
+
+Yata does not use, include or connect to any artificial intelligence or machine learning model or service, whether on your PC or online. Data received from Google (events, calendars, tasks, email) is never sent to an AI provider and is never used to create, train or improve any model.
+
+The programs that show progress with `yata-cli` (see "Data that stays on your computer") may be AI agents, but that channel goes one way only: they send progress to Yata and get back just "ok" or an error message. They cannot read your events, tasks or any other data in Yata.
+
 ## This website
 
 [getyata.app](https://getyata.app) is a static page hosted on GitHub Pages and served through Cloudflare. It sets no cookies and runs no analytics or trackers. Fonts are served from the site itself, with no third-party requests. GitHub and Cloudflare, as host and delivery network, may keep standard server logs. The same policy is on the website in [English](https://getyata.app/privacy) and [Portuguese](https://getyata.app/pt/privacy).
