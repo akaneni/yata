@@ -82,6 +82,8 @@ public sealed class SettingsData
     /// <summary>Screen captures, recordings and screen sharing see through the notch (you still see it).</summary>
     public bool HideFromCapture { get; set; } = true;
     public int HoverDelayMs { get; set; } = 140;
+    /// <summary>The notch opens and closes without the spring's overshoot.</summary>
+    public bool CalmMotion { get; set; }
     public bool UseArtworkAccent { get; set; } = true;
     /// <summary>Display the notch sits on (Windows device name); null follows the primary display.</summary>
     public string? Monitor { get; set; }

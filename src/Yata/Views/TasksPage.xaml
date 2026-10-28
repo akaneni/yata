@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:y="clr-namespace:Yata"
              xmlns:local="clr-namespace:Yata.Views">
-    <Grid Margin="16,0,16,14">
+    <Grid Margin="16,8,16,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -65,7 +65,7 @@
 
         <local:UndoToast x:Name="Undo"/>
 
-        <Border Grid.Row="1" Height="34" Margin="0,8,0,0" CornerRadius="10" Background="{DynamicResource SubtleFill}">
+        <Border Grid.Row="1" Height="34" Margin="0,8,0,0" CornerRadius="14" Background="{DynamicResource SubtleFill}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

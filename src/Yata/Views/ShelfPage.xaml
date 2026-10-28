@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:y="clr-namespace:Yata"
              xmlns:local="clr-namespace:Yata.Views">
-    <Grid Margin="16,0,16,14">
+    <Grid Margin="16,8,16,16">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -89,7 +89,7 @@
             </StackPanel>
         </Grid>
 
-        <Grid x:Name="Footer" Grid.Row="1" Margin="2,6,0,0" Visibility="Collapsed">
+        <Grid x:Name="Footer" Grid.Row="1" Margin="8,8,0,0" Visibility="Collapsed">
             <TextBlock x:Name="CountText" FontSize="11" VerticalAlignment="Center"
                        Foreground="{DynamicResource TextSecondary}"/>
             <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Shelf_Clear}" Height="24" FontSize="11"

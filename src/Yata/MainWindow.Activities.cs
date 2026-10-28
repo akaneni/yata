@@ -244,6 +244,8 @@ public partial class MainWindow
         ActivityPanelShape.Data = _panelBelow
             ? new RectangleGeometry(new Rect(Ear, 0, _panelWidth, height), PanelRadius, PanelRadius)
             : BuildNotchGeometry(_panelWidth, height, PanelRadius);
+        ActivityPanelShadow.Width = _panelWidth;
+        ActivityPanelShadow.Height = height;
         ActivityStrip.Width = _panelWidth - 24;
         ActivityStrip.Margin = new Thickness(Ear + 14, 8, 10, 8);
     }

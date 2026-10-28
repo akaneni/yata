@@ -41,17 +41,21 @@ public partial class MainWindow : Window
     // the notch gets for it; a short name gets less (EventCompact).
     private static readonly Size CompactEvent = new(300, 32);
     private static readonly Size CompactEventTimer = new(380, 32);
+    // Every page of the open notch is as wide: switching tabs only changes the height, so the header
+    // and its tabs stay put instead of jumping while the shape catches up.
+    private const double ExpandedWidth = 520;
     // Expanded heights include the 42px header with the page tabs.
-    private static readonly Size ExpandedIdle = new(420, 170);
+    private static readonly Size ExpandedIdle = new(ExpandedWidth, 170);
     // Room for the weather line under "Nothing playing".
-    private static readonly Size ExpandedIdleWeather = new(420, 190);
-    private static readonly Size ExpandedMedia = new(520, 196);
-    private static readonly Size ExpandedLyrics = new(880, 196);
-    private static readonly Size ExpandedFocus = new(440, 196);
-    private static readonly Size ExpandedWater = new(440, 196);
-    private static readonly Size ExpandedTasks = new(440, 270);
-    private static readonly Size ExpandedShelf = new(520, 250);
-    private static readonly Size ExpandedAgenda = new(460, 250);
+    private static readonly Size ExpandedIdleWeather = new(ExpandedWidth, 190);
+    private static readonly Size ExpandedMedia = new(ExpandedWidth, 196);
+    // The lyrics go under the player.
+    private static readonly Size ExpandedLyrics = new(ExpandedWidth, 300);
+    private static readonly Size ExpandedFocus = new(ExpandedWidth, 196);
+    private static readonly Size ExpandedWater = new(ExpandedWidth, 196);
+    private static readonly Size ExpandedTasks = new(ExpandedWidth, 270);
+    private static readonly Size ExpandedShelf = new(ExpandedWidth, 260);
+    private static readonly Size ExpandedAgenda = new(ExpandedWidth, 250);
     // How early the closed notch starts showing the next event.
     private static readonly TimeSpan UpcomingWindow = TimeSpan.FromMinutes(15);
     private static readonly Size CompactAmbient = new(130, 32);
@@ -788,6 +792,7 @@ public partial class MainWindow : Window
                     : _peeking ? new Size(compact.Width + PeekWidth, compact.Height + PeekHeight)
                     : compact;
 
+        ShapeMotion();
         _width.Target = target.Width;
         _height.Target = target.Height;
         _radius.Target = _expanded ? ExpandedRadius : showNews ? 22 : CompactRadius;
@@ -806,12 +811,14 @@ public partial class MainWindow : Window
         LyricsPanel.Visibility = hasLyrics ? Visibility.Visible : Visibility.Collapsed;
         LyricsDivider.Visibility = LyricsPanel.Visibility;
 
-        MediaPage.Visibility = _page == NotchPage.Media ? Visibility.Visible : Visibility.Collapsed;
-        AgendaPage.Visibility = _page == NotchPage.Agenda ? Visibility.Visible : Visibility.Collapsed;
-        FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Collapsed;
-        WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Collapsed;
-        TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
-        ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Collapsed;
+        // Hidden, not collapsed: the other pages stay laid out, so switching to one doesn't lay out a
+        // whole page (a song's lyrics, a long task list) in the middle of the slide.
+        MediaPage.Visibility = _page == NotchPage.Media ? Visibility.Visible : Visibility.Hidden;
+        AgendaPage.Visibility = _page == NotchPage.Agenda ? Visibility.Visible : Visibility.Hidden;
+        FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Hidden;
+        WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Hidden;
+        TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Hidden;
+        ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Hidden;
 
         // Yata only fidgets beside the idle clock while it can be seen.
         if (_expanded && _page == NotchPage.Media && !hasMedia)
@@ -821,6 +828,26 @@ public partial class MainWindow : Window
 
         FitWindow(allowShrink: false);
         StartAnimation();
+    }
+
+    /// <summary>
+    /// Opening springs out with a slight overshoot (none with calm motion). Closing is quicker and
+    /// doesn't bounce: getting the notch out of the way should feel immediate.
+    /// </summary>
+    private void ShapeMotion()
+    {
+        var (stiffness, damping) = (_expanded, Settings.CalmMotion) switch
+        {
+            (true, false) => (380.0, 0.72),
+            (true, true) => (420.0, 1.0),
+            (false, false) => (520.0, 0.86),
+            (false, true) => (600.0, 1.0),
+        };
+        foreach (var spring in new[] { _width, _height, _radius, _expand })
+        {
+            spring.Stiffness = stiffness;
+            spring.DampingRatio = damping;
+        }
     }
 
     /// <summary>
@@ -927,6 +954,7 @@ public partial class MainWindow : Window
         if (_lastFrame == TimeSpan.Zero)
         {
             _lastFrame = now;
+            FrameTimings.Frame(0);
             return;
         }
 
@@ -934,6 +962,7 @@ public partial class MainWindow : Window
         if (dt <= 0)
             return; // Rendering can fire more than once per frame.
         _lastFrame = now;
+        long workStart = FrameTimings.Enabled ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
 
         if (Motion.Reduced)
         {
@@ -948,12 +977,19 @@ public partial class MainWindow : Window
         bool moving = _width.Step(dt) | _height.Step(dt) | _radius.Step(dt) | _expand.Step(dt) | _hud.Step(dt) |
                       _ambient.Step(dt) | _bubble.Step(dt);
         ApplyFrame();
+        if (FrameTimings.Enabled)
+        {
+            // The layout would run right after this handler anyway; done here, it's counted in the work.
+            UpdateLayout();
+            FrameTimings.Frame(System.Diagnostics.Stopwatch.GetElapsedTime(workStart).TotalMilliseconds);
+        }
 
         if (!moving)
         {
             CompositionTarget.Rendering -= OnRendering;
             _animating = false;
             FitWindow(allowShrink: true);
+            FrameTimings.End();
         }
     }
 
@@ -964,12 +1000,15 @@ public partial class MainWindow : Window
         double radius = Math.Clamp(_radius.Value, 0, Math.Min(width, height) / 2);
 
         NotchShape.Data = BuildNotchGeometry(width, height, radius);
+        NotchShadow.Width = width;
+        NotchShadow.Height = height;
         ContentHost.Width = width;
         ContentHost.Height = height;
 
         double progress = _expand.Value;
         double compactOpacity = Math.Clamp(1 - progress * 3, 0, 1);
-        double expandedOpacity = Math.Clamp((progress - 0.35) / 0.65, 0, 1);
+        // Starts before the compact view is gone (at a third), so the notch is never empty midway.
+        double expandedOpacity = Math.Clamp((progress - 0.25) / 0.6, 0, 1);
         double overlay = Math.Clamp(_hud.Value, 0, 1);
         double ambient = Math.Clamp(_ambient.Value, 0, 1);
         double underOverlay = compactOpacity * (1 - overlay);
@@ -983,7 +1022,8 @@ public partial class MainWindow : Window
         foreach (var view in new UIElement[] { CompactView, AmbientView, HudView, NewsView })
             view.Visibility = view.Opacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
         ExpandedView.Opacity = expandedOpacity;
-        ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
+        // Hidden rather than collapsed for the same reason: opening doesn't lay out the page mid-motion.
+        ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Hidden;
         ExpandedView.IsHitTestVisible = progress > 0.7;
         ApplyBubbleFrame(width, compactOpacity);
         ApplyActivityPanelFrame(width, height, progress);

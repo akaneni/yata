@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <!-- Ring + details as one block, centered in the page -->
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,14">
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,16">
         <Grid Width="112" Height="112">
             <Ellipse Stroke="{DynamicResource TrackBrush}" StrokeThickness="6"/>
             <Path x:Name="ProgressArc" Stroke="{DynamicResource TextPrimary}" StrokeThickness="6"
@@ -12,7 +12,7 @@
         </Grid>
 
         <!-- Fixed width: the block stays put when the status text or buttons change -->
-        <StackPanel Margin="26,0,0,0" VerticalAlignment="Center" Width="200">
+        <StackPanel Margin="24,0,0,0" VerticalAlignment="Center" Width="200">
             <TextBlock x:Name="PhaseText" FontSize="16" FontWeight="SemiBold"/>
             <TextBlock x:Name="StatusText" Margin="0,1,0,0" FontSize="12" Foreground="{DynamicResource TextSecondary}"/>
             <!-- One dot per session in the cycle, built in code -->
@@ -24,7 +24,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock x:Name="PrimaryGlyph" FontFamily="{StaticResource IconFont}" FontSize="10"
                                    VerticalAlignment="Center"/>
-                        <TextBlock x:Name="PrimaryLabel" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="PrimaryLabel" Margin="6,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
                 <!-- Parar (focus) / Pular pausa (break) -->
@@ -33,7 +33,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock x:Name="SecondaryGlyph" FontFamily="{StaticResource IconFont}" FontSize="10"
                                    VerticalAlignment="Center"/>
-                        <TextBlock x:Name="SecondaryLabel" Margin="7,0,0,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="SecondaryLabel" Margin="6,0,0,0" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </StackPanel>

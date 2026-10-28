@@ -21,11 +21,9 @@
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="BubbleShift"/>
             </Grid.RenderTransform>
-            <Path x:Name="BubbleShape" Fill="{DynamicResource NotchBrush}">
-                <Path.Effect>
-                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
-                </Path.Effect>
-            </Path>
+            <views:SoftShadow x:Name="BubbleShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
+                              BlurRadius="20" Depth="4" ShadowOpacity="0.4" Width="32" Height="32"/>
+            <Path x:Name="BubbleShape" Fill="{DynamicResource NotchBrush}"/>
             <Grid x:Name="BubbleContent" Width="22" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Ellipse x:Name="BubbleTrack" Stroke="{DynamicResource TrackBrush}" StrokeThickness="2"/>
                 <Path x:Name="BubbleArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
@@ -45,11 +43,9 @@
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="ActivityPanelShift"/>
             </Grid.RenderTransform>
-            <Path x:Name="ActivityPanelShape" Fill="{DynamicResource NotchBrush}">
-                <Path.Effect>
-                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
-                </Path.Effect>
-            </Path>
+            <views:SoftShadow x:Name="ActivityPanelShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
+                              BlurRadius="20" Depth="4" ShadowOpacity="0.4"/>
+            <Path x:Name="ActivityPanelShape" Fill="{DynamicResource NotchBrush}"/>
             <StackPanel x:Name="ActivityStrip" Margin="14,8,10,8" VerticalAlignment="Top"/>
         </Grid>
 
@@ -59,11 +55,9 @@
               AllowDrop="True" DragEnter="OnNotchDragOver" DragOver="OnNotchDragOver"
               DragLeave="OnNotchDragLeave" Drop="OnNotchDrop">
 
-            <Path x:Name="NotchShape" Fill="{DynamicResource NotchBrush}">
-                <Path.Effect>
-                    <DropShadowEffect BlurRadius="28" ShadowDepth="6" Direction="270" Opacity="0.45" Color="Black"/>
-                </Path.Effect>
-            </Path>
+            <views:SoftShadow x:Name="NotchShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
+                              BlurRadius="28" Depth="6" ShadowOpacity="0.45"/>
+            <Path x:Name="NotchShape" Fill="{DynamicResource NotchBrush}"/>
 
             <Grid x:Name="ContentHost" HorizontalAlignment="Center" VerticalAlignment="Top" ClipToBounds="True">
 
@@ -144,7 +138,7 @@
                 </Grid>
 
                 <!-- News: what happened while you were away, brought by Yata -->
-                <Grid x:Name="NewsView" Margin="18,12,20,12" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed">
+                <Grid x:Name="NewsView" Margin="20,12,20,12" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
@@ -252,14 +246,14 @@
                         </Grid>
                     </Grid>
 
-                    <!-- Player | divider | lyrics: the lyrics column only shows while the notch is split -->
+                    <!-- Player, then divider and lyrics under it: those only show while the song has lyrics -->
                     <Grid x:Name="MediaPage" Grid.Row="1">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid x:Name="MediaPanel" Width="476" HorizontalAlignment="Left" Margin="22,0,22,18">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid x:Name="MediaPanel" Height="136" Margin="24,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -277,7 +271,7 @@
                             </Border>
                         </Grid>
 
-                        <Grid Grid.Column="1" Margin="18,0,0,0">
+                        <Grid Grid.Column="1" Margin="16,10,0,14">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -345,10 +339,10 @@
                         </Grid>
                     </Grid>
 
-                    <!-- Lyrics: right half of the split notch, current line kept centered -->
-                    <Border x:Name="LyricsDivider" Grid.Column="1" Width="1" Margin="-1,6,0,24"
+                    <!-- Lyrics: under the player, current line kept centered -->
+                    <Border x:Name="LyricsDivider" Grid.Row="1" Height="1" Margin="24,4,24,0"
                             Background="{DynamicResource DividerBrush}" Visibility="Collapsed"/>
-                    <Grid x:Name="LyricsPanel" Grid.Column="2" Margin="24,0,24,14" ClipToBounds="True" Visibility="Collapsed"
+                    <Grid x:Name="LyricsPanel" Grid.Row="2" Margin="24,8,24,16" ClipToBounds="True" Visibility="Collapsed"
                           SizeChanged="OnLyricsLayoutChanged">
                         <!-- Absolute, sized to the panel in code: relative to its bounding box, the mask would
                              stretch over the whole song and leave the lines near its start and end faint -->
@@ -371,8 +365,8 @@
                         </Canvas>
                     </Grid>
 
-                    <StackPanel x:Name="IdlePanel" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                Margin="0,0,0,14">
+                    <StackPanel x:Name="IdlePanel" Grid.RowSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                Margin="0,0,0,16">
                         <!-- Yata keeps the clock company while nothing plays -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock x:Name="IdleClock" FontFamily="{StaticResource DisplayFont}" FontSize="36"
