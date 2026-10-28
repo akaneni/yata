@@ -317,14 +317,15 @@ public sealed class MediaService
     /// Shows a made-up track, playing from the start, instead of following Windows' sessions.
     /// Only for measurements (--bench): the controls do nothing without a session.
     /// </summary>
-    internal void Simulate(string title, string artist, TimeSpan duration)
+    internal void Simulate(string title, string artist, TimeSpan duration, TimeSpan position = default, BitmapImage? cover = null)
     {
         _title = title;
         _artist = artist;
         _isPlaying = true;
         _playbackRate = 1;
-        _position = TimeSpan.Zero;
+        _position = position;
         _duration = duration;
+        _thumbnail = cover;
         _positionUpdatedAt = DateTimeOffset.Now;
         Current = Snapshot();
         Changed?.Invoke();

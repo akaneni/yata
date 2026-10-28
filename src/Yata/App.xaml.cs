@@ -52,7 +52,7 @@ public partial class App : Application
             return;
         }
 
-        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench"), BenchVariant = variant, StartedWithWindows = e.Args.Contains(Autostart.Argument) };
+        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench"), BenchVariant = variant, ShotsDir = ArgValue(e.Args, "--shots"), StartedWithWindows = e.Args.Contains(Autostart.Argument) };
         StartupTimings.Mark("MainWindow");
         _window.Show();
         StartupTimings.Mark("Show");
