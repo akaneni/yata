@@ -57,5 +57,7 @@
     <SolidColorBrush x:Key="WarningBrush" Color="#FFFF6B6B"/>
     <SolidColorBrush x:Key="WaterBrush" Color="#FF5AB8FF"/>
     <SolidColorBrush x:Key="WaterPastBrush" Color="#595AB8FF"/>
+    <!-- Days before today in the Focus page week -->
+    <SolidColorBrush x:Key="FocusPastBrush" Color="#59FFFFFF"/>
     <SolidColorBrush x:Key="WaterSubtleFill" Color="#1A5AB8FF"/>
 </ResourceDictionary>

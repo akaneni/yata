@@ -96,12 +96,13 @@ public sealed class AppStoreTests : IDisposable
     [Fact]
     public void Numbers_go_back_into_the_settings_ranges()
     {
-        File.WriteAllText(DataFile, """{"Settings":{"HoverDelayMs":-5,"FocusMinutes":0,"SessionsPerCycle":99}}""");
+        File.WriteAllText(DataFile, """{"Settings":{"HoverDelayMs":-5,"FocusMinutes":0,"SessionsPerCycle":99,"FocusGoalMinutes":5},"Focus":null}""");
         var settings = AppStore.Load(DataFile).Settings;
 
         Assert.Equal(0, settings.HoverDelayMs);
         Assert.Equal(5, settings.FocusMinutes);
         Assert.Equal(8, settings.SessionsPerCycle);
+        Assert.Equal(15, settings.FocusGoalMinutes);
     }
 
     [Fact]

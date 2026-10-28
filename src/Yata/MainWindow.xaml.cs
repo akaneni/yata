@@ -77,6 +77,7 @@ public partial class MainWindow : Window
     private readonly UpdateChecker _updates;
     private readonly AppStore _store = AppStore.Load();
     private readonly FocusTimer _focus;
+    private readonly FocusLog _focusLog;
     private readonly WaterTracker _water;
     private readonly TaskList _tasks;
     private readonly Shelf _shelf;
@@ -194,7 +195,7 @@ public partial class MainWindow : Window
         _water.Message += ShowHud;
         _tasks.Message += ShowHud;
         _focus.Changed += UpdateCompactTimer;
-        FocusPage.Attach(_focus);
+        _focusLog = new FocusLog(_store, _focus);
         WaterPage.Attach(_water);
         TasksPage.Attach(_tasks);
         _calendar = new GoogleCalendar(_store, _google);
@@ -202,6 +203,7 @@ public partial class MainWindow : Window
         _calendar.Message += ShowHud;
         _calendar.Changed += UpdateClock;
         AgendaPage.Attach(_calendar);
+        FocusPage.Attach(_focus, _focusLog, _tasks, _calendar);
         _weather = new WeatherService(_store);
         _weather.Message += ShowHud;
         _weather.Changed += UpdateWeather;
@@ -531,6 +533,7 @@ public partial class MainWindow : Window
     private void OnSettingsChanged()
     {
         _focus.ApplySettings();
+        _focusLog.ApplySettings();
         _water.ApplySettings();
         _weather.ApplySettings();
         ApplyActivitySettings();

@@ -672,6 +672,12 @@
                     </views:SettingRow>
                     <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
+                        <TextBlock Text="{x:Static y:Strings.Settings_FocusGoal}" Style="{StaticResource Label}" VerticalAlignment="Center"/>
+                        <views:Stepper HorizontalAlignment="Right" Minimum="15" Maximum="600" Step="15" Suffix=" min"
+                                       Value="{Binding Settings.FocusGoalMinutes}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8">
                             <TextBlock Text="{x:Static y:Strings.Settings_PauseWhenAway}" Style="{StaticResource Label}"/>
                             <TextBlock Text="{x:Static y:Strings.Settings_PauseWhenAwayHint}" Style="{StaticResource Hint}"/>

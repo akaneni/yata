@@ -23,6 +23,8 @@ public sealed class FocusTimer
 
     private readonly DispatcherTimer _tick = new();
     private TimeSpan _pausedRemaining;
+    // What was left when the current run started: what ran since is that minus what's left now.
+    private TimeSpan _runFrom;
     private DateTime _endsAt;
     private DateTime _lastTick;
 
@@ -59,8 +61,16 @@ public sealed class FocusTimer
 
     public double Progress => 1 - Remaining.TotalSeconds / PhaseLength.TotalSeconds;
 
+    /// <summary>Focus run so far and not yet reported by <see cref="Focused"/>; zero unless focusing.</summary>
+    public TimeSpan CurrentRun => State == FocusState.Running && Phase == FocusPhase.Focus ? Ran(Remaining) : TimeSpan.Zero;
+
     public event Action? Changed;
     public event Action<HudMessage>? Message;
+    /// <summary>
+    /// A stretch of focus ended (the session finished, was paused or stopped, or the PC slept), with
+    /// how long it really ran. Time away given back by <see cref="PauseAfterIdle"/> doesn't count.
+    /// </summary>
+    public event Action<TimeSpan>? Focused;
 
     /// <param name="clock">Time source; tests pass a fake one. UTC by default: a time zone change
     /// or daylight saving must not shorten or stretch a session.</param>
@@ -115,6 +125,8 @@ public sealed class FocusTimer
     /// </summary>
     public void Stop()
     {
+        if (State == FocusState.Running)
+            EndRun(Remaining);
         _tick.Stop();
         Phase = FocusPhase.Focus;
         State = FocusState.Ready;
@@ -208,6 +220,7 @@ public sealed class FocusTimer
 
     private void Run()
     {
+        _runFrom = _pausedRemaining;
         _lastTick = _now();
         _endsAt = _lastTick + _pausedRemaining;
         State = FocusState.Running;
@@ -221,6 +234,8 @@ public sealed class FocusTimer
 
     private void Freeze(TimeSpan remaining)
     {
+        if (State == FocusState.Running)
+            EndRun(remaining);
         _pausedRemaining = remaining;
         State = FocusState.Paused;
         _tick.Stop();
@@ -231,6 +246,8 @@ public sealed class FocusTimer
     {
         if (Phase == FocusPhase.Focus)
         {
+            if (State == FocusState.Running)
+                EndRun(TimeSpan.Zero);
             CompletedSessions++;
             Phase = CompletedSessions >= SessionsPerCycle ? FocusPhase.LongBreak : FocusPhase.ShortBreak;
             _pausedRemaining = PhaseLength;
@@ -251,6 +268,16 @@ public sealed class FocusTimer
                 Notify(Strings.Focus_BackToFocus, $"{PhaseLength.TotalMinutes:0} min");
             Changed?.Invoke();
         }
+    }
+
+    private TimeSpan Ran(TimeSpan remaining) => remaining < _runFrom ? _runFrom - remaining : TimeSpan.Zero;
+
+    /// <summary>The run stops with <paramref name="remaining"/> left; a focus run reports what it covered.</summary>
+    private void EndRun(TimeSpan remaining)
+    {
+        if (Phase == FocusPhase.Focus && Ran(remaining) is { } ran && ran > TimeSpan.Zero)
+            Focused?.Invoke(ran);
+        _runFrom = remaining; // Reported once, even if Stop follows a Freeze.
     }
 
     // Tagged: the news of the next phase replaces the one still waiting. "Break time" is old news
