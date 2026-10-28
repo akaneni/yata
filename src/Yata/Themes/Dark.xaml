@@ -30,11 +30,12 @@
     <SolidColorBrush x:Key="HoverFill" Color="#1FFFFFFF"/>
     <SolidColorBrush x:Key="PressedFill" Color="#33FFFFFF"/>
     <SolidColorBrush x:Key="PillFill" Color="#1AFFFFFF"/>
-    <SolidColorBrush x:Key="PillFillHover" Color="#29FFFFFF"/>
     <SolidColorBrush x:Key="PillFillPressed" Color="#3DFFFFFF"/>
+    <!-- Hover layers faded in over a pill's own fill: together they make #29FFFFFF on a pill and #E6E6E6 on a white one -->
+    <SolidColorBrush x:Key="PillHoverOverlay" Color="#11FFFFFF"/>
+    <SolidColorBrush x:Key="InverseHoverOverlay" Color="#1A000000"/>
     <!-- The one obvious action: the text color as background -->
     <SolidColorBrush x:Key="InverseFill" Color="#FFFFFFFF"/>
-    <SolidColorBrush x:Key="InverseFillHover" Color="#FFE6E6E6"/>
     <SolidColorBrush x:Key="InverseFillPressed" Color="#FFC8C8C8"/>
     <SolidColorBrush x:Key="InverseText" Color="#FF000000"/>
     <SolidColorBrush x:Key="SwitchThumbOff" Color="#B3FFFFFF"/>
