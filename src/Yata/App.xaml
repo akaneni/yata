@@ -13,6 +13,12 @@
             <FontFamily x:Key="DisplayFont">Segoe UI Variable Display, Segoe UI</FontFamily>
             <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
+            <!-- Page insets of the open notch (scale 2/4/6/8/12/16/24): text and images sit 24 px from the
+                 edge; filled surfaces (fields, boxes, row highlights) sit at 16 and their own padding brings
+                 the content back to 24. PageInsetFilled leaves 8 px under the tabs for those surfaces. -->
+            <Thickness x:Key="PageInset">24,0,24,16</Thickness>
+            <Thickness x:Key="PageInsetFilled">16,8,16,16</Thickness>
+
             <Style TargetType="views:RavenSprite">
                 <Setter Property="Fill" Value="{DynamicResource TextPrimary}"/>
             </Style>
@@ -39,6 +45,7 @@
                 <Setter Property="FontSize" Value="16"/>
                 <Setter Property="Width" Value="36"/>
                 <Setter Property="Height" Value="36"/>
+                <Setter Property="views:PressFeedback.IsEnabled" Value="True"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Focusable" Value="False"/>
                 <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
@@ -50,14 +57,28 @@
                         <ControlTemplate TargetType="ButtonBase">
                             <Grid>
                                 <Ellipse x:Name="Bg" Fill="{TemplateBinding Background}"/>
+                                <Ellipse x:Name="Hover" Fill="{DynamicResource HoverFill}" Opacity="0"/>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource HoverFill}"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
-                                    <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource PressedFill}"/>
+                                    <Setter TargetName="Hover" Property="Fill" Value="{DynamicResource PressedFill}"/>
                                 </Trigger>
                                 <Trigger Property="IsEnabled" Value="False">
                                     <Setter Property="Opacity" Value="0.35"/>
@@ -76,11 +97,25 @@
                         <ControlTemplate TargetType="Button">
                             <Grid>
                                 <Ellipse x:Name="Bg" Fill="{DynamicResource InverseFill}"/>
+                                <Ellipse x:Name="Hover" Fill="{DynamicResource InverseHoverOverlay}" Opacity="0"/>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource InverseFillHover}"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="Bg" Property="Fill" Value="{DynamicResource InverseFillPressed}"/>
@@ -98,22 +133,37 @@
                 <Setter Property="Width" Value="32"/>
                 <Setter Property="Height" Value="26"/>
                 <Setter Property="Margin" Value="2,0,0,0"/>
+                <Setter Property="views:PressFeedback.IsEnabled" Value="True"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Focusable" Value="False"/>
                 <Setter Property="AutomationProperties.Name" Value="{Binding ToolTip, RelativeSource={RelativeSource Self}}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="RadioButton">
-                            <Border x:Name="Bg" CornerRadius="8" Background="#00FFFFFF">
+                            <Grid Background="#00FFFFFF">
+                                <Border x:Name="Hover" CornerRadius="8" Background="{DynamicResource SubtleFill}" Opacity="0"/>
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SubtleFill}"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <!-- The selection background is a separate pill that slides between tabs -->
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="#00FFFFFF"/>
+                                    <Setter TargetName="Hover" Property="Visibility" Value="Hidden"/>
                                     <Setter Property="Foreground" Value="{DynamicResource TextPrimary}"/>
                                 </Trigger>
                             </ControlTemplate.Triggers>
@@ -144,18 +194,34 @@
                 <Setter Property="FontSize" Value="12"/>
                 <Setter Property="Height" Value="28"/>
                 <Setter Property="Padding" Value="12,0"/>
+                <Setter Property="views:PressFeedback.IsEnabled" Value="True"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Focusable" Value="False"/>
                 <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" CornerRadius="14" Background="{DynamicResource PillFill}" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Border x:Name="Bg" CornerRadius="14" Background="{DynamicResource PillFill}"/>
+                                <Border x:Name="Hover" CornerRadius="14" Background="{DynamicResource PillHoverOverlay}" Opacity="0"/>
+                                <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource PillFillHover}"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="Bg" Property="Background" Value="{DynamicResource PillFillPressed}"/>
@@ -173,18 +239,34 @@
                 <Setter Property="FontWeight" Value="SemiBold"/>
                 <Setter Property="Height" Value="30"/>
                 <Setter Property="Padding" Value="14,0"/>
+                <Setter Property="views:PressFeedback.IsEnabled" Value="True"/>
                 <Setter Property="Cursor" Value="Hand"/>
                 <Setter Property="Focusable" Value="False"/>
                 <Setter Property="FocusVisualStyle" Value="{StaticResource FocusRing}"/>
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="Bg" CornerRadius="15" Background="{DynamicResource InverseFill}" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
+                            <Grid>
+                                <Border x:Name="Bg" CornerRadius="15" Background="{DynamicResource InverseFill}"/>
+                                <Border x:Name="Hover" CornerRadius="15" Background="{DynamicResource InverseHoverOverlay}" Opacity="0"/>
+                                <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Grid>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Bg" Property="Background" Value="{DynamicResource InverseFillHover}"/>
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="1" Duration="0:0:0.12"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <DoubleAnimation Storyboard.TargetName="Hover" Storyboard.TargetProperty="Opacity" To="0" Duration="0:0:0.18"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="Bg" Property="Background" Value="{DynamicResource InverseFillPressed}"/>

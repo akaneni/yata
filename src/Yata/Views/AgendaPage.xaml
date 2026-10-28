@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:y="clr-namespace:Yata"
              xmlns:local="clr-namespace:Yata.Views">
-    <Grid Margin="16,8,16,16">
+    <Grid Margin="{StaticResource PageInsetFilled}">
 
         <!-- Not connected, connecting, nothing today: Yata with one line and at most one action -->
         <StackPanel x:Name="EmptyState" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -41,7 +41,7 @@
                                     <TextBlock x:Name="Detail" Text="{Binding Detail}" FontSize="11"
                                                Foreground="{DynamicResource TextSecondary}" TextTrimming="CharacterEllipsis"/>
                                 </StackPanel>
-                                <Button x:Name="Join" Grid.Column="2" Style="{StaticResource PillButton}" Height="26"
+                                <Button x:Name="Join" Grid.Column="2" Style="{StaticResource PillButton}"
                                         Margin="0,0,6,0" Visibility="Collapsed" ToolTip="{Binding MeetingUrl}"
                                         AutomationProperties.Name="{x:Static y:Strings.Agenda_JoinCall}" Click="OnJoin">
                                     <StackPanel Orientation="Horizontal">

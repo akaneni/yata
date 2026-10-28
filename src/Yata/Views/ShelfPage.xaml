@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:y="clr-namespace:Yata"
              xmlns:local="clr-namespace:Yata.Views">
-    <Grid Margin="16,8,16,16">
+    <Grid Margin="{StaticResource PageInsetFilled}">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
@@ -28,12 +28,13 @@
             <ItemsControl x:Name="List" Focusable="False">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel/>
+                        <!-- Six equal columns across the fixed-width notch, flush with both sides -->
+                        <UniformGrid Columns="6" VerticalAlignment="Top"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid x:Name="Tile" Width="78" Height="82" Margin="0,0,2,2" Background="#00FFFFFF" Cursor="Hand"
+                        <Grid x:Name="Tile" Height="82" Margin="1" Background="#00FFFFFF" Cursor="Hand"
                               ToolTip="{Binding FilePath}"
                               MouseLeftButtonDown="OnTileMouseDown" MouseMove="OnTileMouseMove">
                             <Border x:Name="Hover" CornerRadius="12" Background="{DynamicResource SubtleFill}" Visibility="Hidden"/>
@@ -92,7 +93,7 @@
         <Grid x:Name="Footer" Grid.Row="1" Margin="8,8,0,0" Visibility="Collapsed">
             <TextBlock x:Name="CountText" FontSize="11" VerticalAlignment="Center"
                        Foreground="{DynamicResource TextSecondary}"/>
-            <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Shelf_Clear}" Height="24" FontSize="11"
+            <Button Style="{StaticResource PillButton}" Content="{x:Static y:Strings.Shelf_Clear}"
                     HorizontalAlignment="Right" Click="OnClear"/>
         </Grid>
     </Grid>

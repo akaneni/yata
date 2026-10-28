@@ -44,18 +44,11 @@ public partial class MainWindow : Window
     // Every page of the open notch is as wide: switching tabs only changes the height, so the header
     // and its tabs stay put instead of jumping while the shape catches up.
     private const double ExpandedWidth = 520;
-    // Expanded heights include the 42px header with the page tabs.
-    private static readonly Size ExpandedIdle = new(ExpandedWidth, 170);
-    // Room for the weather line under "Nothing playing".
-    private static readonly Size ExpandedIdleWeather = new(ExpandedWidth, 190);
-    private static readonly Size ExpandedMedia = new(ExpandedWidth, 196);
-    // The lyrics go under the player.
-    private static readonly Size ExpandedLyrics = new(ExpandedWidth, 300);
-    private static readonly Size ExpandedFocus = new(ExpandedWidth, 196);
-    private static readonly Size ExpandedWater = new(ExpandedWidth, 196);
-    private static readonly Size ExpandedTasks = new(ExpandedWidth, 270);
-    private static readonly Size ExpandedShelf = new(ExpandedWidth, 260);
-    private static readonly Size ExpandedAgenda = new(ExpandedWidth, 250);
+    // And only two heights (with the 42px header): between pages of the same height the shape holds
+    // still and only the page slides. Short: the player, Focus, Water, the idle clock. Tall: the lists
+    // (Agenda, Tasks, Shelf) and the player with the lyrics under it.
+    private static readonly Size ExpandedShort = new(ExpandedWidth, 196);
+    private static readonly Size ExpandedTall = new(ExpandedWidth, 300);
     // How early the closed notch starts showing the next event.
     private static readonly TimeSpan UpcomingWindow = TimeSpan.FromMinutes(15);
     private static readonly Size CompactAmbient = new(130, 32);
@@ -773,12 +766,9 @@ public partial class MainWindow : Window
         CompactView.Margin = new Thickness(12 + privacyRoom, 0, 12, 0);
         Size expanded = _page switch
         {
-            NotchPage.Agenda => ExpandedAgenda,
-            NotchPage.Focus => ExpandedFocus,
-            NotchPage.Water => ExpandedWater,
-            NotchPage.Tasks => ExpandedTasks,
-            NotchPage.Shelf => ExpandedShelf,
-            _ => hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : weather != null ? ExpandedIdleWeather : ExpandedIdle,
+            NotchPage.Agenda or NotchPage.Tasks or NotchPage.Shelf => ExpandedTall,
+            NotchPage.Media when hasLyrics => ExpandedTall,
+            _ => ExpandedShort,
         };
         LayoutActivityPanel(expanded.Width);
         bool showNews = _newsActive && !_expanded;
@@ -941,6 +931,7 @@ public partial class MainWindow : Window
         _animating = true;
         _lastFrame = TimeSpan.Zero;
         CompositionTarget.Rendering += OnRendering;
+        FrameTimings.Moving();
     }
 
     private void OnRendering(object? sender, EventArgs e)
@@ -954,7 +945,6 @@ public partial class MainWindow : Window
         if (_lastFrame == TimeSpan.Zero)
         {
             _lastFrame = now;
-            FrameTimings.Frame(0);
             return;
         }
 
@@ -981,7 +971,7 @@ public partial class MainWindow : Window
         {
             // The layout would run right after this handler anyway; done here, it's counted in the work.
             UpdateLayout();
-            FrameTimings.Frame(System.Diagnostics.Stopwatch.GetElapsedTime(workStart).TotalMilliseconds);
+            FrameTimings.Work(System.Diagnostics.Stopwatch.GetElapsedTime(workStart).TotalMilliseconds);
         }
 
         if (!moving)
@@ -989,7 +979,7 @@ public partial class MainWindow : Window
             CompositionTarget.Rendering -= OnRendering;
             _animating = false;
             FitWindow(allowShrink: true);
-            FrameTimings.End();
+            FrameTimings.Settled();
         }
     }
 
