@@ -9,6 +9,8 @@ O Yata só acessa a internet nestes casos:
 - GitHub (api.github.com), para o aviso de versão nova, só se você ligar: uma vez por dia, pergunta qual é a versão mais recente. Se você clicar em "Atualizar e reiniciar", baixa o novo instalador do GitHub.
 - Google Agenda e Google Tasks, só se você conectar sua conta. A comunicação é direta entre o seu PC e o Google.
 
+O Yata não usa nenhum modelo ou serviço de IA. Os dados do Google nunca são enviados a um provedor de IA nem usados para treinar modelos.
+
 Este instalador também baixa o .NET 10 Desktop Runtime da Microsoft, se ele estiver faltando.
 
 Política completa: https://getyata.app/pt/privacy

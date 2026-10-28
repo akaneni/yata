@@ -2,7 +2,7 @@
 
 [English](PRIVACY.md) · **Português**
 
-*Última atualização: 27 de outubro de 2026*
+*Última atualização: 28 de outubro de 2026*
 
 O Yata é um app de código aberto para Windows que mostra um "notch" no topo da tela. Ele não tem conta, servidor nem telemetria. Esta política explica quais dados o Yata usa e para onde eles vão.
 
@@ -56,6 +56,12 @@ O uso e a transferência, pelo Yata, de informações recebidas das APIs do Goog
 - No Yata: **Configurações → Google → Desconectar**. O acesso (agenda e tarefas) é revogado no Google e o arquivo local é apagado.
 - No Google: <https://myaccount.google.com/connections>, removendo o Yata.
 - Desinstalar o Yata não apaga a pasta `%LOCALAPPDATA%\Yata`. Apague a pasta manualmente se quiser remover tudo.
+
+## Inteligência artificial
+
+O Yata não usa, não inclui e não se conecta a nenhum modelo ou serviço de inteligência artificial ou aprendizado de máquina, nem no seu PC nem na internet. Os dados recebidos do Google (eventos, agendas, tarefas, e-mail) nunca são enviados a um provedor de IA e nunca são usados para criar, treinar ou melhorar nenhum modelo.
+
+Os programas que mostram progresso com o `yata-cli` (veja "Dados que ficam no seu computador") podem ser agentes de IA, mas esse canal é de mão única: eles enviam o progresso ao Yata e recebem só "ok" ou uma mensagem de erro. Não conseguem ler seus eventos, suas tarefas nem nenhum outro dado do Yata.
 
 ## Este site
 
