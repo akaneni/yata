@@ -37,6 +37,22 @@
             </Grid>
         </Grid>
 
+        <!-- Activities panel: the bubble grown up. While the notch is open, every activity is listed in a
+             second notch beside it, so the open notch keeps its size. Outside NotchHost like the bubble;
+             hovering it keeps the notch open. Placed and sized in code (ApplyActivityPanelFrame). -->
+        <Grid x:Name="ActivityPanel" HorizontalAlignment="Center" VerticalAlignment="Top" Opacity="0"
+              Visibility="Collapsed" MouseEnter="OnActivityPanelMouseEnter" MouseLeave="OnActivityPanelMouseLeave">
+            <Grid.RenderTransform>
+                <TranslateTransform x:Name="ActivityPanelShift"/>
+            </Grid.RenderTransform>
+            <Path x:Name="ActivityPanelShape" Fill="{DynamicResource NotchBrush}">
+                <Path.Effect>
+                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
+                </Path.Effect>
+            </Path>
+            <StackPanel x:Name="ActivityStrip" Margin="14,8,10,8" VerticalAlignment="Top"/>
+        </Grid>
+
         <Grid x:Name="NotchHost" HorizontalAlignment="Center" VerticalAlignment="Top"
               MouseEnter="OnNotchMouseEnter" MouseLeave="OnNotchMouseLeave"
               MouseLeftButtonUp="OnNotchClick"

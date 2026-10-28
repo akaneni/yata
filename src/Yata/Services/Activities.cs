@@ -293,6 +293,9 @@ internal sealed class ActivityBoard
         return (previous.State != activity.State ? ActivityChange.StateChanged : ActivityChange.Updated, activity);
     }
 
+    /// <summary>The user put it away (the strip's ×); if its program sends it again, it comes back.</summary>
+    public bool Remove(string id) => _items.RemoveAll(a => a.Id == id) > 0;
+
     /// <summary>Its window closed: clicking it no longer offers to go there.</summary>
     public void ForgetWindow(string id)
     {

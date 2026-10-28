@@ -4,10 +4,13 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Yata.Helpers;
+using Yata.Interop;
 using Yata.Services;
 using Yata.Views;
 using Glyphs = Yata.Services.Glyphs;
@@ -162,6 +165,207 @@ public partial class MainWindow
             _activityExpiry.Start();
         }
         UpdateBubble();
+        UpdateActivityStrip();
+    }
+
+    // ---- The panel beside the open notch ---------------------------------------------
+
+    private const double StripRowHeight = 30;
+    private const double StripMoreHeight = 18;
+    private const int StripMaxRows = 4;
+    private const double PanelMaxWidth = 300;
+    private const double PanelMinWidth = 200;
+    private const double PanelRadius = 16;
+    private int _stripRows;
+    private bool _stripMore;
+    private double _panelWidth = PanelMaxWidth;
+    // Too little room beside the open notch (a narrow screen, the lyrics view): the panel hangs below it.
+    private bool _panelBelow;
+
+    private bool HasActivityPanel => _stripRows > 0;
+
+    private double PanelHeight => _stripRows * StripRowHeight + (_stripMore ? StripMoreHeight : 0) +
+                                  ActivityStrip.Margin.Top + ActivityStrip.Margin.Bottom;
+
+    /// <summary>
+    /// Every activity, while the notch is open, in a second notch beside it: the bubble grown up. The
+    /// bubble shows one at a time; here they're all listed, each with a way to its window and a way to
+    /// put it away. Opening the notch with the keyboard shortcut shows it too, so nothing needs the mouse.
+    /// </summary>
+    private void UpdateActivityStrip()
+    {
+        var items = _activities.Items;
+        int rows = Math.Min(items.Count, StripMaxRows);
+        ActivityStrip.Children.Clear();
+        foreach (var activity in items.Take(rows))
+            ActivityStrip.Children.Add(StripRow(activity));
+        _stripMore = items.Count > rows;
+        if (_stripMore)
+        {
+            var more = new TextBlock
+            {
+                Text = string.Format(CultureInfo.CurrentCulture, Strings.Activity_More, items.Count - rows),
+                FontSize = 11, Height = StripMoreHeight, Margin = new Thickness(30, 0, 0, 0),
+            };
+            more.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondary");
+            ActivityStrip.Children.Add(more);
+        }
+        bool appearing = (rows > 0) != (_stripRows > 0);
+        _stripRows = rows;
+        ShapeActivityPanel();
+        if (appearing && _expanded)
+            UpdateTargets();
+    }
+
+    /// <summary>
+    /// Beside the open notch when there's room on the screen (up to 300 wide, at least 200); below its
+    /// right end otherwise. The window is centered on the notch, so the room is the same on both sides.
+    /// </summary>
+    private void LayoutActivityPanel(double expandedWidth)
+    {
+        var display = Monitors.Resolve(Settings.Monitor);
+        double scale = NativeMethods.ScaleAt(display.X + display.Width / 2, display.Y);
+        double room = display.Width / scale / 2 - expandedWidth / 2 - BubbleGap - 2 * Ear - 8;
+        bool below = room < PanelMinWidth;
+        double width = below ? PanelMaxWidth : Math.Min(PanelMaxWidth, room);
+        if (below == _panelBelow && width == _panelWidth)
+            return;
+        _panelBelow = below;
+        _panelWidth = width;
+        ShapeActivityPanel();
+    }
+
+    private void ShapeActivityPanel()
+    {
+        if (!HasActivityPanel)
+            return;
+        double height = PanelHeight;
+        // Beside the notch it hangs from the screen edge like the notch; below it, it floats.
+        ActivityPanelShape.Data = _panelBelow
+            ? new RectangleGeometry(new Rect(Ear, 0, _panelWidth, height), PanelRadius, PanelRadius)
+            : BuildNotchGeometry(_panelWidth, height, PanelRadius);
+        ActivityStrip.Width = _panelWidth - 24;
+        ActivityStrip.Margin = new Thickness(Ear + 14, 8, 10, 8);
+    }
+
+    /// <summary>Room the panel needs in the window: beside (both sides, centered) or below.</summary>
+    private (double Width, double Height) ActivityPanelRoom =>
+        !HasActivityPanel || !(_expanded || _expand.Value > 0.001) ? (0, 0)
+        : _panelBelow ? (0, BubbleGap + PanelHeight)
+        : (2 * (BubbleGap + _panelWidth + Ear), 0);
+
+    /// <summary>Comes out from under the open notch as it opens, and goes back as it closes.</summary>
+    private void ApplyActivityPanelFrame(double notchWidth, double notchHeight, double progress)
+    {
+        double shown = HasActivityPanel ? Math.Clamp((progress - 0.35) / 0.65, 0, 1) : 0;
+        ActivityPanel.Opacity = shown;
+        ActivityPanel.Visibility = shown > 0.001 ? Visibility.Visible : Visibility.Collapsed;
+        ActivityPanel.IsHitTestVisible = shown > 0.7;
+        if (_panelBelow)
+        {
+            ActivityPanelShift.X = notchWidth / 2 - _panelWidth / 2;
+            ActivityPanelShift.Y = (notchHeight + BubbleGap) * shown;
+        }
+        else
+        {
+            ActivityPanelShift.X = (notchWidth / 2 + BubbleGap + _panelWidth / 2) * shown;
+            ActivityPanelShift.Y = 0;
+        }
+    }
+
+    /// <summary>Moving from the notch onto the panel (or back) keeps the notch open.</summary>
+    private void OnActivityPanelMouseEnter(object sender, MouseEventArgs e)
+    {
+        if (!_pendingExpand)
+            _hoverTimer.Stop();
+    }
+
+    private void OnActivityPanelMouseLeave(object sender, MouseEventArgs e)
+    {
+        if (_expanded && !IsCursorOverNotch() && !TasksPage.HasDraft)
+            ScheduleExpanded(false, 350);
+    }
+
+    private UIElement StripRow(Activity activity)
+    {
+        var row = new Grid { Height = StripRowHeight };
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var glyph = new TextBlock
+        {
+            Text = activity.Glyph, FontSize = 13, HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        glyph.SetResourceReference(TextBlock.FontFamilyProperty, "IconFont");
+        glyph.SetResourceReference(TextBlock.ForegroundProperty, activity.Warning ? "WarningBrush" : "TextPrimary");
+        row.Children.Add(glyph);
+
+        var line = new TextBlock
+        {
+            Text = activity.Line, FontSize = 12, VerticalAlignment = VerticalAlignment.Center,
+            TextTrimming = TextTrimming.CharacterEllipsis, ToolTip = activity.Line,
+        };
+        line.SetResourceReference(TextBlock.ForegroundProperty, activity.Warning ? "WarningBrush" : "TextPrimary");
+        Grid.SetColumn(line, 1);
+        row.Children.Add(line);
+
+        if (activity.Progress is double progress)
+        {
+            var value = new TextBlock
+            {
+                Text = Percent(progress), FontSize = 11, Margin = new Thickness(8, 0, 4, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            value.SetResourceReference(TextBlock.ForegroundProperty, "TextSecondary");
+            Grid.SetColumn(value, 2);
+            row.Children.Add(value);
+        }
+
+        if (activity.Window != null)
+        {
+            var go = StripButton("", Strings.Activity_GoTo, activity);
+            go.Click += (_, _) => GoToStripWindow(activity.Id);
+            Grid.SetColumn(go, 3);
+            row.Children.Add(go);
+        }
+
+        var dismiss = StripButton("", Strings.Activity_Dismiss, activity);
+        dismiss.Click += (_, _) =>
+        {
+            if (_activities.Remove(activity.Id))
+                OnActivitiesChanged();
+        };
+        Grid.SetColumn(dismiss, 4);
+        row.Children.Add(dismiss);
+        return row;
+    }
+
+    /// <summary>A screen reader hears which activity it's for: "Go to its window: Build · compiling".</summary>
+    private static Button StripButton(string glyph, string name, Activity activity)
+    {
+        var button = new Button
+        {
+            Content = glyph, Width = 26, Height = 26, FontSize = 11, Margin = new Thickness(2, 0, 0, 0),
+            ToolTip = name,
+        };
+        button.SetResourceReference(StyleProperty, "IconButton");
+        button.SetResourceReference(ForegroundProperty, "TextSecondary");
+        AutomationProperties.SetName(button, $"{name}: {activity.Line}");
+        return button;
+    }
+
+    private void GoToStripWindow(string id)
+    {
+        var activity = _activities.Items.FirstOrDefault(a => a.Id == id);
+        if (GoToWindow(activity?.Window))
+            return;
+        // Gone: the row loses its button (a notice can't show while the notch is open).
+        _activities.ForgetWindow(id);
+        OnActivitiesChanged();
     }
 
     // ---- The bubble ------------------------------------------------------------------
