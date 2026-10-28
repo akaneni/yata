@@ -22,9 +22,6 @@ Aviso ao conectar fones e mouse, com o nível da bateria, e a lista no notch abe
 ### Controles de chamada
 Silenciar e encerrar Teams/Zoom/Meet/Discord ao lado do ponto laranja do microfone. Verificar o que o Windows 11 expõe (o mute de chamada da barra de tarefas, Win+Alt+K) antes de depender de cada app.
 
-### Lista de atividades no notch aberto
-Hoje a bolha mostra uma atividade (a mais urgente) e o aviso ao passar o mouse diz "+N" quando há outras. Falta um lugar no notch aberto para ver todas, com o andamento de cada uma.
-
 ### Teclado dentro do notch aberto
 Tab e setas entre as abas e os controles (hoje só o Ctrl+Alt+Y e o campo de tarefas usam o teclado).
 
@@ -48,10 +45,11 @@ Não há API limpa para o navegador nem para o Explorer. O caminho viável é pe
 ### Histórico da área de transferência e cotas de IA
 Há demanda no Mac (Atoll, Notchpoint), mas o histórico da área de transferência guarda senhas e dados pessoais; só faria sentido em memória, opt-in e com exclusões.
 
-### Microsoft Store e winget
-O winget espera o instalador estável e assinado (veja [code-signing.md](code-signing.md)); a Store resolveria a assinatura e a identidade de pacote juntas.
+### winget
+O winget espera o instalador estável e assinado (veja [code-signing.md](code-signing.md)).
 
 ## Decidido não fazer
 
 - **Aprovar ou negar permissões dos agentes pelo notch**: o clique leva ao terminal, e a decisão fica na própria ferramenta, com o comando inteiro à vista.
+- **Microsoft Store (MSIX)**: resolveria a assinatura, mas muda o jeito do app (atualização pela Store, dados e caminhos virtualizados, sem limpeza dos hooks ao desinstalar). A assinatura segue pela SignPath Foundation.
 - **Plugins com código de terceiros** dentro do Yata: contradizem a proposta de confiança. O pipe de atividades cobre a maior parte do valor sem carregar código de fora.

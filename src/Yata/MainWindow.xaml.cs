@@ -619,7 +619,8 @@ public partial class MainWindow : Window
         if (!IsVisible || !NativeMethods.GetCursorPos(out var cursor))
             return false;
         var local = NotchHost.PointFromScreen(new Point(cursor.X, cursor.Y));
-        return local.X >= 0 && local.Y >= 0 && local.X <= NotchHost.ActualWidth && local.Y <= NotchHost.ActualHeight;
+        return (local.X >= 0 && local.Y >= 0 && local.X <= NotchHost.ActualWidth && local.Y <= NotchHost.ActualHeight) ||
+               (ActivityPanel.IsVisible && ActivityPanel.IsMouseOver);
     }
 
     private void OnNotchClick(object sender, MouseButtonEventArgs e)
@@ -725,6 +726,7 @@ public partial class MainWindow : Window
             NotchPage.Shelf => ExpandedShelf,
             _ => hasLyrics ? ExpandedLyrics : hasMedia ? ExpandedMedia : weather != null ? ExpandedIdleWeather : ExpandedIdle,
         };
+        LayoutActivityPanel(expanded.Width);
         bool showNews = _newsActive && !_expanded;
         bool showHud = !showNews && _hudActive && !_expanded;
         if (showNews || showHud)
@@ -833,8 +835,11 @@ public partial class MainWindow : Window
         // The bubble beside the notch; the window stays centered on the notch, so room on both sides.
         double bubbleRoom = BubbleShown || _bubble.Value > 0.001 ? 2 * (BubbleGap + BubbleSize + Ear) : 0;
 
-        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom + bubbleRoom;
-        double height = Math.Max(_height.Value, _height.Target) * overshoot + bottomRoom;
+        // The activities panel beside the open notch (or below it, see LayoutActivityPanel).
+        var panel = ActivityPanelRoom;
+
+        double width = Math.Max(_width.Value, _width.Target) * overshoot + 2 * Ear + 2 * sideRoom + Math.Max(bubbleRoom, panel.Width);
+        double height = Math.Max(Math.Max(_height.Value, _height.Target) * overshoot, Math.Max(_height.Value, _height.Target) + panel.Height) + bottomRoom;
         width = Math.Ceiling(width / 2) * 2; // Even, so centering doesn't shift the notch by half a pixel.
         height = Math.Ceiling(height);
 
@@ -931,6 +936,7 @@ public partial class MainWindow : Window
         ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
         ExpandedView.IsHitTestVisible = progress > 0.7;
         ApplyBubbleFrame(width, compactOpacity);
+        ApplyActivityPanelFrame(width, height, progress);
     }
 
     /// <summary>Flat top flush with the screen edge, concave ears, rounded bottom corners.</summary>

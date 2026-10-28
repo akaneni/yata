@@ -48,6 +48,17 @@ public class HostWindowTests
     }
 
     [Fact]
+    public void A_dismissed_activity_comes_back_when_its_program_sends_it_again()
+    {
+        var board = new ActivityBoard();
+        board.Apply(new ActivityRequest(ActivityOp.Set, "a", "Agent", State: ActivityState.Attention), Now);
+        Assert.True(board.Remove("a"));
+        Assert.Equal(0, board.Count);
+        Assert.False(board.Remove("a"));
+        Assert.Equal(ActivityChange.Added, board.Apply(new ActivityRequest(ActivityOp.Set, "a", "Agent"), Now).Change);
+    }
+
+    [Fact]
     public void A_window_that_no_longer_matches_isnt_brought_forward()
     {
         // A handle that doesn't exist, and this test's own process: neither may be focused.
