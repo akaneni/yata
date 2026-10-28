@@ -159,5 +159,6 @@ footer { border-top: 1px solid var(--line) }
 footer .wrap { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; padding-block: 2rem; color: var(--dim) }
 footer .logo svg { height: 22px }
 footer nav { gap: 1.25rem }
+footer .marks { flex-basis: 100%; margin: 0; font-size: .75rem; line-height: 1.5 }
 
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto } .hero-shot { transition: none } }
