@@ -23,7 +23,9 @@ namespace Yata;
 // activities with yata-cli.exe (src/Yata.Cli), through ActivityPipe.
 public partial class MainWindow
 {
-    private const double BubbleSize = 32;
+    // A small pill: the icon in one round end, the ring in the other (see the XAML).
+    private const double BubbleWidth = 54;
+    private const double BubbleHeight = 32;
     // Close enough for the two shapes' ears to meet at the screen edge, as if one split from the other.
     private const double BubbleGap = 6;
     // A runaway script can't flood the notch: past this, requests are refused for a moment.
@@ -40,9 +42,12 @@ public partial class MainWindow
     // The next event, kept even while media has the closed notch, so the bubble can carry it.
     private CalendarEvent? _upcomingEvent;
 
-    /// <summary>What the bubble shows, and the notice hovering it brings up.</summary>
-    private sealed record BubbleItem(string? Glyph, string? Label, double? Progress, bool Warning, HudMessage Detail,
-        bool Dim = false, string? ActivityId = null, HostWindow? Window = null);
+    /// <summary>
+    /// What the bubble shows, and the notice hovering it brings up: the icon on the left; on the right
+    /// the ring (when there's progress), with the label or the badge inside it.
+    /// </summary>
+    private sealed record BubbleItem(string Glyph, string? Label, double? Progress, bool Warning, HudMessage Detail,
+        bool Dim = false, string? Badge = null, string? ActivityId = null, HostWindow? Window = null);
 
     private const string PauseGlyph = "";
 
@@ -50,7 +55,7 @@ public partial class MainWindow
 
     private void StartActivities()
     {
-        BubbleShape.Data = BuildNotchGeometry(BubbleSize, BubbleSize, BubbleSize / 2);
+        BubbleShape.Data = BuildNotchGeometry(BubbleWidth, BubbleHeight, BubbleHeight / 2);
         _activityExpiry.Tick += (_, _) =>
         {
             _activityExpiry.Stop();
@@ -141,7 +146,8 @@ public partial class MainWindow
     {
         string? value = activity.Progress is double p ? Percent(p) : null;
         return new HudMessage(activity.Glyph, activity.Line, value, activity.Progress, activity.Warning,
-            DurationMs: important ? 4500 : 2500, Important: important, Kind: HudKind.Activity, Tag: activity.Id);
+            DurationMs: important ? 4500 : 2500, Important: important, Kind: HudKind.Activity, Tag: activity.Id,
+            Badge: activity.Badge);
     }
 
     private static string PhraseText(string phrase) => phrase switch
@@ -298,14 +304,13 @@ public partial class MainWindow
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         row.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        var glyph = new TextBlock
+        var icon = new IconView
         {
-            Text = activity.Glyph, FontSize = 13, HorizontalAlignment = HorizontalAlignment.Center,
+            Glyph = activity.Glyph, Badge = activity.Badge, Size = 13, HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center,
         };
-        glyph.SetResourceReference(TextBlock.FontFamilyProperty, "IconFont");
-        glyph.SetResourceReference(TextBlock.ForegroundProperty, activity.Warning ? "WarningBrush" : "TextPrimary");
-        row.Children.Add(glyph);
+        icon.SetResourceReference(IconView.ForegroundProperty, activity.Warning ? "WarningBrush" : "TextPrimary");
+        row.Children.Add(icon);
 
         var line = new TextBlock
         {
@@ -382,13 +387,18 @@ public partial class MainWindow
         _bubbleItem = item;
         if (item != null)
         {
-            BubbleGlyph.Text = item.Glyph ?? "";
-            BubbleGlyph.Visibility = item.Glyph == null ? Visibility.Collapsed : Visibility.Visible;
-            BubbleGlyph.SetResourceReference(TextBlock.ForegroundProperty, item.Warning ? "WarningBrush" : "TextPrimary");
+            string brush = item.Warning ? "WarningBrush" : "TextPrimary";
+            BubbleIcon.Glyph = item.Glyph;
+            BubbleIcon.SetResourceReference(IconView.ForegroundProperty, brush);
+            BubbleGlyph.Text = item.Badge ?? "";
+            BubbleGlyph.Visibility = item.Badge == null ? Visibility.Collapsed : Visibility.Visible;
+            BubbleGlyph.SetResourceReference(TextBlock.ForegroundProperty, brush);
             BubbleLabel.Text = item.Label ?? "";
             // "57s" needs a smaller size than "25" to keep clear of the ring.
             BubbleLabel.FontSize = item.Label?.Length > 2 ? 8 : 10;
             BubbleLabel.Visibility = item.Label == null ? Visibility.Collapsed : Visibility.Visible;
+            // Nothing else to say on the right while it runs: a dot, so the pill isn't half empty.
+            BubbleDot.Visibility = item is { Label: null, Badge: null, Progress: null } ? Visibility.Visible : Visibility.Collapsed;
             BubbleTrack.Visibility = item.Progress == null ? Visibility.Collapsed : Visibility.Visible;
             BubbleArc.Data = item.Progress is double progress ? FocusPage.BuildArc(progress, 22, 2) : null;
             BubbleArc.SetResourceReference(System.Windows.Shapes.Shape.StrokeProperty, item.Warning ? "WarningBrush" : "TextPrimary");
@@ -434,7 +444,7 @@ public partial class MainWindow
         double progress = Math.Clamp(1 - left / UpcomingWindow, 0, 1);
         var detail = new HudMessage(Glyphs.Calendar, $"{next.Title} {CalendarReminders.Until(next.Start, now)}",
             DurationMs: 3000);
-        return new BubbleItem(null, minutes.ToString(CultureInfo.InvariantCulture), progress, false, detail);
+        return new BubbleItem(Glyphs.Calendar, minutes.ToString(CultureInfo.InvariantCulture), progress, false, detail);
     }
 
     /// <summary>
@@ -459,12 +469,12 @@ public partial class MainWindow
         string label = remaining < TimeSpan.FromMinutes(1) ? $"{Math.Max(0, (int)Math.Ceiling(remaining.TotalSeconds))}s"
                      : minutes > 99 ? $"{(int)Math.Round(remaining.TotalHours)}h"
                      : minutes.ToString(CultureInfo.InvariantCulture);
-        return new BubbleItem(null, label, 1 - _focus.Progress, false, detail);
+        return new BubbleItem(Glyphs.Timer, label, 1 - _focus.Progress, false, detail);
     }
 
     private static BubbleItem FromActivity(Activity activity) =>
         new(activity.Glyph, null, activity.Progress, activity.Warning, ActivityNotice(activity, false),
-            ActivityId: activity.Id, Window: activity.Window);
+            Badge: activity.Badge, ActivityId: activity.Id, Window: activity.Window);
 
     /// <summary>"Build · 40% · +2", and what a click does when it goes somewhere.</summary>
     private static string BubbleTip(BubbleItem item)
@@ -542,6 +552,6 @@ public partial class MainWindow
         Bubble.Opacity = opacity;
         Bubble.Visibility = opacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
         Bubble.IsHitTestVisible = shown > 0.7 && compactOpacity > 0.7;
-        BubbleShift.X = (notchWidth / 2 + BubbleGap + BubbleSize / 2) * shown;
+        BubbleShift.X = (notchWidth / 2 + BubbleGap + BubbleWidth / 2) * shown;
     }
 }

@@ -112,6 +112,18 @@ public partial class MainWindow
         await Task.Delay(6000); // The announcement in the notch, then the activity moves to the bubble.
         await Shot(dir, "fechado-atividade");
         await Open(dir, "media", "aberto-atividade");
+
+        // An agent done: its mark keeps saying which one, the badge says it finished.
+        SetExpanded(false);
+        HandleActivity(JsonSerializer.Serialize(new { op = "end", id = "vitrine" }));
+        HandleActivity(JsonSerializer.Serialize(new
+        {
+            op = "set", id = "vitrine-agent", title = "Windows Terminal · yata", icon = "claude", state = "done", phrase = "done",
+        }));
+        await Task.Delay(800);
+        await Shot(dir, "fechado-agente-aviso");
+        await Task.Delay(6000);
+        await Shot(dir, "fechado-agente");
     }
 
     /// <summary>The day's events around now; all but the one about to start on the quarter hour, as real ones are.</summary>

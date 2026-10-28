@@ -15,23 +15,32 @@
 
         <!-- Bubble: a second, small notch beside the first for what doesn't fit in it (another program's
              activity, the next meeting while music plays). Outside NotchHost, so hovering it doesn't open
-             the notch; drawn first, so it slides out from under it. Placed in code (ApplyBubbleFrame). -->
+             the notch; drawn first, so it slides out from under it. Placed in code (ApplyBubbleFrame).
+             A small pill: where it comes from on the left (the program's icon, an agent's mark), how
+             it's going on the right (the ring, the minutes, done or failed). Each sits in the middle of
+             its round end. -->
         <Grid x:Name="Bubble" HorizontalAlignment="Center" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed"
               MouseEnter="OnBubbleMouseEnter" MouseLeave="OnBubbleMouseLeave" MouseLeftButtonUp="OnBubbleClick">
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="BubbleShift"/>
             </Grid.RenderTransform>
             <views:SoftShadow x:Name="BubbleShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
-                              BlurRadius="20" Depth="4" ShadowOpacity="0.4" Width="32" Height="32"/>
+                              BlurRadius="20" Depth="4" ShadowOpacity="0.4" Width="54" Height="32"/>
             <Path x:Name="BubbleShape" Fill="{DynamicResource NotchBrush}"/>
-            <Grid x:Name="BubbleContent" Width="22" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
-                <Ellipse x:Name="BubbleTrack" Stroke="{DynamicResource TrackBrush}" StrokeThickness="2"/>
-                <Path x:Name="BubbleArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                <TextBlock x:Name="BubbleGlyph" FontFamily="{StaticResource IconFont}" FontSize="10"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                <!-- Minutes to the next meeting, or left in a focus session -->
-                <TextBlock x:Name="BubbleLabel" FontSize="10" FontWeight="SemiBold" Typography.NumeralAlignment="Tabular"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <Grid x:Name="BubbleContent" Width="54" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <views:IconView x:Name="BubbleIcon" Size="13" Margin="9.5,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <Grid Width="22" Height="22" Margin="0,0,5,0" HorizontalAlignment="Right">
+                    <Ellipse x:Name="BubbleTrack" Stroke="{DynamicResource TrackBrush}" StrokeThickness="2"/>
+                    <Path x:Name="BubbleArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <!-- Done, failed or needs you -->
+                    <TextBlock x:Name="BubbleGlyph" FontFamily="{StaticResource IconFont}" FontSize="10"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <!-- Minutes to the next meeting, or left in a focus session -->
+                    <TextBlock x:Name="BubbleLabel" FontSize="10" FontWeight="SemiBold" Typography.NumeralAlignment="Tabular"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    <!-- Running, with no progress to show -->
+                    <Ellipse x:Name="BubbleDot" Width="5" Height="5" Fill="{DynamicResource TextSecondary}"/>
+                </Grid>
             </Grid>
         </Grid>
 
@@ -159,8 +168,9 @@
                                             <ColumnDefinition Width="*"/>
                                             <ColumnDefinition Width="Auto"/>
                                         </Grid.ColumnDefinitions>
-                                        <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="12"
-                                                   VerticalAlignment="Center"/>
+                                        <views:IconView Glyph="{Binding Glyph}" Size="12" HorizontalAlignment="Left"
+                                                        VerticalAlignment="Center"
+                                                        Foreground="{DynamicResource TextPrimary}"/>
                                         <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="13" VerticalAlignment="Center"
                                                    TextTrimming="CharacterEllipsis"/>
                                         <TextBlock Grid.Column="2" Text="{Binding At, StringFormat=HH:mm}" FontSize="11"
@@ -176,8 +186,7 @@
                 <!-- HUD: transient system status (volume, brightness, battery, Caps Lock, ...) -->
                 <StackPanel x:Name="HudView" Orientation="Horizontal" HorizontalAlignment="Center"
                             Opacity="0" Visibility="Collapsed">
-                    <TextBlock x:Name="HudIcon" FontFamily="{StaticResource IconFont}" FontSize="15"
-                               VerticalAlignment="Center"/>
+                    <views:IconView x:Name="HudIcon" Size="15" VerticalAlignment="Center"/>
                     <!-- Takes the icon's place for small wins -->
                     <views:RavenSprite x:Name="HudRaven" PixelSize="1.5" VerticalAlignment="Center" Visibility="Collapsed"/>
                     <TextBlock x:Name="HudText" Margin="10,0,0,0" MaxWidth="320" FontSize="13" FontWeight="SemiBold"

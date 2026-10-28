@@ -83,6 +83,8 @@ Source: "{#PublishDir}\Yata.exe"; DestDir: "{app}"; Flags: ignoreversion
 ; Console side, for scripts and agents (yata-cli activity ...).
 Source: "{#PublishDir}\yata-cli.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+; The Lobe Icons license, for the agents' marks (Services\BrandMarks.cs).
+Source: "..\THIRD-PARTY-NOTICES.md"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\Yata"; Filename: "{app}\Yata.exe"

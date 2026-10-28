@@ -31,10 +31,10 @@ public class AgentHookTests
     {
         var request = Request("claude", Claude(evt))!;
         Assert.Equal("claude-8f2c-41ab", request.Id);
-        Assert.Equal("Claude Code · yata", request.Title);
+        Assert.Equal("yata", request.Title); // No window in a test: the project alone, the mark names the agent.
         Assert.Equal(state, request.State);
         Assert.Equal(phrase, request.Phrase);
-        Assert.Equal("agent", request.Icon);
+        Assert.Equal("claude", request.Icon);
         Assert.Null(request.Text); // Nothing from the conversation, only the state.
     }
 
@@ -65,7 +65,8 @@ public class AgentHookTests
         var result = AgentHook.Translate("cursor", payload);
         var request = ActivityRequest.Parse(result.Request!, out _)!;
         Assert.Equal("cursor-c1", request.Id);
-        Assert.Equal("Cursor · site", request.Title);
+        Assert.Equal("site", request.Title);
+        Assert.Equal("cursor", request.Icon);
         Assert.Equal(state, request.State);
         Assert.Equal(output, result.Output);
     }
@@ -100,7 +101,8 @@ public class AgentHookTests
         var result = AgentHook.Translate("codex", $$"""{"session_id":"s9","cwd":"D:\\work\\api","hook_event_name":"{{evt}}"}""");
         var request = ActivityRequest.Parse(result.Request!, out _)!;
         Assert.Equal("codex-s9", request.Id);
-        Assert.Equal("Codex · api", request.Title);
+        Assert.Equal("api", request.Title);
+        Assert.Equal("codex", request.Icon);
         Assert.Equal(state, request.State);
         // Codex adds whatever UserPromptSubmit prints to the conversation: it must stay silent.
         Assert.Equal(output, result.Output);
@@ -154,6 +156,26 @@ public class AgentHookTests
         var longOne = Request("claude", $$"""{"session_id":"{{new string('x', 100)}}","hook_event_name":"Stop"}""")!;
         Assert.Equal(64, longOne.Id.Length);
         Assert.Equal("Claude Code", Request("claude", """{"hook_event_name":"Stop"}""")!.Title);
+    }
+
+    [Theory]
+    [InlineData("Orca", "teste", "Orca · teste")]
+    [InlineData("Orca", "", "Orca")]
+    [InlineData(null, "teste", "teste")]
+    [InlineData(null, "", "Claude Code")]
+    public void The_title_names_where_it_runs_and_the_mark_names_the_agent(string? host, string project, string title)
+    {
+        Assert.Equal(title, AgentHook.Title("Claude Code", project, host));
+    }
+
+    [Fact]
+    public void The_window_says_which_program_it_belongs_to()
+    {
+        // The test host is a .NET program with a product name of its own.
+        using var self = System.Diagnostics.Process.GetCurrentProcess();
+        string? name = new HostWindow(1, self.Id).AppName();
+        Assert.False(string.IsNullOrEmpty(name));
+        Assert.DoesNotContain("Windows®", name);
     }
 
     [Theory]

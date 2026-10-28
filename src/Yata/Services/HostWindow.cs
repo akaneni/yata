@@ -65,6 +65,50 @@ public sealed record HostWindow(long Handle, int ProcessId)
         return SetForegroundWindow(window);
     }
 
+    /// <summary>
+    /// The program the window belongs to, as it calls itself ("Orca", "Windows Terminal", "Visual
+    /// Studio Code"): its product name, or its description when the product is Windows itself. Null
+    /// for the plain console window, which says nothing about where you are, and when it can't be read.
+    /// </summary>
+    public string? AppName()
+    {
+        try
+        {
+            if (ImagePath(ProcessId) is not string path)
+                return null;
+            string exe = System.IO.Path.GetFileNameWithoutExtension(path);
+            if (exe.Equals("conhost", StringComparison.OrdinalIgnoreCase) || exe.Equals("OpenConsole", StringComparison.OrdinalIgnoreCase))
+                return null;
+            var info = FileVersionInfo.GetVersionInfo(path);
+            return Usable(info.ProductName) ?? Usable(info.FileDescription);
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            return null;
+        }
+    }
+
+    // "Microsoft® Windows® Operating System", in any language, names no program.
+    private static string? Usable(string? name) =>
+        string.IsNullOrWhiteSpace(name) || name.Contains("Windows®", StringComparison.Ordinal) ? null : name.Trim();
+
+    private static string? ImagePath(int pid)
+    {
+        nint process = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+        if (process == 0)
+            return null;
+        try
+        {
+            var buffer = new System.Text.StringBuilder(1024);
+            int size = buffer.Capacity;
+            return QueryFullProcessImageName(process, 0, buffer, ref size) ? buffer.ToString() : null;
+        }
+        finally
+        {
+            CloseHandle(process);
+        }
+    }
+
     /// <summary>The request's <c>"window"</c> field: <c>{"handle": 123, "pid": 456}</c>.</summary>
     public void WriteTo(System.Collections.Generic.IDictionary<string, object> request) =>
         request["window"] = new System.Collections.Generic.Dictionary<string, object> { ["handle"] = Handle, ["pid"] = ProcessId };
@@ -172,6 +216,9 @@ public sealed record HostWindow(long Handle, int ProcessId)
 
     [DllImport("kernel32.dll")]
     private static extern bool CloseHandle(nint handle);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, EntryPoint = "QueryFullProcessImageNameW")]
+    private static extern bool QueryFullProcessImageName(nint process, int flags, System.Text.StringBuilder name, ref int size);
 
     [DllImport("kernel32.dll")]
     private static extern bool GetProcessTimes(nint process, out long creation, out long exit, out long kernel, out long user);
