@@ -40,14 +40,15 @@ public sealed class UpdateInstaller
         if (!UpdateChecker.IsNewer(installer.Version, UpdateChecker.Current))
             throw new UpdateException(Strings.Update_UpToDate);
 
-        // Only the installer about to run is kept; older ones are leftovers.
-        if (Directory.Exists(_folder))
-            Directory.Delete(_folder, recursive: true);
-        Directory.CreateDirectory(_folder);
         string path = Path.Combine(_folder, $"Yata-Setup-{installer.Version}.exe");
-
         try
         {
+            // Only the installer about to run is kept; older ones are leftovers. One still open (or
+            // held by an antivirus) makes this fail, and that's a failed update, not a stuck button.
+            if (Directory.Exists(_folder))
+                Directory.Delete(_folder, recursive: true);
+            Directory.CreateDirectory(_folder);
+
             using var response = await Http.GetAsync(installer.Url, HttpCompletionOption.ResponseHeadersRead, ct);
             if (!IsAllowed(response.RequestMessage?.RequestUri))
                 throw new UpdateException(Strings.Update_Failed);

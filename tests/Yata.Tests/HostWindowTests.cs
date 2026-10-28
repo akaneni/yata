@@ -68,11 +68,18 @@ public class HostWindowTests
             Window: Terminal), Now.AddSeconds(-30));
 
         Assert.Equal("agent", board.NextWithWindow(null)!.Id);
-        Assert.Equal("build", board.NextWithWindow("agent")!.Id);
-        Assert.Equal("agent", board.NextWithWindow("build")!.Id);
+        Assert.Equal("agent", board.NextWithWindow("agent")!.Id); // The build is only working.
         Assert.Equal("agent", board.NextWithWindow("gone")!.Id);
 
+        board.Apply(new ActivityRequest(ActivityOp.Set, "agent2", "Agent 2", State: ActivityState.Attention,
+            Window: new HostWindow(2, 2)), Now);
+        Assert.Equal("agent2", board.NextWithWindow("agent")!.Id);
+        Assert.Equal("agent", board.NextWithWindow("agent2")!.Id);
+
+        // Nothing waits on you: then any activity with a window.
         board.ForgetWindow("agent");
+        board.ForgetWindow("agent2");
+        Assert.Equal("build", board.NextWithWindow(null)!.Id);
         board.ForgetWindow("build");
         Assert.Null(board.NextWithWindow(null));
     }

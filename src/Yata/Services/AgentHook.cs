@@ -26,6 +26,8 @@ internal static class AgentHook
 
     private enum Status { Working, Permission, Waiting, Done, Failed, Ended }
 
+    internal static readonly TimeSpan AgentWorkingTtl = TimeSpan.FromHours(1);
+
     private static readonly Regex Unsafe = new("[^A-Za-z0-9._:-]", RegexOptions.Compiled);
 
     /// <param name="window">The agent's terminal or editor, so a click on the activity goes there.</param>
@@ -161,6 +163,11 @@ internal static class AgentHook
                 _ => "working",
             },
         };
+        // A long tool (a 20-minute build) sends nothing until it ends: without this, "working" would
+        // expire at the default 10 minutes and come back as a new activity. The session's own end
+        // (Stop, SessionEnd) clears it anyway; the TTL only covers an agent that died.
+        if (status == Status.Working)
+            request["ttl"] = (int)AgentWorkingTtl.TotalSeconds;
         window?.WriteTo(request);
         return JsonSerializer.Serialize(request);
     }

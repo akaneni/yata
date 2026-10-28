@@ -103,7 +103,19 @@ public class CalendarTests
             """));
     }
 
+    [Fact]
+    public void New_Teams_domain_and_Safe_Links_are_found()
+    {
+        Assert.Equal("https://teams.cloud.microsoft/meet/123?p=x", Link("""
+            {"description":"Entrar: https://teams.cloud.microsoft/meet/123?p=x"}
+            """));
+        Assert.Equal("https://teams.microsoft.com/l/meetup-join/19", Link("""
+            {"description":"https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fteams.microsoft.com%2Fl%2Fmeetup-join%2F19&data=05"}
+            """));
+    }
+
     [Theory]
+    [InlineData("""{"description":"https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fevil.example.com%2F"}""")]
     [InlineData("""{"description":"https://evil.example.com/meet.google.com"}""")]
     [InlineData("""{"description":"http://meet.google.com/abc"}""")]
     [InlineData("""{"description":"https://zoom.us.evil.com/j/1"}""")]

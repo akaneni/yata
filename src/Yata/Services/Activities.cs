@@ -307,10 +307,14 @@ internal sealed class ActivityBoard
     /// <summary>
     /// The next activity with a window to go to, in the order of Items: the one right after
     /// <paramref name="afterId"/>, wrapping around, or the most pressing when it's null or gone.
+    /// While something needs you, only those take turns: the key is for what's waiting on you, not
+    /// for an agent that's just working.
     /// </summary>
     public Activity? NextWithWindow(string? afterId)
     {
         var withWindow = Items.Where(a => a.Window != null).ToList();
+        if (withWindow.Any(a => a.Warning))
+            withWindow.RemoveAll(a => !a.Warning);
         if (withWindow.Count == 0)
             return null;
         int index = afterId == null ? -1 : withWindow.FindIndex(a => a.Id == afterId);
