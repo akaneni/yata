@@ -29,7 +29,7 @@ internal static class Diagnostics
             .AppendLine($"Notch na tela: {(settings.Monitor == null ? "principal" : "escolhida")}")
             .AppendLine($"Idioma: {settings.Language ?? $"do Windows ({Lang.FromWindows})"}")
             .AppendLine($"Letras: {OnOff(settings.LyricsEnabled)} · Tempo: {OnOff(settings.WeatherEnabled)} · " +
-                        $"Aviso de versão: {OnOff(settings.UpdateCheckEnabled)} · Atalho: {OnOff(settings.HotkeyEnabled)}")
+                        $"Aviso de versão: {OnOff(settings.UpdateCheckEnabled)} · Atalho: {OnOff(settings.HotkeyEnabled)} · Ir ao agente: {OnOff(settings.JumpHotkeyEnabled)}")
             .AppendLine($"Conta Google: {google} · Agenda no notch fechado: {OnOff(settings.CalendarInCompact)} · " +
                         $"Sincronizar tarefas: {OnOff(settings.TasksSyncEnabled)}")
             .AppendLine($"Yata companheiro: {OnOff(settings.CompanionEnabled)} · Esconder em tela cheia: {OnOff(settings.HideInFullscreen)}")

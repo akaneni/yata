@@ -304,6 +304,19 @@ internal sealed class ActivityBoard
             _items[index] = _items[index] with { Window = null };
     }
 
+    /// <summary>
+    /// The next activity with a window to go to, in the order of Items: the one right after
+    /// <paramref name="afterId"/>, wrapping around, or the most pressing when it's null or gone.
+    /// </summary>
+    public Activity? NextWithWindow(string? afterId)
+    {
+        var withWindow = Items.Where(a => a.Window != null).ToList();
+        if (withWindow.Count == 0)
+            return null;
+        int index = afterId == null ? -1 : withWindow.FindIndex(a => a.Id == afterId);
+        return withWindow[(index + 1) % withWindow.Count];
+    }
+
     /// <summary>Drops what nobody updated in time (a script that died midway). True if any went.</summary>
     public bool Prune(DateTime now) => _items.RemoveAll(a => a.Expires <= now) > 0;
 

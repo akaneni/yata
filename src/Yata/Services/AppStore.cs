@@ -42,6 +42,8 @@ public sealed class SettingsData
     public string? Monitor { get; set; }
     /// <summary>Ctrl+Alt+Y opens and closes the notch.</summary>
     public bool HotkeyEnabled { get; set; } = true;
+    /// <summary>Ctrl+Alt+J goes to the window of the activity that needs you. Off unless the user opts in.</summary>
+    public bool JumpHotkeyEnabled { get; set; }
 
     // Media
     public bool LyricsEnabled { get; set; } = true;
