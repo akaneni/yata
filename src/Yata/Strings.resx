@@ -42,6 +42,8 @@
   <data name="Settings_HideFromCapture" xml:space="preserve"><value>Hide from recordings and screen sharing</value></data>
   <data name="Settings_HideFromCaptureHint" xml:space="preserve"><value>People watching your screen in a call or recording don't see the notch. You still do.</value></data>
   <data name="Settings_HoverDelay" xml:space="preserve"><value>Open on hover after</value></data>
+  <data name="Settings_CalmMotion" xml:space="preserve"><value>Calm motion</value></data>
+  <data name="Settings_CalmMotionHint" xml:space="preserve"><value>The notch opens and closes without the spring's bounce.</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Album art color as accent</value></data>
   <data name="Settings_AccentHint" xml:space="preserve"><value>When off, everything stays black and white.</value></data>
   <data name="Settings_Updates" xml:space="preserve"><value>Updates</value></data>

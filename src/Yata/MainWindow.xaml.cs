@@ -792,6 +792,7 @@ public partial class MainWindow : Window
                     : _peeking ? new Size(compact.Width + PeekWidth, compact.Height + PeekHeight)
                     : compact;
 
+        ShapeMotion();
         _width.Target = target.Width;
         _height.Target = target.Height;
         _radius.Target = _expanded ? ExpandedRadius : showNews ? 22 : CompactRadius;
@@ -810,12 +811,14 @@ public partial class MainWindow : Window
         LyricsPanel.Visibility = hasLyrics ? Visibility.Visible : Visibility.Collapsed;
         LyricsDivider.Visibility = LyricsPanel.Visibility;
 
-        MediaPage.Visibility = _page == NotchPage.Media ? Visibility.Visible : Visibility.Collapsed;
-        AgendaPage.Visibility = _page == NotchPage.Agenda ? Visibility.Visible : Visibility.Collapsed;
-        FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Collapsed;
-        WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Collapsed;
-        TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Collapsed;
-        ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Collapsed;
+        // Hidden, not collapsed: the other pages stay laid out, so switching to one doesn't lay out a
+        // whole page (a song's lyrics, a long task list) in the middle of the slide.
+        MediaPage.Visibility = _page == NotchPage.Media ? Visibility.Visible : Visibility.Hidden;
+        AgendaPage.Visibility = _page == NotchPage.Agenda ? Visibility.Visible : Visibility.Hidden;
+        FocusPage.Visibility = _page == NotchPage.Focus ? Visibility.Visible : Visibility.Hidden;
+        WaterPage.Visibility = _page == NotchPage.Water ? Visibility.Visible : Visibility.Hidden;
+        TasksPage.Visibility = _page == NotchPage.Tasks ? Visibility.Visible : Visibility.Hidden;
+        ShelfPage.Visibility = _page == NotchPage.Shelf ? Visibility.Visible : Visibility.Hidden;
 
         // Yata only fidgets beside the idle clock while it can be seen.
         if (_expanded && _page == NotchPage.Media && !hasMedia)
@@ -825,6 +828,26 @@ public partial class MainWindow : Window
 
         FitWindow(allowShrink: false);
         StartAnimation();
+    }
+
+    /// <summary>
+    /// Opening springs out with a slight overshoot (none with calm motion). Closing is quicker and
+    /// doesn't bounce: getting the notch out of the way should feel immediate.
+    /// </summary>
+    private void ShapeMotion()
+    {
+        var (stiffness, damping) = (_expanded, Settings.CalmMotion) switch
+        {
+            (true, false) => (380.0, 0.72),
+            (true, true) => (420.0, 1.0),
+            (false, false) => (520.0, 0.86),
+            (false, true) => (600.0, 1.0),
+        };
+        foreach (var spring in new[] { _width, _height, _radius, _expand })
+        {
+            spring.Stiffness = stiffness;
+            spring.DampingRatio = damping;
+        }
     }
 
     /// <summary>
@@ -984,7 +1007,8 @@ public partial class MainWindow : Window
 
         double progress = _expand.Value;
         double compactOpacity = Math.Clamp(1 - progress * 3, 0, 1);
-        double expandedOpacity = Math.Clamp((progress - 0.35) / 0.65, 0, 1);
+        // Starts before the compact view is gone (at a third), so the notch is never empty midway.
+        double expandedOpacity = Math.Clamp((progress - 0.25) / 0.6, 0, 1);
         double overlay = Math.Clamp(_hud.Value, 0, 1);
         double ambient = Math.Clamp(_ambient.Value, 0, 1);
         double underOverlay = compactOpacity * (1 - overlay);
@@ -998,7 +1022,8 @@ public partial class MainWindow : Window
         foreach (var view in new UIElement[] { CompactView, AmbientView, HudView, NewsView })
             view.Visibility = view.Opacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
         ExpandedView.Opacity = expandedOpacity;
-        ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Collapsed;
+        // Hidden rather than collapsed for the same reason: opening doesn't lay out the page mid-motion.
+        ExpandedView.Visibility = expandedOpacity > 0.001 ? Visibility.Visible : Visibility.Hidden;
         ExpandedView.IsHitTestVisible = progress > 0.7;
         ApplyBubbleFrame(width, compactOpacity);
         ApplyActivityPanelFrame(width, height, progress);

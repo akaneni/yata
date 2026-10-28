@@ -42,6 +42,8 @@
   <data name="Settings_HideFromCapture" xml:space="preserve"><value>Esconder de gravações e do compartilhamento de tela</value></data>
   <data name="Settings_HideFromCaptureHint" xml:space="preserve"><value>Quem vê a sua tela numa chamada ou gravação não vê o notch. Você continua vendo.</value></data>
   <data name="Settings_HoverDelay" xml:space="preserve"><value>Abrir ao passar o mouse após</value></data>
+  <data name="Settings_CalmMotion" xml:space="preserve"><value>Movimento sóbrio</value></data>
+  <data name="Settings_CalmMotionHint" xml:space="preserve"><value>O notch abre e fecha sem o balanço da mola.</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Cor da capa como destaque</value></data>
   <data name="Settings_AccentHint" xml:space="preserve"><value>Desligado, tudo fica em preto e branco.</value></data>
   <data name="Settings_Updates" xml:space="preserve"><value>Atualizações</value></data>

@@ -287,6 +287,15 @@
                     <Border Style="{StaticResource Divider}"/>
                     <views:SettingRow Style="{StaticResource Row}">
                         <StackPanel VerticalAlignment="Center" Margin="0,8">
+                            <TextBlock Text="{x:Static y:Strings.Settings_CalmMotion}" Style="{StaticResource Label}"/>
+                            <TextBlock Text="{x:Static y:Strings.Settings_CalmMotionHint}" Style="{StaticResource Hint}"/>
+                        </StackPanel>
+                        <CheckBox Style="{StaticResource Switch}" HorizontalAlignment="Right"
+                                  IsChecked="{Binding Settings.CalmMotion}"/>
+                    </views:SettingRow>
+                    <Border Style="{StaticResource Divider}"/>
+                    <views:SettingRow Style="{StaticResource Row}">
+                        <StackPanel VerticalAlignment="Center" Margin="0,8">
                             <TextBlock Text="{x:Static y:Strings.Settings_Accent}" Style="{StaticResource Label}"/>
                             <TextBlock Text="{x:Static y:Strings.Settings_AccentHint}" Style="{StaticResource Hint}"/>
                         </StackPanel>
