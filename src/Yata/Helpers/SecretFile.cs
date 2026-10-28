@@ -35,9 +35,7 @@ internal static class SecretFile
     {
         byte[] cipher = ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(value), Entropy, DataProtectionScope.CurrentUser);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        string temp = path + ".tmp";
-        File.WriteAllBytes(temp, cipher);
-        File.Move(temp, path, overwrite: true);
+        AtomicFile.Write(path, cipher);
     }
 
     public static void Delete(string path)

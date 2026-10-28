@@ -14,7 +14,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 **Acesso à rede:** só o que você liga, e nada sobre o PC é enviado:
 - busca de letras no [LRCLIB](https://lrclib.net) (serviço aberto e gratuito), enviando apenas artista, título e duração da música. As letras ficam em cache em `%LOCALAPPDATA%\Yata\lyrics`. Pode ser desligada nas configurações.
-- aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. **Procurar agora** (Configurações → Atualizações, ou o menu da bandeja) consulta na hora, ligado ou não. Atualizar leva um clique (**Atualizar e reiniciar** nas Configurações): o instalador vem do GitHub e é conferido com o SHA-256 publicado antes de rodar.
+- aviso de versão nova: **desligado por padrão**. Se ligado, consulta uma vez por dia a [página pública de versões](https://github.com/akaneni/yata/releases) do GitHub. **Procurar agora** (Configurações → Atualizações, ou o menu da bandeja) consulta na hora, ligado ou não. Atualizar leva um clique (**Atualizar e reiniciar** nas Configurações): o instalador vem do GitHub e é conferido com o SHA-256 publicado antes de rodar; quando o Yata passar a ser assinado, ele também precisa ter a assinatura do mesmo editor.
 - **tempo** no [Open-Meteo](https://open-meteo.com) (aberto, sem conta nem chave), só se você ligar: envia as coordenadas da cidade escolhida, arredondadas para ~1 km. A busca da cidade envia só o nome digitado.
 - **Google Agenda e Google Tasks**, só se você conectar sua conta e liberar cada um: leitura das agendas e dos eventos de hoje e amanhã, e sincronização de uma lista de tarefas, direto entre o PC e o Google. O acesso fica cifrado com DPAPI em `%LOCALAPPDATA%\Yata\google.dat` e os eventos ficam só na memória. Detalhes em [PRIVACY.pt-BR.md](PRIVACY.pt-BR.md).
 
@@ -31,6 +31,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 ## Funcionalidades (v0.1)
 
+- **Boas-vindas**: na primeira vez, as Configurações abrem com o que dá para fazer no notch e as escolhas que são suas (lembrete de água, aviso de versão nova). O menu da bandeja tem **Abrir o Yata**.
 - **Português e inglês**: segue o idioma do Windows (português em qualquer Windows em português, inglês nos demais), ou escolha em Configurações → Idioma.
 - **Notch compacto**: relógio quando nada toca; capa, título e equalizador animado quando há mídia.
 - **Expande ao passar o mouse** com animação de mola; recolhe ao sair.
@@ -44,8 +45,8 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Agenda (Google)**: conecte com sua conta Google (OAuth, só leitura) e escolha quais agendas aparecem. A aba mostra hoje e amanhã, destaca o evento em andamento e tem o botão **Entrar** para chamadas do Meet, Zoom e Teams. O notch fechado mostra "Daily em 8 min" nos 15 minutos antes, e chega um aviso (com som) alguns minutos antes, configurável, e outro quando o evento começa. Convites recusados não aparecem. Para cadastrar o app no Google, veja [docs/google-calendar.md](docs/google-calendar.md).
 - **Tempo** (desligado por padrão): você escolhe a cidade pelo nome ou, se preferir, com uma leitura única da localização do Windows (arredondada para ~1 km na hora, nunca guardada com precisão). Nada de geolocalização por IP. Ícones em pixel art 1-bit no estilo do Yata. O notch fechado mostra ícone e temperatura ao lado do relógio; aberto sem música, mostra condição, máxima/mínima e a chuva prevista. Chega um aviso quando a chance de chuva passa de 60% nas próximas 2 horas. Dados do tempo: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
 - **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
-- **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete de hora em hora (8h–22h) enquanto a meta não é batida.
-- **Tarefas**: lista com marcar/remover (remover pode ser desfeito por alguns segundos); um horário no fim do texto ("Reunião 15:30", "ligar às 9h00", "Call Ana at 3pm") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
+- **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete opcional de hora em hora (8h–22h) enquanto a meta não é batida (desligado até você ligar, nas boas-vindas ou nas Configurações).
+- **Tarefas**: lista com marcar/remover (remover pode ser desfeito por alguns segundos); um horário no fim do texto ("Reunião 15:30", "ligar às 9h", "Call Ana at 3pm") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
 - **Prateleira de arquivos**: arraste arquivos ou pastas até o notch para guardar e arraste de volta para qualquer app; clique duplo abre. Guarda só o caminho (nada é copiado) e itens apagados/movidos somem sozinhos. Imagens ganham miniatura. "Limpar" também pode ser desfeito por alguns segundos.
 - **O Yata (companheiro)**, a partir do tempo desde o último uso de mouse/teclado (`GetLastInputInfo` — só o horário, nunca o conteúdo):
   - **Modo ambiente** (2 min parado, nada tocando): o relógio dá lugar ao Yata pousado, que pisca, olha em volta e se ajeita; aos 10 min ele cochila.
@@ -60,6 +61,8 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Bolha ao lado do notch**: como a ilha do iPhone se dividindo em duas, um segundo notch pequeno leva o que não cabe no primeiro: enquanto a música ocupa o notch, a contagem do foco (um anel esvaziando em volta dos minutos que faltam) e a próxima reunião vão para lá, assim como as atividades de outros programas. Uma de cada vez, por prioridade (o que precisa de você, a reunião, o foco, as atividades); passe o mouse para ver o que é e quantas outras estão esperando. Clicar numa atividade leva você à janela de onde ela veio (o terminal em que o agente pede uma permissão, por exemplo), e você responde lá. Com o notch aberto, a bolha vira um segundo notch ao lado dele com todas as atividades, cada uma com um botão para ir à janela e outro para dispensar.
 - **Atividades de outros programas** (scripts, builds, agentes de IA): podem mostrar o andamento na bolha com o `yata-cli`. Veja [Atividades](#atividades) abaixo. Pode ser desligado nas Configurações.
 - **Some em tela cheia** (vídeos, jogos, apresentações).
+- **Fora do compartilhamento de tela e das gravações**: numa chamada do Teams/Meet/Zoom, numa live do OBS ou num print, o notch não é capturado, então a próxima reunião, suas tarefas e o projeto do agente não aparecem para os outros (você continua vendo). Ligado por padrão; o `--show` deixa o notch capturável para prévias.
+- **O som vem junto com o lembrete**: um lembrete que esperou o jogo em tela cheia toca quando aparece, não no meio da partida. Sem som com o microfone em uso (uma chamada) ou quando o Windows pede para não perturbar, e dá para desligar. Um lembrete que esperou e deixou de valer ("Daily em 5 min" depois que a reunião começou) é descartado em vez de aparecer atrasado.
 - Não rouba o foco, não aparece no Alt+Tab nem na barra de tarefas. Sair pelo ícone na bandeja.
 
 ## Instalar
@@ -67,7 +70,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 Baixe `Yata-Setup-x.y.z.exe` em [Releases](https://github.com/akaneni/yata/releases) (~3 MB). O instalador:
 
 - instala só para o seu usuário, sem pedir administrador;
-- se faltar o **.NET 10 Desktop Runtime**, baixa direto da Microsoft e instala (essa etapa pede permissão de administrador);
+- se faltar o **.NET 10 Desktop Runtime**, baixa direto da Microsoft, confere que é assinado pela Microsoft e instala (essa etapa pede permissão de administrador);
 - oferece iniciar com o Windows e atalho na área de trabalho;
 - na desinstalação, remove o app e a inicialização automática, mas **mantém seus dados** em `%LOCALAPPDATA%\Yata`.
 
@@ -115,7 +118,7 @@ yata-cli activity end agent
 - **Mande o `--title` sempre.** Uma atividade em andamento que ninguém atualiza some depois de 10 minutos (`--ttl` muda isso, até 24 h), e um id que sumiu precisa do título para voltar. `attention` e `fail` ficam até um `end` (no máximo 1 h); `done` fica 12 s. `end` num id que já sumiu não dá erro.
 - Ícones: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. Um conjunto fixo: programas não mandam imagens nem glifos quaisquer.
 - O texto é uma linha simples (títulos até 60 caracteres, texto até 120); caracteres de controle, invisíveis e de mudança de direção são removidos.
-- No máximo 8 atividades ao mesmo tempo, e 30 pedidos a cada 10 s. Nada é impresso quando dá certo.
+- No máximo 8 atividades ao mesmo tempo, e 60 pedidos a cada 10 s. Nada é impresso quando dá certo.
 - Códigos de saída: 0 mostrou, 1 argumentos errados (opção, ícone ou valor desconhecido), 2 o Yata não está aberto, 3 recusado pelo Yata (o motivo é impresso).
 - Como funciona: um named pipe que só o seu usuário do Windows abre e que recusa acesso pela rede. As atividades ficam só na memória; o texto delas não vai para o log.
 

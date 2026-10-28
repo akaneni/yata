@@ -54,6 +54,16 @@ public partial class MainWindow
         }
     }
 
+    /// <summary>Opens the notch for a while, as Ctrl+Alt+Y does (the tray menu's "Open Yata").</summary>
+    public void OpenNotch()
+    {
+        if (!IsVisible || _expanded)
+            return;
+        _hoverTimer.Stop();
+        _pinnedUntil = DateTime.Now + HotkeyPin;
+        SetExpanded(true);
+    }
+
     private void OnHotkey(int id)
     {
         if (id == JumpHotkeyId)

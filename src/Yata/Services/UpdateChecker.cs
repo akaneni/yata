@@ -89,9 +89,12 @@ public sealed class UpdateChecker
         try
         {
             string? latest = await _fetch();
-            Data.LastCheck = now;
+            // Offline right after logging on isn't the day's check: the next round tries again.
             if (latest != null)
+            {
+                Data.LastCheck = now;
                 Data.Latest = latest.Trim().TrimStart('v', 'V');
+            }
             _store.SaveSoon();
             Announce();
             Changed?.Invoke();

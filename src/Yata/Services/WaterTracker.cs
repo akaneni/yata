@@ -89,7 +89,8 @@ public sealed class WaterTracker
 
         _lastReminder = now;
         Message?.Invoke(new HudMessage(Glyphs.Water, Strings.Water_Reminder, $"{TodayMl}/{GoalMl} ml",
-            (double)TodayMl / GoalMl, DurationMs: 4000, Important: true));
+            (double)TodayMl / GoalMl, DurationMs: 4000, Important: true,
+            Tag: "water", Expires: now.AddMinutes(Data.ReminderMinutes)));
     }
 
     private int AmountOn(DateTime day) => Data.Days.TryGetValue(Key(day), out int ml) ? ml : 0;

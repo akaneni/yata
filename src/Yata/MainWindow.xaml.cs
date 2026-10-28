@@ -252,6 +252,7 @@ public partial class MainWindow : Window
 
         PositionWindow();
         UpdateHotkey();
+        ApplyCaptureExclusion();
 
         _fullscreen = new FullscreenWatcher(hwnd);
         _fullscreen.Changed += OnFullscreenChanged;
@@ -483,6 +484,19 @@ public partial class MainWindow : Window
 
     private void OnSettingsClick(object sender, RoutedEventArgs e) => OpenSettings();
 
+    /// <summary>
+    /// First start: the settings open on a welcome card with what the notch does and the choices
+    /// that are the user's (water reminders, update check). Saved right away, so it shows once.
+    /// </summary>
+    public void WelcomeIfNew()
+    {
+        if (!_store.IsNew || Bench != null)
+            return;
+        _store.SaveNow();
+        OpenSettings();
+        _settingsWindow?.ShowWelcome();
+    }
+
     /// <summary>Everything the settings window can change, re-applied live.</summary>
     private void OnSettingsChanged()
     {
@@ -505,6 +519,7 @@ public partial class MainWindow : Window
         UpdateClock();
         PositionWindow();
         UpdateHotkey();
+        ApplyCaptureExclusion();
         _ = _updates.CheckIfDueAsync(); // Just switched on: look now rather than within the hour.
         UpdateShown();
         UpdatePrivacy();
@@ -590,6 +605,8 @@ public partial class MainWindow : Window
             _ => TabMedia,
         };
         tab.IsChecked = true;
+        _capturable = true;
+        ApplyCaptureExclusion();
         _pinnedUntil = DateTime.Now.AddSeconds(Math.Clamp(seconds, 1, 300));
         _hoverTimer.Stop();
         SetExpanded(true);

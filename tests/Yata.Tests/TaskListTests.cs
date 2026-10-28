@@ -7,11 +7,10 @@ public class TaskListTests
 {
     private DateTime _now = new(2026, 10, 26, 14, 0, 0);
     private readonly List<HudMessage> _messages = new();
-    private int _chimes;
 
     private TaskList NewList()
     {
-        var list = new TaskList(AppStore.InMemory(), () => _now, () => _chimes++);
+        var list = new TaskList(AppStore.InMemory(), () => _now);
         list.Message += _messages.Add;
         return list;
     }
@@ -19,6 +18,8 @@ public class TaskListTests
     [Theory]
     [InlineData("Reunião 15:30", "Reunião", 15, 30)]
     [InlineData("ligar às 9h05", "ligar", 9, 5)]
+    [InlineData("ligar às 9h", "ligar", 9, 0)]
+    [InlineData("Reunião as 15h", "Reunião", 15, 0)]
     [InlineData("pagar conta as 18:00", "pagar conta", 18, 0)]
     [InlineData("Call Ana at 3pm", "Call Ana", 15, 0)]
     [InlineData("Dentist 9:30 am", "Dentist", 9, 30)]
@@ -55,6 +56,8 @@ public class TaskListTests
     [InlineData("Room 13pm")]      // no 13 o'clock on a 12-hour clock
     [InlineData("Shift 0am")]
     [InlineData("Read chapter 3")]
+    [InlineData("estudar 2h")]     // how long, not when
+    [InlineData("ligar às 25h")]
     public void Text_without_a_valid_trailing_time_has_no_due(string input)
     {
         var list = NewList();
@@ -106,7 +109,7 @@ public class TaskListTests
         Assert.Equal("Reunião", message.Text);
         Assert.Equal("14:30", message.Value);
         Assert.True(message.Important);
-        Assert.Equal(1, _chimes);
+        Assert.True(message.Chime);
     }
 
     [Fact]

@@ -26,8 +26,12 @@ internal static class CalendarEvents
     // Hosts whose links are video calls. Anything else in a description is left alone.
     private static readonly string[] MeetingHosts =
     {
-        "meet.google.com", "zoom.us", "teams.microsoft.com", "teams.live.com", "webex.com", "whereby.com", "meet.jit.si",
+        "meet.google.com", "zoom.us", "zoomgov.com", "teams.microsoft.com", "teams.cloud.microsoft", "teams.live.com",
+        "webex.com", "whereby.com", "meet.jit.si",
     };
+
+    // Outlook's Safe Links wraps every link in a company invite: the call is in its url= parameter.
+    private const string SafeLinksHost = "safelinks.protection.outlook.com";
 
     public static CalendarEvent? Parse(JsonElement item)
     {
@@ -104,6 +108,9 @@ internal static class CalendarEvents
     {
         if (candidate == null || !Uri.TryCreate(candidate, UriKind.Absolute, out var uri) || uri.Scheme != Uri.UriSchemeHttps)
             return null;
+        if (uri.Host.EndsWith("." + SafeLinksHost, StringComparison.OrdinalIgnoreCase) &&
+            System.Web.HttpUtility.ParseQueryString(uri.Query)["url"] is string wrapped)
+            return SafeUrl(wrapped, anyHost);
         if (!anyHost && !MeetingHosts.Any(h => uri.Host.Equals(h, StringComparison.OrdinalIgnoreCase) ||
                                                uri.Host.EndsWith("." + h, StringComparison.OrdinalIgnoreCase)))
             return null;

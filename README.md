@@ -14,7 +14,7 @@ Open source, no account and no telemetry.
 
 **Network access:** only what you turn on, and nothing about the PC is sent:
 - lyrics lookup on [LRCLIB](https://lrclib.net) (an open, free service), sending only the artist, title and length of the song. Lyrics are cached in `%LOCALAPPDATA%\Yata\lyrics`. Can be turned off in Settings.
-- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. **Check now** (Settings → Updates, or the tray menu) asks right away, on or off. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs.
+- new version notice: **off by default**. When on, it checks GitHub's [public releases page](https://github.com/akaneni/yata/releases) once a day. **Check now** (Settings → Updates, or the tray menu) asks right away, on or off. Updating takes one click (**Update and restart** in Settings): the installer comes from GitHub and is checked against its published SHA-256 before it runs; once Yata is code-signed, it also has to carry the same publisher's signature.
 - **weather** from [Open-Meteo](https://open-meteo.com) (open, no account or key), only if you turn it on: sends the chosen city's coordinates, rounded to ~1 km. The city search sends only the name you type.
 - **Google Calendar and Google Tasks**, only if you connect your account and allow each one: reading your calendars and today's and tomorrow's events, and syncing one task list, directly between the PC and Google. The access is encrypted with DPAPI in `%LOCALAPPDATA%\Yata\google.dat` and events stay in memory only. Details in [PRIVACY.md](PRIVACY.md).
 
@@ -31,6 +31,7 @@ Open source, no account and no telemetry.
 
 ## Features (v0.1)
 
+- **Welcome**: the first time, Settings open with what the notch can do and the choices that are yours (water reminders, new version notice). The tray menu has **Open Yata**.
 - **English and Portuguese**: follows the Windows language (Portuguese on any Portuguese Windows, English everywhere else), or pick one in Settings → Language.
 - **Compact notch**: a clock when nothing is playing; album art, title and an animated equalizer when media is.
 - **Expands on hover** with a spring animation; collapses when the mouse leaves.
@@ -44,8 +45,8 @@ Open source, no account and no telemetry.
 - **Calendar (Google)**: connect your Google account (OAuth, read-only) and choose which calendars appear. The tab shows today and tomorrow, highlights the ongoing event and has a **Join** button for Meet, Zoom and Teams calls. The closed notch shows "Standup in 8 min" in the 15 minutes before, and a notice (with sound) arrives a configurable few minutes before, plus another when the event starts. Declined invitations don't appear. To register the app with Google, see [docs/google-calendar.md](docs/google-calendar.md) (in Portuguese).
 - **Weather** (off by default): pick the city by name or, if you prefer, with a single reading of the Windows location (rounded to ~1 km right away, never stored precisely). No IP geolocation. 1-bit pixel-art icons in Yata's style. The closed notch shows the icon and temperature next to the clock; open with no music, it shows the condition, high/low and expected rain. A notice arrives when the chance of rain goes over 60% in the next 2 hours. Weather data: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
 - **Focus (Pomodoro)**: 25 min of focus / 5 min break, a 15 min long break every 4 sessions, a sound at the end of each phase and a countdown in the compact notch. Explicit controls for each state: **Start**, **Pause**, **Resume**, **Stop** and **Skip break**; when paused, the ring dims and the time pulses gently (and the compact notch shows ⏸).
-- **Water**: a daily goal, a +250 ml button, a chart of the last 7 days and an hourly reminder (8:00–22:00) until the goal is reached.
-- **Tasks**: a list with check/remove (a removal can be undone for a few seconds); a time at the end of the text ("Call Ana at 3pm", "Meeting 15:30", "ligar às 9h00") becomes a reminder. Optionally syncs both ways with a **Google Tasks** list (Google keeps only the day; the reminder time stays in Yata). The notch takes keyboard focus only while you type and gives focus back to the previous window when you're done.
+- **Water**: a daily goal, a +250 ml button, a chart of the last 7 days and an optional hourly reminder (8:00–22:00) until the goal is reached (off until you turn it on, on the welcome card or in Settings).
+- **Tasks**: a list with check/remove (a removal can be undone for a few seconds); a time at the end of the text ("Call Ana at 3pm", "Meeting 15:30", "ligar às 9h") becomes a reminder. Optionally syncs both ways with a **Google Tasks** list (Google keeps only the day; the reminder time stays in Yata). The notch takes keyboard focus only while you type and gives focus back to the previous window when you're done.
 - **File shelf**: drag files or folders onto the notch to keep them and drag them back out into any app; double-click opens. Only the path is kept (nothing is copied), and deleted/moved items disappear on their own. Images get a thumbnail. "Clear" can also be undone for a few seconds.
 - **Yata (the companion)**, based on the time since the last mouse/keyboard input (`GetLastInputInfo` — only the time, never the content):
   - **Ambient mode** (2 min idle, nothing playing): the clock gives way to Yata perched, blinking, looking around and settling; at 10 min it naps.
@@ -60,6 +61,8 @@ Open source, no account and no telemetry.
 - **Bubble beside the notch**: like the iPhone's island splitting in two, a second small notch carries what doesn't fit in the first: while music has the notch, the focus countdown (a ring emptying around the minutes left) and the next meeting move there, and so do other programs' activities. One at a time, by priority (what needs you, the meeting, focus, activities); hover it to see what it is and how many others are waiting. Clicking an activity takes you to the window it came from (the terminal where the agent asks for a permission, say), and you answer there. While the notch is open, the bubble grows into a second notch beside it that lists every activity, each with a way to its window and a way to dismiss it.
 - **Activities from other programs** (scripts, builds, AI agents): they can show their progress in the bubble with `yata-cli`. See [Activities](#activities) below. Can be turned off in Settings.
 - **Hides in full screen** (videos, games, presentations).
+- **Out of screen sharing and recordings**: in a Teams/Meet/Zoom call, an OBS stream or a screenshot, the notch isn't captured, so the next meeting, your tasks and your agent's project don't show up for others (you still see it). On by default; `--show` keeps the notch capturable for previews.
+- **The chime comes with the reminder**: a reminder held back by a game in full screen chimes when it shows, not in the middle of the match. No chime while the microphone is in use (a call) or Windows says not to disturb, and it can be turned off. A held reminder that's no longer true ("Daily in 5 min" after the meeting started) is dropped instead of shown late.
 - Doesn't steal focus and doesn't show in Alt+Tab or the taskbar. Quit from the tray icon.
 
 ## Install
@@ -67,7 +70,7 @@ Open source, no account and no telemetry.
 Download `Yata-Setup-x.y.z.exe` from [Releases](https://github.com/akaneni/yata/releases) (~3 MB). The installer:
 
 - installs for your user only, without asking for administrator rights;
-- if the **.NET 10 Desktop Runtime** is missing, downloads it straight from Microsoft and installs it (that step asks for administrator rights);
+- if the **.NET 10 Desktop Runtime** is missing, downloads it straight from Microsoft, checks that Microsoft signed it, and installs it (that step asks for administrator rights);
 - offers to start with Windows and a desktop shortcut;
 - on uninstall, removes the app and the automatic start but **keeps your data** in `%LOCALAPPDATA%\Yata`.
 
@@ -115,7 +118,7 @@ It's a console program, so PowerShell, cmd, bash and AI agents wait for it and g
 - **Send `--title` every time.** A running activity nobody updates goes away after 10 minutes (`--ttl` changes it, up to 24 h), and an id that's gone needs its title to come back. `attention` and `fail` stay until ended (up to 1 h); `done` stays 12 s. `end` on an id that's already gone is fine.
 - Icons: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. A fixed set: programs can't send images or arbitrary glyphs.
 - Text is one plain line (titles up to 60 characters, text up to 120); control, invisible and direction-changing characters are removed.
-- At most 8 activities at a time, and 30 requests per 10 s. Nothing is printed on success.
+- At most 8 activities at a time, and 60 requests per 10 s. Nothing is printed on success.
 - Exit codes: 0 shown, 1 bad arguments (unknown option, icon or value), 2 Yata isn't running, 3 refused by Yata (the reason is printed).
 - How it works: a named pipe that only your Windows user can open and that refuses network access. Activities live in memory only; their text isn't logged.
 

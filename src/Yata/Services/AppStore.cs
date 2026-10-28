@@ -36,6 +36,8 @@ public sealed class SettingsData
     /// <summary>"en" or "pt-BR" (see Lang); null follows the Windows language.</summary>
     public string? Language { get; set; }
     public bool HideInFullscreen { get; set; } = true;
+    /// <summary>Screen captures, recordings and screen sharing see through the notch (you still see it).</summary>
+    public bool HideFromCapture { get; set; } = true;
     public int HoverDelayMs { get; set; } = 140;
     public bool UseArtworkAccent { get; set; } = true;
     /// <summary>Display the notch sits on (Windows device name); null follows the primary display.</summary>
@@ -75,6 +77,10 @@ public sealed class SettingsData
     public bool WeatherRainAlerts { get; set; } = true;
 
     // Notices
+    /// <summary>The chime that comes with reminders.</summary>
+    public bool SoundsEnabled { get; set; } = true;
+    /// <summary>No chime while the microphone is in use (a call).</summary>
+    public bool QuietDuringCalls { get; set; } = true;
     public bool HudVolume { get; set; } = true;
     public bool HudBrightness { get; set; } = true;
     public bool HudPower { get; set; } = true;
@@ -121,7 +127,9 @@ public sealed class WaterData
     public int GoalMl { get; set; } = 2000;
     public int CupMl { get; set; } = 250;
     public int ReminderMinutes { get; set; } = 60;
-    public bool RemindersEnabled { get; set; } = true;
+    /// <summary>Off unless asked for (the welcome offers it): an hourly nudge nobody wanted is noise.
+    /// Existing data.json files keep what they have.</summary>
+    public bool RemindersEnabled { get; set; }
     public DateTime? LastDrink { get; set; }
     /// <summary>Milliliters per day, keyed "yyyy-MM-dd".</summary>
     public Dictionary<string, int> Days { get; set; } = new();
@@ -159,6 +167,9 @@ public sealed class AppStore
     /// <summary>data.json was damaged and set aside; the app started over with defaults.</summary>
     public bool RecoveredFromDamage { get; private init; }
 
+    /// <summary>There was no data.json: Yata's first start on this PC (for this user).</summary>
+    public bool IsNew { get; private init; }
+
     /// <summary>Raised after the settings window changed something; listeners re-apply.</summary>
     public event Action? SettingsChanged;
 
@@ -182,7 +193,7 @@ public sealed class AppStore
         try
         {
             if (!File.Exists(path))
-                return new AppStore(path, new StoreData());
+                return new AppStore(path, new StoreData()) { IsNew = true };
             var data = JsonSerializer.Deserialize<StoreData>(File.ReadAllText(path), Options);
             return new AppStore(path, data ?? new StoreData());
         }

@@ -106,8 +106,11 @@ public sealed class LyricsService
 
         // Music videos run longer than the album track, so only prefer the closest duration there.
         double maxDurationDiff = fromBrowser ? double.MaxValue : 4;
-        string? lrc = await SearchAsync(artist, title, media.Duration, maxDurationDiff, ct);
-        WriteCache(cacheFile, lrc ?? "");
+        var (lrc, failed) = await SearchAsync(artist, title, media.Duration, maxDurationDiff, ct);
+        // A miss is remembered only when LRCLIB said so: offline or a server hiccup isn't "no lyrics",
+        // and caching it would leave the song without them for days.
+        if (lrc != null || !failed)
+            WriteCache(cacheFile, lrc ?? "");
         return lrc == null ? null : Lyrics.Parse(lrc);
     }
 
@@ -118,33 +121,39 @@ public sealed class LyricsService
     internal void Seed(string artist, string title, string lrc) =>
         WriteCache(Path.Combine(_cacheDir, CacheKey(artist, title) + ".lrc"), lrc);
 
-    private static async Task<string?> SearchAsync(string artist, string title, TimeSpan duration, double maxDurationDiff, CancellationToken ct)
+    /// <returns>The lyrics, or null; and whether a query failed (no answer) rather than found nothing.</returns>
+    private static async Task<(string? Lrc, bool Failed)> SearchAsync(string artist, string title, TimeSpan duration, double maxDurationDiff, CancellationToken ct)
     {
         var queries = new List<string>();
         if (artist.Length > 0)
             queries.Add($"api/search?track_name={Uri.EscapeDataString(title)}&artist_name={Uri.EscapeDataString(artist)}");
         queries.Add($"api/search?q={Uri.EscapeDataString((artist + " " + title).Trim())}");
 
+        bool failed = false;
         foreach (var query in queries)
         {
             try
             {
                 using var response = await Http.GetAsync(query, ct);
                 if (!response.IsSuccessStatusCode)
+                {
+                    failed = true;
                     continue;
+                }
 
                 await using var body = await response.Content.ReadAsStreamAsync(ct);
                 using var json = await JsonDocument.ParseAsync(body, cancellationToken: ct);
                 string? best = PickBest(json.RootElement, duration, maxDurationDiff);
                 if (best != null)
-                    return best;
+                    return (best, false);
             }
             catch (Exception ex) when (ex is HttpRequestException or JsonException or TaskCanceledException && !ct.IsCancellationRequested)
             {
-                // Offline or service hiccup: try the next query, otherwise report "not found".
+                // Offline or service hiccup: try the next query, otherwise report it as a failure.
+                failed = true;
             }
         }
-        return null;
+        return (null, failed);
     }
 
     /// <summary>The synced result whose duration is closest to the playing track.</summary>

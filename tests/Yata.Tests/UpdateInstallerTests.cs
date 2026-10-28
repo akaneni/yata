@@ -75,4 +75,23 @@ public class UpdateInstallerTests
     {
         Assert.Equal(allowed, UpdateInstaller.IsAllowed(new Uri(url)));
     }
+
+    [Theory]
+    [InlineData(null, null, true)]            // Unsigned Yata (today): the hash alone.
+    [InlineData(null, "CN=Anyone", true)]
+    [InlineData("CN=Yata", "CN=Yata", true)]
+    [InlineData("CN=Yata", null, false)]      // Signed Yata, unsigned installer.
+    [InlineData("CN=Yata", "CN=Mallory", false)]
+    public void A_signed_Yata_takes_only_its_own_publishers_installer(string? ours, string? theirs, bool ok)
+    {
+        Assert.Equal(ok, UpdateInstaller.SamePublisher(ours, theirs));
+    }
+
+    [Fact]
+    public void Reads_who_signed_a_file()
+    {
+        // The .NET runtime is Microsoft-signed; this test assembly isn't signed at all.
+        Assert.Contains("Microsoft", Yata.Helpers.Authenticode.Publisher(typeof(object).Assembly.Location));
+        Assert.Null(Yata.Helpers.Authenticode.Publisher(typeof(UpdateInstallerTests).Assembly.Location));
+    }
 }

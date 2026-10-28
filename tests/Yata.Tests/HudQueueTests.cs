@@ -117,4 +117,28 @@ public class HudQueueTests
         Assert.Equal("Now", queue.Resume()?.Text);
         Assert.Equal("R2", queue.Finish()?.Text);
     }
+
+    [Fact]
+    public void What_expired_while_waiting_is_dropped()
+    {
+        var now = new DateTime(2026, 10, 28, 9, 0, 0);
+        var queue = new HudQueue(() => now);
+        queue.Offer(new HudMessage("", "Daily", "in 5 min", Important: true, Expires: now.AddMinutes(5)), canShow: false);
+        queue.Offer(Reminder("Call Ana"), canShow: false);
+
+        now = now.AddHours(2); // A long game.
+        Assert.Equal("Call Ana", queue.Resume()?.Text);
+        Assert.Null(queue.Finish());
+    }
+
+    [Fact]
+    public void A_meeting_starting_replaces_its_waiting_heads_up()
+    {
+        var queue = new HudQueue();
+        queue.Offer(new HudMessage("", "Daily", "in 5 min", Important: true, Tag: "calendar|daily"), canShow: false);
+        queue.Offer(new HudMessage("", "Daily", "now", Important: true, Tag: "calendar|daily"), canShow: false);
+
+        Assert.Equal("now", queue.Resume()?.Value);
+        Assert.Null(queue.Finish());
+    }
 }

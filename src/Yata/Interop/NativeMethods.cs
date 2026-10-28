@@ -26,6 +26,17 @@ internal static class NativeMethods
     // SHQueryUserNotificationState results that always mean "something is full screen".
     public const int QUNS_RUNNING_D3D_FULL_SCREEN = 3;
     public const int QUNS_PRESENTATION_MODE = 4;
+    // ...and the ones that mean "the user doesn't want to be disturbed".
+    public const int QUNS_BUSY = 2;
+    public const int QUNS_QUIET_TIME = 6;
+
+    // Windows 10 2004+: screen capture and sharing don't see the window.
+    public const uint WDA_NONE = 0x0;
+    public const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetWindowDisplayAffinity(IntPtr hwnd, uint affinity);
 
     public const int WM_HOTKEY = 0x0312;
     public const uint MOD_ALT = 0x1;

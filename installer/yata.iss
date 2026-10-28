@@ -132,6 +132,19 @@ begin
   end;
 end;
 
+// The runtime installer runs elevated, so it runs only if Windows says Microsoft signed it
+// (Authenticode, checked with PowerShell's Get-AuthenticodeSignature). The download comes from a
+// floating aka.ms link, so a pinned hash would go stale with every .NET patch.
+function IsMicrosoftSigned(FileName: String): Boolean;
+var
+  ResultCode: Integer;
+begin
+  Result := Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+    '-NoProfile -NonInteractive -Command "$s = Get-AuthenticodeSignature -LiteralPath ''' + FileName + '''; ' +
+    'if ($s.Status -eq ''Valid'' -and $s.SignerCertificate.Subject -match ''O=Microsoft Corporation'') { exit 0 } else { exit 1 }"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode) and (ResultCode = 0);
+end;
+
 // Runs for both interactive and silent installs, right before files are copied.
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
@@ -144,9 +157,14 @@ begin
 
   WizardForm.StatusLabel.Caption := CustomMessage('RuntimeInstalling');
   try
-    // Straight from Microsoft over HTTPS; the runtime installer is Microsoft-signed.
+    // Straight from Microsoft over HTTPS, and checked to be Microsoft-signed before it runs.
     DownloadTemporaryFile('{#RuntimeUrl}', 'windowsdesktop-runtime-win-x64.exe', '', nil);
     Installer := ExpandConstant('{tmp}\windowsdesktop-runtime-win-x64.exe');
+    if not IsMicrosoftSigned(Installer) then
+    begin
+      Result := CustomMessage('RuntimeFailed');
+      Exit;
+    end;
     // ShellExec (not Exec) so Windows can show the UAC prompt the runtime installer needs.
     if not ShellExec('', Installer, '/install /quiet /norestart', '', SW_SHOW, ewWaitUntilTerminated, ResultCode) or
        ((ResultCode <> 0) and (ResultCode <> 3010)) or not IsDesktopRuntimeInstalled then

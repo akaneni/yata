@@ -47,6 +47,19 @@ public class UpdateCheckerTests
     }
 
     [Fact]
+    public async Task A_check_without_an_answer_doesnt_count_as_the_days_check()
+    {
+        var now = new DateTime(2026, 10, 26, 8, 0, 0);
+        var store = AppStore.InMemory();
+        store.Settings.UpdateCheckEnabled = true;
+        var checker = new UpdateChecker(store, () => now, () => Task.FromResult<string?>(null));
+
+        await checker.CheckIfDueAsync(); // offline
+
+        Assert.Null(store.Data.Updates.LastCheck);
+    }
+
+    [Fact]
     public void Announces_a_new_version_once()
     {
         var store = AppStore.InMemory();

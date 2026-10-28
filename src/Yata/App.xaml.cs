@@ -72,6 +72,9 @@ public partial class App : Application
             _window.OpenSettings();
         if (e.Args.Contains("--demo"))
             _window.Dispatcher.InvokeAsync(_window.RunCompanionDemo, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
+        // Not for previews, demos or measurements, which may run on a fresh profile.
+        if (show < 0 && !e.Args.Contains("--demo") && !e.Args.Contains("--settings"))
+            _window.Dispatcher.InvokeAsync(_window.WelcomeIfNew, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
     }
 
     /// <summary>
@@ -151,6 +154,7 @@ public partial class App : Application
     private void CreateTrayIcon()
     {
         var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add(Strings.Tray_Open, null, (_, _) => _window?.OpenNotch());
         menu.Items.Add(Strings.Tray_Settings, null, (_, _) => _window?.OpenSettings());
         menu.Items.Add(Strings.Tray_CheckUpdates, null, (_, _) => _window?.CheckForUpdatesNow());
         menu.Items.Add(Strings.Tray_Demo, null, (_, _) => _window?.RunCompanionDemo());

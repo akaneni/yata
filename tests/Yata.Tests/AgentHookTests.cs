@@ -137,6 +137,16 @@ public class AgentHookTests
     }
 
     [Fact]
+    public void Working_lasts_an_hour_so_a_long_tool_doesnt_expire_midway()
+    {
+        Assert.Equal(AgentHook.AgentWorkingTtl, Request("claude", Claude("PostToolUse"))!.Ttl);
+        Assert.Equal(TimeSpan.FromHours(1), AgentHook.AgentWorkingTtl);
+        // Waiting on you and done have their own fixed times on the board.
+        Assert.Null(Request("claude", Claude("PermissionRequest"))!.Ttl);
+        Assert.Null(Request("claude", Claude("Stop"))!.Ttl);
+    }
+
+    [Fact]
     public void Odd_session_ids_still_make_a_valid_id()
     {
         var request = Request("claude", """{"session_id":"a b/c\\d<>","hook_event_name":"Stop"}""")!;

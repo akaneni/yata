@@ -96,6 +96,20 @@ public partial class SettingsWindow : Window
         BuildSectionNav();
     }
 
+    public void ShowWelcome()
+    {
+        WelcomeCard.Visibility = Visibility.Visible;
+        Scroll.ScrollToTop();
+    }
+
+    private void OnWelcomeDone(object sender, RoutedEventArgs e)
+    {
+        WelcomeCard.Visibility = Visibility.Collapsed;
+        // The same switches further down were bound before the welcome changed them; refresh them.
+        DataContext = null;
+        DataContext = _store.Data;
+    }
+
     // ---- Sections -----------------------------------------------------------------------
 
     private readonly List<(TextBlock Title, RadioButton Item)> _sections = new();

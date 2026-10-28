@@ -1,3 +1,5 @@
+using System;
+
 namespace Yata.Services;
 
 /// <summary>What a notice is about, so each kind can be switched off in the settings.</summary>
@@ -14,6 +16,10 @@ public enum HudKind { Reminder, Volume, Brightness, Power, AudioDevice, CapsLock
 /// <param name="Celebrate">A small win (session done, water goal): Yata flaps in place of the icon.</param>
 /// <param name="Tag">What the notice is about (an activity's id): a newer notice about the same
 /// thing replaces it instead of queueing behind it.</param>
+/// <param name="Chime">Comes with the chime, played when the notice actually shows (after the game,
+/// not in the middle of it).</param>
+/// <param name="Expires">Past this, a notice still waiting is dropped: "Daily in 5 min" is wrong
+/// once the meeting started.</param>
 public sealed record HudMessage(
     string Glyph,
     string Text,
@@ -24,7 +30,9 @@ public sealed record HudMessage(
     bool Important = false,
     HudKind Kind = HudKind.Reminder,
     bool Celebrate = false,
-    string? Tag = null);
+    string? Tag = null,
+    bool Chime = false,
+    DateTime? Expires = null);
 
 internal static class Glyphs
 {

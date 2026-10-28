@@ -165,7 +165,13 @@ internal sealed record ActivityRequest(
                 (window = HostWindow.Read(w)) == null)
                 return Fail("window must be {\"handle\": number, \"pid\": number}", out error);
 
-            return new ActivityRequest(ActivityOp.Set, id, Clean(String(root, "title"), MaxTitle),
+            string? rawTitle = String(root, "title");
+            string? title = Clean(rawTitle, MaxTitle);
+            // Sent, but nothing visible survives the cleaning: say so, not "send --title".
+            if (rawTitle is { Length: > 0 } && string.IsNullOrEmpty(title))
+                return Fail("title has no visible characters", out error);
+
+            return new ActivityRequest(ActivityOp.Set, id, title,
                 Clean(String(root, "text"), MaxText), progress, state.Value, icon, ttl, phrase, window);
         }
         catch (JsonException)
@@ -307,10 +313,14 @@ internal sealed class ActivityBoard
     /// <summary>
     /// The next activity with a window to go to, in the order of Items: the one right after
     /// <paramref name="afterId"/>, wrapping around, or the most pressing when it's null or gone.
+    /// While something needs you, only those take turns: the key is for what's waiting on you, not
+    /// for an agent that's just working.
     /// </summary>
     public Activity? NextWithWindow(string? afterId)
     {
         var withWindow = Items.Where(a => a.Window != null).ToList();
+        if (withWindow.Any(a => a.Warning))
+            withWindow.RemoveAll(a => !a.Warning);
         if (withWindow.Count == 0)
             return null;
         int index = afterId == null ? -1 : withWindow.FindIndex(a => a.Id == afterId);

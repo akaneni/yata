@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,6 +8,7 @@ namespace Yata.Services;
 /// Decides which notice the closed notch shows. Reminders (Important) are never lost: they wait
 /// while the notch can't show them and take turns with each other. Status blips (volume, Caps
 /// Lock...) only matter right now: they show at once, even over a reminder, which then comes back.
+/// What expired while waiting (a meeting that already started) is dropped instead of shown late.
 /// </summary>
 internal sealed class HudQueue
 {
@@ -14,6 +16,10 @@ internal sealed class HudQueue
     public const int MaxWaiting = 5;
 
     private readonly LinkedList<HudMessage> _waiting = new();
+    private readonly Func<DateTime> _clock;
+
+    /// <param name="clock">Current time; tests pass a fake one.</param>
+    public HudQueue(Func<DateTime>? clock = null) => _clock = clock ?? (() => DateTime.Now);
 
     /// <summary>The notice on screen, or null.</summary>
     public HudMessage? Current { get; private set; }
@@ -86,10 +92,14 @@ internal sealed class HudQueue
 
     private HudMessage? Next()
     {
-        if (_waiting.First is not { } first)
-            return null;
-        _waiting.RemoveFirst();
-        return Current = first.Value;
+        var now = _clock();
+        while (_waiting.First is { } first)
+        {
+            _waiting.RemoveFirst();
+            if (first.Value.Expires is not DateTime expires || expires > now)
+                return Current = first.Value;
+        }
+        return null;
     }
 
     private void Enqueue(HudMessage message, bool first)

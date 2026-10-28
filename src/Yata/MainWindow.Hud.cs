@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,12 +31,21 @@ public partial class MainWindow
 {
     private readonly DispatcherTimer _hudRavenLand = new() { Interval = TimeSpan.FromMilliseconds(1100) };
     private readonly HudQueue _hudQueue = new();
+    // Reminders that already chimed: one interrupted by the notch opening comes back, quietly.
+    private readonly ConditionalWeakTable<HudMessage, object> _chimed = new();
     // The notice's content plus padding: a long text with a bar needs more than the usual width.
     private double _hudWidth;
 
     // Not while open, hidden (full screen) or busy with the "while you were away" news; nor with the
     // mouse on the bubble, where a notice would widen the notch under the cursor and open it.
     private bool CanShowHud => IsVisible && !_expanded && !_newsActive && !Bubble.IsMouseOver;
+
+    // No sound if the user turned it off, is on a call (the microphone is in use) or asked Windows
+    // not to be disturbed. The notice itself still shows.
+    private bool ChimeAllowed =>
+        Settings.SoundsEnabled &&
+        !(Settings.QuietDuringCalls && _privacy.Current.Microphone.Count > 0) &&
+        !FullscreenWatcher.WindowsWantsQuiet();
 
     private void ShowHud(HudMessage message)
     {
@@ -50,6 +60,8 @@ public partial class MainWindow
     private void DisplayHud(HudMessage message)
     {
         _hudTimer.Interval = TimeSpan.FromMilliseconds(message.DurationMs);
+        if (message.Chime && _chimed.TryAdd(message, true) && ChimeAllowed)
+            Chime.Play();
 
         HudIcon.Text = message.Glyph;
         HudIcon.SetResourceReference(TextBlock.ForegroundProperty,

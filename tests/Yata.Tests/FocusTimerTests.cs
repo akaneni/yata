@@ -11,11 +11,11 @@ public class FocusTimerTests
     private DateTime _now = new(2026, 10, 26, 9, 0, 0);
     private readonly SettingsData _settings = new();
     private readonly List<HudMessage> _messages = new();
-    private int _chimes;
+    private int Chimes => _messages.Count(m => m.Chime);
 
     private FocusTimer NewTimer()
     {
-        var timer = new FocusTimer(_settings, () => _now, () => _chimes++);
+        var timer = new FocusTimer(_settings, () => _now);
         timer.Message += _messages.Add;
         return timer;
     }
@@ -114,7 +114,7 @@ public class FocusTimerTests
         Assert.Equal(FocusState.Running, timer.State);
         Assert.Equal(Min(5), timer.Remaining);
         Assert.Equal(1, timer.CompletedSessions);
-        Assert.Equal(1, _chimes);
+        Assert.Equal(1, Chimes);
         Assert.Equal("Hora da pausa", Assert.Single(_messages).Text);
     }
 
@@ -128,7 +128,7 @@ public class FocusTimerTests
         Assert.Equal(FocusPhase.Focus, timer.Phase);
         Assert.Equal(FocusState.Ready, timer.State);
         Assert.Equal(Min(25), timer.Remaining);
-        Assert.Equal(2, _chimes);
+        Assert.Equal(2, Chimes);
         Assert.Equal("De volta ao foco", _messages[^1].Text);
     }
 
@@ -162,12 +162,12 @@ public class FocusTimerTests
         Assert.Equal(0, timer.CompletedSessions);
 
         CompleteFocus(timer);
-        int chimesBefore = _chimes;
+        int chimesBefore = Chimes;
         timer.SkipBreak();
 
         Assert.Equal(FocusPhase.Focus, timer.Phase);
         Assert.Equal(FocusState.Ready, timer.State);
-        Assert.Equal(chimesBefore, _chimes);
+        Assert.Equal(chimesBefore, Chimes);
     }
 
     [Fact]

@@ -39,6 +39,7 @@ public class ActivityTests
     [InlineData("""{"op":"set","id":"x","title":"T","icon":"skull"}""")]
     [InlineData("""{"op":"set","id":"x","title":"T","ttl":1}""")]
     [InlineData("""{"op":"set","id":"x","title":42}""")]
+    [InlineData("""{"op":"set","id":"x","title":"​‮"}""")]
     public void Anything_unexpected_is_refused_with_a_reason(string json) =>
         Assert.False(string.IsNullOrEmpty(Refusal(json)));
 
@@ -190,10 +191,19 @@ public class ActivityTests
     [InlineData("set x --progress 140%")]
     [InlineData("set x --ttl soon")]
     [InlineData("set x --icon skull")]
+    [InlineData("set x --ttl 1")]
+    [InlineData("set x --ttl 100000")]
     public void Bad_arguments_say_what_is_wrong(string line)
     {
         Assert.Null(ActivityCommand.Build(line.Split(' ', StringSplitOptions.RemoveEmptyEntries), out string? error));
         Assert.False(string.IsNullOrEmpty(error));
+    }
+
+    [Fact]
+    public void An_invisible_title_is_a_bad_argument()
+    {
+        Assert.Null(ActivityCommand.Build(new[] { "set", "x", "--title", "​‮" }, out string? error));
+        Assert.Contains("visible", error);
     }
 
     [Fact]

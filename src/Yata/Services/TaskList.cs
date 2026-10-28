@@ -94,18 +94,18 @@ public sealed record RemoteTask(string Id, string Title, bool Done, DateTime? Du
 
 /// <summary>
 /// To-do list. A trailing time becomes a reminder, in either language whatever the interface's:
-/// "Reunião 15:30", "ligar às 9h00", "Call Ana at 3pm", "Dentist 9:30 am".
+/// "Reunião 15:30", "ligar às 9h00", "ligar às 9h", "Call Ana at 3pm", "Dentist 9:30 am".
 /// </summary>
 public sealed class TaskList
 {
-    // Groups: 1 text, 2 hour, 3 minutes (24 h), 4 minutes and 5 a/p (12 h, minutes optional).
+    // Groups: 1 text, 2 hour, 3 minutes (24 h), 4 minutes and 5 a/p (12 h, minutes optional), 6 a
+    // whole hour ("às 9h"). That one needs the "às": "estudar 2h" is how long, not when.
     private static readonly Regex TrailingTime = new(
-        @"^(.*?)\s+(?:(?:às|as|at)\s+)?(\d{1,2})(?:(?::|h)(\d{2})|(?::(\d{2}))?\s?([ap])\.?m\.?)$",
+        @"^(.*?)\s+(?:(?:(?:às|as|at)\s+)?(\d{1,2})(?:(?::|h)(\d{2})|(?::(\d{2}))?\s?([ap])\.?m\.?)|(?:às|as)\s+(\d{1,2})h)$",
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private readonly AppStore _store;
     private readonly Func<DateTime> _clock;
-    private readonly Action _chime;
     private readonly DispatcherTimer _reminder = new() { Interval = TimeSpan.FromSeconds(15) };
 
     public ObservableCollection<TaskItem> Items { get; } = new();
@@ -119,12 +119,10 @@ public sealed class TaskList
     public event Action? LocalChanged;
 
     /// <param name="clock">Current time; tests pass a fake one.</param>
-    /// <param name="chime">Reminder sound; tests pass a silent one.</param>
-    public TaskList(AppStore store, Func<DateTime>? clock = null, Action? chime = null)
+    public TaskList(AppStore store, Func<DateTime>? clock = null)
     {
         _store = store;
         _clock = clock ?? (() => DateTime.Now);
-        _chime = chime ?? Chime.Play;
         foreach (var data in store.Data.Tasks)
         {
             Items.Add(new TaskItem
@@ -176,6 +174,12 @@ public sealed class TaskList
     /// <summary>The matched time, or null when it isn't one ("25:00", "13pm").</summary>
     private static TimeSpan? TimeOfDay(Match match)
     {
+        if (match.Groups[6].Success)
+        {
+            int whole = int.Parse(match.Groups[6].Value);
+            return whole < 24 ? new TimeSpan(whole, 0, 0) : null;
+        }
+
         int hour = int.Parse(match.Groups[2].Value);
         if (!match.Groups[5].Success)
         {
@@ -334,9 +338,8 @@ public sealed class TaskList
         foreach (var item in due)
         {
             item.Reminded = true;
-            _chime();
             Message?.Invoke(new HudMessage(Glyphs.Bell, item.Text, item.Due!.Value.ToString("HH:mm"),
-                DurationMs: 6000, Important: true));
+                DurationMs: 6000, Important: true, Chime: true));
         }
 
         if (due.Count > 0)

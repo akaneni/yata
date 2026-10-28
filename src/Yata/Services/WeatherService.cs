@@ -320,6 +320,6 @@ public sealed class WeatherService
         _lastRainNotice = DateTime.Now;
         string when = at <= DateTime.Now ? Strings.Weather_RainNow : string.Format(Lang.Culture, Strings.Weather_RainExpected, at);
         Message?.Invoke(new HudMessage(Glyphs.Cloud, when, $"{report.RainChance}%", DurationMs: 5000, Important: true,
-            Kind: HudKind.Weather));
+            Kind: HudKind.Weather, Expires: DateTime.Now + TimeSpan.FromHours(2)));
     }
 }

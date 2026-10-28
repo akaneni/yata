@@ -5,6 +5,17 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Welcome_Title" xml:space="preserve"><value>Boas-vindas ao Yata</value></data>
+  <data name="Welcome_Tip1" xml:space="preserve"><value>• Passe o mouse no notch, no topo da tela, para abrir.</value></data>
+  <data name="Welcome_Tip2" xml:space="preserve"><value>• Ctrl+Alt+Y abre e fecha de qualquer lugar.</value></data>
+  <data name="Welcome_Tip3" xml:space="preserve"><value>• Arraste arquivos até o notch para guardar na prateleira.</value></data>
+  <data name="Welcome_Tip4" xml:space="preserve"><value>• Nas tarefas, um horário no fim vira lembrete: “ligar às 15h”.</value></data>
+  <data name="Welcome_Water" xml:space="preserve"><value>Lembrar de beber água</value></data>
+  <data name="Welcome_WaterHint" xml:space="preserve"><value>De hora em hora, das 8h às 22h, até bater a meta do dia.</value></data>
+  <data name="Welcome_UpdatesHint" xml:space="preserve"><value>Uma consulta por dia à página de versões do GitHub.</value></data>
+  <data name="Welcome_Google" xml:space="preserve"><value>A agenda e as tarefas do Google ficam mais abaixo, em Google.</value></data>
+  <data name="Welcome_Done" xml:space="preserve"><value>Pronto</value></data>
+  <data name="Tray_Open" xml:space="preserve"><value>Abrir o Yata</value></data>
   <data name="Tray_Settings" xml:space="preserve"><value>Configurações…</value></data>
   <data name="Tray_Demo" xml:space="preserve"><value>Demonstração do Yata</value></data>
   <data name="Tray_Quit" xml:space="preserve"><value>Sair</value></data>
@@ -28,6 +39,8 @@
   <data name="Settings_JumpHotkey" xml:space="preserve"><value>Ir ao agente que precisa de você com Ctrl+Alt+J</value></data>
   <data name="Settings_JumpHotkeyHint" xml:space="preserve"><value>Vai para a janela da atividade mais urgente; apertando de novo, para a próxima.</value></data>
   <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Esconder em apps de tela cheia</value></data>
+  <data name="Settings_HideFromCapture" xml:space="preserve"><value>Esconder de gravações e do compartilhamento de tela</value></data>
+  <data name="Settings_HideFromCaptureHint" xml:space="preserve"><value>Quem vê a sua tela numa chamada ou gravação não vê o notch. Você continua vendo.</value></data>
   <data name="Settings_HoverDelay" xml:space="preserve"><value>Abrir ao passar o mouse após</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Cor da capa como destaque</value></data>
   <data name="Settings_AccentHint" xml:space="preserve"><value>Desligado, tudo fica em preto e branco.</value></data>
@@ -133,6 +146,9 @@
   <data name="Agents_NoCli" xml:space="preserve"><value>O yata-cli.exe não está ao lado do Yata (build de desenvolvimento?).</value></data>
   <data name="Agents_Unreadable" xml:space="preserve"><value>Não foi possível ler {0}. Corrija o arquivo ou ponha os hooks à mão (yata-cli hook setup).</value></data>
   <data name="Agents_NotAnObject" xml:space="preserve"><value>{0} não é um objeto JSON, então o Yata não mexe nele.</value></data>
+  <data name="Settings_Sounds" xml:space="preserve"><value>Som nos lembretes</value></data>
+  <data name="Settings_QuietDuringCalls" xml:space="preserve"><value>Sem som durante chamadas</value></data>
+  <data name="Settings_QuietDuringCallsHint" xml:space="preserve"><value>Enquanto o microfone estiver em uso.</value></data>
   <data name="Settings_HudVolume" xml:space="preserve"><value>Volume</value></data>
   <data name="Settings_HudBrightness" xml:space="preserve"><value>Brilho</value></data>
   <data name="Settings_HudPower" xml:space="preserve"><value>Carregador e bateria baixa</value></data>

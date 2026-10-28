@@ -27,6 +27,24 @@ public sealed class AppStoreTests : IDisposable
         Assert.False(File.Exists(DataFile + ".tmp"));
     }
 
+    [Fact]
+    public void Only_the_first_start_is_new_and_water_reminders_wait_to_be_asked_for()
+    {
+        var store = AppStore.Load(DataFile);
+        Assert.True(store.IsNew);
+        Assert.False(store.Data.Water.RemindersEnabled);
+        store.SaveNow();
+
+        Assert.False(AppStore.Load(DataFile).IsNew);
+    }
+
+    [Fact]
+    public void Existing_water_reminders_stay_on()
+    {
+        File.WriteAllText(DataFile, """{"Water":{"RemindersEnabled":true}}""");
+        Assert.True(AppStore.Load(DataFile).Data.Water.RemindersEnabled);
+    }
+
     [Theory]
     [InlineData("")]
     [InlineData("{\"Settings\": {\"FocusMinutes\": 4")]
