@@ -35,13 +35,15 @@ public sealed class GoogleCalendar
     private DateTime _dayPrompted;
     private bool _fetching;
     private string? _error;
+    // Events handed in by a bench (Simulate) instead of read from an account.
+    private bool _simulated;
 
     public IReadOnlyList<CalendarEvent> Events { get; private set; } = Array.Empty<CalendarEvent>();
     public IReadOnlyList<CalendarInfo> Calendars { get; private set; } = Array.Empty<CalendarInfo>();
     public string? Email => _account.Email;
 
     /// <summary>The account's state, narrowed to whether it grants calendar access.</summary>
-    public CalendarStatus Status => _account.Status switch
+    public CalendarStatus Status => _simulated ? CalendarStatus.Connected : _account.Status switch
     {
         GoogleAccountStatus.NotConfigured => CalendarStatus.NotConfigured,
         GoogleAccountStatus.Connecting => CalendarStatus.Connecting,
@@ -100,6 +102,14 @@ public sealed class GoogleCalendar
     }
 
     public void CancelConnect() => _account.CancelConnect();
+
+    /// <summary>A fixed day of events, for the screenshots (--bench vitrine); nothing is read from Google.</summary>
+    internal void Simulate(IEnumerable<CalendarEvent> events)
+    {
+        _simulated = true;
+        Events = events.OrderBy(e => e.Start).ToList();
+        Changed?.Invoke();
+    }
 
     public Task DisconnectAsync() => _account.DisconnectAsync();
 

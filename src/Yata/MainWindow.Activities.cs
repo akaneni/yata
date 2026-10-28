@@ -70,7 +70,8 @@ public partial class MainWindow
     /// <summary>Switched off, the pipe closes and whatever was up goes away.</summary>
     private void ApplyActivitySettings()
     {
-        if (Settings.ActivitiesEnabled)
+        // Screenshots: only the bench's own activity, none from the programs running on this PC.
+        if (Settings.ActivitiesEnabled && ShotsDir == null)
         {
             _activityPipe ??= new ActivityPipe(line => Dispatcher.InvokeAsync(() => HandleActivity(line)).Task);
             if (!_activityPipe.IsRunning)
