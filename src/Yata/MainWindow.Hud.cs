@@ -33,8 +33,9 @@ public partial class MainWindow
     // The notice's content plus padding: a long text with a bar needs more than the usual width.
     private double _hudWidth;
 
-    // Not while open, hidden (full screen) or busy with the "while you were away" news.
-    private bool CanShowHud => IsVisible && !_expanded && !_newsActive;
+    // Not while open, hidden (full screen) or busy with the "while you were away" news; nor with the
+    // mouse on the bubble, where a notice would widen the notch under the cursor and open it.
+    private bool CanShowHud => IsVisible && !_expanded && !_newsActive && !Bubble.IsMouseOver;
 
     private void ShowHud(HudMessage message)
     {

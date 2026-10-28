@@ -97,6 +97,8 @@
   <data name="Activity_Working" xml:space="preserve"><value>trabalhando</value></data>
   <data name="Activity_Permission" xml:space="preserve"><value>precisa da sua permissão</value></data>
   <data name="Activity_Waiting" xml:space="preserve"><value>esperando você</value></data>
+  <data name="Activity_GoToWindow" xml:space="preserve"><value>Clique para ir à janela</value></data>
+  <data name="Activity_WindowGone" xml:space="preserve"><value>A janela não está mais aberta</value></data>
   <data name="Activity_Done" xml:space="preserve"><value>concluído</value></data>
   <data name="Activity_Failed" xml:space="preserve"><value>falhou</value></data>
   <data name="Settings_Activities" xml:space="preserve"><value>Atividades</value></data>

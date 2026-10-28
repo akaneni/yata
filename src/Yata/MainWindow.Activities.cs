@@ -39,7 +39,7 @@ public partial class MainWindow
 
     /// <summary>What the bubble shows, and the notice hovering it brings up.</summary>
     private sealed record BubbleItem(string? Glyph, string? Label, double? Progress, bool Warning, HudMessage Detail,
-        bool Dim = false);
+        bool Dim = false, string? ActivityId = null, HostWindow? Window = null);
 
     private const string PauseGlyph = "";
 
@@ -188,6 +188,7 @@ public partial class MainWindow
             // Paused reads differently from running at a glance, as in the notch: dimmed.
             BubbleContent.Opacity = item.Dim ? 0.55 : 1;
             System.Windows.Automation.AutomationProperties.SetName(Bubble, item.Detail.Text);
+            Bubble.ToolTip = BubbleTip(item);
         }
         // The countdown changes the bubble every second; only showing or hiding it moves the notch.
         if (appearing)
@@ -255,20 +256,75 @@ public partial class MainWindow
     }
 
     private static BubbleItem FromActivity(Activity activity) =>
-        new(activity.Glyph, null, activity.Progress, activity.Warning, ActivityNotice(activity, false));
+        new(activity.Glyph, null, activity.Progress, activity.Warning, ActivityNotice(activity, false),
+            ActivityId: activity.Id, Window: activity.Window);
 
-    /// <summary>Hovering (or clicking) the bubble says what it is, in the notch beside it.</summary>
-    private void OnBubbleMouseEnter(object sender, MouseEventArgs e)
+    /// <summary>"Build · 40% · +2", and what a click does when it goes somewhere.</summary>
+    private static string BubbleTip(BubbleItem item)
     {
-        if (_bubbleItem?.Detail is HudMessage detail && !_hudActive)
-            ShowHud(detail);
+        string tip = item.Detail.Value == null ? item.Detail.Text : $"{item.Detail.Text} · {item.Detail.Value}";
+        return item.Window == null ? tip : tip + Environment.NewLine + Strings.Activity_GoToWindow;
     }
 
+    /// <summary>
+    /// Hovering the bubble must not move anything: a notice would widen the notch right under the
+    /// cursor, which opens it and hides the bubble. The tooltip says what it is instead, and a
+    /// hover-open still pending from crossing the notch on the way is dropped.
+    /// </summary>
+    private void OnBubbleMouseEnter(object sender, MouseEventArgs e)
+    {
+        if (_pendingExpand)
+            _hoverTimer.Stop();
+    }
+
+    /// <summary>The notices held while the mouse was on the bubble (see CanShowHud) come now.</summary>
+    private void OnBubbleMouseLeave(object sender, MouseEventArgs e) => ShowNextHud();
+
+    /// <summary>An activity from a terminal takes you there; if that window is gone, the tooltip says so.</summary>
     private void OnBubbleClick(object sender, MouseButtonEventArgs e)
     {
-        if (_bubbleItem?.Detail is HudMessage detail)
-            ShowHud(detail);
         e.Handled = true;
+        if (_bubbleItem is not { Window: HostWindow window, ActivityId: string id })
+            return;
+        if (GoToWindow(window))
+            return;
+        _activities.ForgetWindow(id);
+        UpdateBubble();
+        Bubble.ToolTip = new ToolTip { Content = Strings.Activity_WindowGone, IsOpen = true, PlacementTarget = Bubble };
+    }
+
+    /// <summary>The activity the notch is announcing, if it came from a window a click can go to.</summary>
+    private Activity? AnnouncedWithWindow() =>
+        _hudActive && _hudQueue.Current is { Kind: HudKind.Activity, Tag: string id }
+            ? _activities.Items.FirstOrDefault(a => a.Id == id && a.Window != null)
+            : null;
+
+    /// <summary>
+    /// Clicking the notch while it announces an activity goes to that activity's window (the agent
+    /// asking for a permission: you answer it there). False if there's none, and the notch opens.
+    /// </summary>
+    private bool GoToActivityWindow()
+    {
+        if (AnnouncedWithWindow() is not Activity activity)
+            return false;
+        if (!GoToWindow(activity.Window))
+        {
+            _activities.ForgetWindow(activity.Id);
+            UpdateBubble();
+            return false;
+        }
+        HideHud();
+        return true;
+    }
+
+    private static bool GoToWindow(HostWindow? window)
+    {
+        if (window == null)
+            return false;
+        bool focused = window.Focus();
+        if (!focused)
+            Log.Info("activities", "A janela da atividade não está mais disponível");
+        return focused;
     }
 
     /// <summary>Slides out from under the notch to its place beside it, following its width.</summary>

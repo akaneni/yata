@@ -10,8 +10,8 @@ Registro das melhorias levantadas na análise de outubro de 2026 (código do Yat
 
 ## Próximos passos
 
-### Aprovar ou negar pelo notch
-O estado dos agentes (Claude Code, Cursor e Codex) já aparece no notch pelos hooks (`yata-cli hook`), e uma skill ensina o agente a usar o `yata-cli`. O passo seguinte é **aprovar ou negar permissões pelo notch**: o hook `PermissionRequest` do Claude Code e do Codex pode devolver a decisão, então seria um pedido que espera resposta pelo pipe (uma operação nova, como `ask`, com botões na bolha e tempo-limite, que na dúvida deixa o agente perguntar normalmente). Nenhum app de Windows faz isso; no Mac há mais de 8.
+### Ir para a aba certa
+Clicar numa atividade já leva à janela de onde ela veio (o terminal do agente que pede permissão), e você responde lá: o Yata nunca decide pelo agente. Decidimos não aprovar nem negar pelo notch, porque um clique no notch autorizaria a execução de código, vendo só um pedaço do comando. Falta a precisão de aba: o Windows Terminal (`WT_SESSION`) e o Orca (`ORCA_TAB_ID`) não têm uma forma pública de focar uma aba. No VS Code e no Cursor, com várias janelas do mesmo processo, vale a que foi usada por último; falta testar.
 
 ### Prova pública de desempenho
 Publicar no site, a cada versão, a CPU e a memória medidas pelo `tools/measure.ps1` (parado, música, aberto, foco). Ataca a queixa nº 1 do mercado e dá prova ao "o notch em que você pode confiar".
@@ -53,4 +53,5 @@ O winget espera o instalador estável e assinado (veja [code-signing.md](code-si
 
 ## Decidido não fazer
 
+- **Aprovar ou negar permissões dos agentes pelo notch**: o clique leva ao terminal, e a decisão fica na própria ferramenta, com o comando inteiro à vista.
 - **Plugins com código de terceiros** dentro do Yata: contradizem a proposta de confiança. O pipe de atividades cobre a maior parte do valor sem carregar código de fora.

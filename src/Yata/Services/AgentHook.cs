@@ -11,7 +11,8 @@ namespace Yata.Services;
 /// <c>yata-cli hook claude|cursor|codex</c>: turns an AI agent's lifecycle event (the JSON its hooks
 /// send) into an activity in the notch — working, waiting for you, done. One activity per agent
 /// session, titled with the agent and the project folder. Nothing from the conversation itself (the
-/// prompt, the commands, the answers) is ever sent: only the state.
+/// prompt, the commands, the answers) is ever sent: only the state, and which window the agent runs
+/// in (<see cref="HostWindow"/>), so a click on the activity goes there.
 ///
 /// A hook must never get in the agent's way: whatever happens, the caller exits 0, and prints only
 /// the neutral answer some events require (<see cref="Result.Output"/>).
@@ -27,7 +28,8 @@ internal static class AgentHook
 
     private static readonly Regex Unsafe = new("[^A-Za-z0-9._:-]", RegexOptions.Compiled);
 
-    public static Result Translate(string agent, string? payload)
+    /// <param name="window">The agent's terminal or editor, so a click on the activity goes there.</param>
+    public static Result Translate(string agent, string? payload, HostWindow? window = null)
     {
         JsonElement root;
         try
@@ -44,15 +46,15 @@ internal static class AgentHook
 
         return agent switch
         {
-            "claude" => Claude(root),
-            "cursor" => Cursor(root),
-            "codex" => Codex(root),
+            "claude" => Claude(root, window),
+            "cursor" => Cursor(root, window),
+            "codex" => Codex(root, window),
             _ => new Result(null, null),
         };
     }
 
     // https://code.claude.com/docs/en/hooks — exit 0 with nothing printed changes nothing.
-    private static Result Claude(JsonElement e)
+    private static Result Claude(JsonElement e, HostWindow? window)
     {
         Status? status = Get(e, "hook_event_name") switch
         {
@@ -69,12 +71,12 @@ internal static class AgentHook
             "SessionEnd" => Status.Ended,
             _ => null,
         };
-        return new Result(Request("claude", "Claude Code", Get(e, "session_id"), Get(e, "cwd"), status), null);
+        return new Result(Request("claude", "Claude Code", Get(e, "session_id"), Get(e, "cwd"), status, window), null);
     }
 
     // https://cursor.com/docs/agent/hooks — only fail-open events are used; the ones that decide
     // permissions (preToolUse, beforeShellExecution...) are left alone on purpose.
-    private static Result Cursor(JsonElement e)
+    private static Result Cursor(JsonElement e, HostWindow? window)
     {
         string? name = Get(e, "hook_event_name");
         Status? status = name switch
@@ -100,15 +102,15 @@ internal static class AgentHook
             "stop" => "{}",
             _ => null,
         };
-        return new Result(Request("cursor", "Cursor", Get(e, "conversation_id"), folder, status), output);
+        return new Result(Request("cursor", "Cursor", Get(e, "conversation_id"), folder, status, window), output);
     }
 
     // https://learn.chatgpt.com/docs/hooks (stdin), and the older `notify` setting, which passes
     // one JSON argument with "type": "agent-turn-complete".
-    private static Result Codex(JsonElement e)
+    private static Result Codex(JsonElement e, HostWindow? window)
     {
         if (Get(e, "type") == "agent-turn-complete")
-            return new Result(Request("codex", "Codex", Get(e, "thread-id"), Get(e, "cwd"), Status.Done), null);
+            return new Result(Request("codex", "Codex", Get(e, "thread-id"), Get(e, "cwd"), Status.Done, window), null);
 
         string? name = Get(e, "hook_event_name");
         Status? status = name switch
@@ -121,10 +123,11 @@ internal static class AgentHook
         };
         // Stop and Interrupt expect a JSON answer; an empty object asks for nothing.
         string? output = name is "Stop" or "Interrupt" ? "{}" : null;
-        return new Result(Request("codex", "Codex", Get(e, "session_id"), Get(e, "cwd"), status), output);
+        return new Result(Request("codex", "Codex", Get(e, "session_id"), Get(e, "cwd"), status, window), output);
     }
 
-    private static string? Request(string agent, string product, string? session, string? folder, Status? status)
+    private static string? Request(string agent, string product, string? session, string? folder, Status? status,
+        HostWindow? window)
     {
         if (status == null)
             return null;
@@ -158,6 +161,7 @@ internal static class AgentHook
                 _ => "working",
             },
         };
+        window?.WriteTo(request);
         return JsonSerializer.Serialize(request);
     }
 

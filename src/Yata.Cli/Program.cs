@@ -26,7 +26,8 @@ internal static class Program
         switch (args.FirstOrDefault())
         {
             case ActivityCommand.Verb:
-                return await ActivityCommand.RunAsync(args.Skip(1).ToArray(), Console.Error.WriteLine);
+                return await ActivityCommand.RunAsync(args.Skip(1).ToArray(), Console.Error.WriteLine,
+                    window: HostWindow.Find());
             case "hook" when args.Length >= 3 && args[1] == "setup":
                 return Print(AgentHook.Setup(args[2]));
             case "hook":
@@ -64,7 +65,7 @@ internal static class Program
             using var stdin = new StreamReader(Console.OpenStandardInput(), new UTF8Encoding(false),
                 detectEncodingFromByteOrderMarks: true);
             string? payload = AgentHook.ReadPayload(args.Skip(2).ToArray(), stdin, Console.IsInputRedirected);
-            var result = AgentHook.Translate(agent, payload);
+            var result = AgentHook.Translate(agent, payload, HostWindow.Find());
             if (result.Output != null)
                 Console.Out.Write(result.Output);
             if (result.Request != null)

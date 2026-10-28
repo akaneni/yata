@@ -111,6 +111,9 @@ public partial class MainWindow : Window
     private MediaState? _state;
     private bool _expanded;
     private bool _pendingExpand;
+    // Where the mouse was when the hover wait (re)started; it must stay about here to open the notch.
+    private Point _hoverFrom;
+    private const double HoverRestDistance = 8;
     private bool _peeking;
     private bool _animating;
     // --timings: note when the first frame of an opening is drawn (how fast the notch responds).
@@ -551,6 +554,13 @@ public partial class MainWindow : Window
     private void OnNotchMouseEnter(object sender, MouseEventArgs e)
     {
         _pinnedUntil = DateTime.MinValue; // The real mouse takes over from a preview.
+        // Announcing an activity a click goes to: hovering doesn't open the notch, or the click
+        // would land on the open notch instead. Once the notice is over, hovering opens it as usual.
+        if (AnnouncedWithWindow() != null)
+        {
+            _hoverTimer.Stop();
+            return;
+        }
         SetPeeking(true);
         ScheduleExpanded(true, Settings.HoverDelayMs);
     }
@@ -617,13 +627,15 @@ public partial class MainWindow : Window
         if (!_expanded)
         {
             _hoverTimer.Stop();
-            SetExpanded(true);
+            if (!GoToActivityWindow())
+                SetExpanded(true);
         }
     }
 
     private void ScheduleExpanded(bool expanded, int delayMs)
     {
         _pendingExpand = expanded;
+        _hoverFrom = Mouse.GetPosition(this);
         _hoverTimer.Stop();
         _hoverTimer.Interval = TimeSpan.FromMilliseconds(delayMs);
         _hoverTimer.Start();
@@ -632,6 +644,20 @@ public partial class MainWindow : Window
     private void OnHoverTimer(object? sender, EventArgs e)
     {
         _hoverTimer.Stop();
+        if (_pendingExpand)
+        {
+            if (Bubble.IsMouseOver)
+                return; // Crossed the notch on the way to the bubble: not a reason to open.
+            // Opens when the mouse rests on the notch, not while it's passing over it (on its way
+            // to the bubble, or across the top of the screen): still moving, the wait starts again.
+            var now = Mouse.GetPosition(this);
+            if ((now - _hoverFrom).Length > HoverRestDistance)
+            {
+                _hoverFrom = now;
+                _hoverTimer.Start();
+                return;
+            }
+        }
         SetExpanded(_pendingExpand);
     }
 

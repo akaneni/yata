@@ -17,7 +17,7 @@
              activity, the next meeting while music plays). Outside NotchHost, so hovering it doesn't open
              the notch; drawn first, so it slides out from under it. Placed in code (ApplyBubbleFrame). -->
         <Grid x:Name="Bubble" HorizontalAlignment="Center" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed"
-              MouseEnter="OnBubbleMouseEnter" MouseLeftButtonUp="OnBubbleClick">
+              MouseEnter="OnBubbleMouseEnter" MouseLeave="OnBubbleMouseLeave" MouseLeftButtonUp="OnBubbleClick">
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="BubbleShift"/>
             </Grid.RenderTransform>

@@ -21,6 +21,7 @@
     <Compile Include="..\Yata\Services\ActivityClient.cs" Link="Shared\ActivityClient.cs" />
     <Compile Include="..\Yata\Services\ActivityCommand.cs" Link="Shared\ActivityCommand.cs" />
     <Compile Include="..\Yata\Services\AgentHook.cs" Link="Shared\AgentHook.cs" />
+    <Compile Include="..\Yata\Services\HostWindow.cs" Link="Shared\HostWindow.cs" />
   </ItemGroup>
 
   <!-- The agent skill, kept once in the Claude Code plugin; yata-cli skill [install] hands it out. -->
