@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title data-i18n="changelog.title">Changelog · Yata</title>
+<meta name="description" content="What changed in each version of Yata, the open-source notch for Windows." data-i18n-content="changelog.description">
+<link rel="canonical" href="{{CANONICAL}}">
+<link rel="alternate" hreflang="en" href="https://getyata.app/changelog">
+<link rel="alternate" hreflang="pt-BR" href="https://getyata.app/pt/changelog">
+<link rel="alternate" hreflang="x-default" href="https://getyata.app/changelog">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Yata">
+<meta property="og:locale" content="{{OG_LOCALE}}">
+<meta property="og:locale:alternate" content="{{OG_LOCALE_ALT}}">
+<meta property="og:title" content="Changelog · Yata" data-i18n-content="changelog.title">
+<meta property="og:description" content="What changed in each version of Yata, the open-source notch for Windows." data-i18n-content="changelog.description">
+<meta property="og:url" content="{{CANONICAL}}">
+<meta property="og:image" content="https://getyata.app/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Yata logo: a pixel raven next to the word yata, white on black" data-i18n-content="meta.ogalt">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/dotgothic16.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- A template: tools/make-site.ps1 fills {{CHANGELOG}} from CHANGELOG.md (here) and
+     CHANGELOG.pt-BR.md (pt/changelog), and translates the rest with site/pt.json. -->
+<header>
+  <div class="wrap">
+    <a class="logo" href="{{HOME}}" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Main" data-i18n-label="aria.main">
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="lang" role="group" aria-label="Language" data-i18n-label="aria.language">
+        <a href="/changelog" hreflang="en" lang="en"{{CUR_EN}}>EN</a>
+        <a href="/pt/changelog" hreflang="pt-BR" lang="pt-BR"{{CUR_PT}}>PT</a>
+      </span>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <article class="doc">
+{{CHANGELOG}}
+  </article>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="{{HOME}}" aria-label="Yata">{{LOCKUP}}</a>
+    <nav aria-label="Footer" data-i18n-label="aria.footer">
+      <a href="/privacy" data-i18n="footer.privacy">Privacy policy</a>
+      <a href="/code-signing" data-i18n="footer.signing">Code signing policy</a>
+      <a href="/changelog" aria-current="page" data-i18n="footer.changelog">Changelog</a>
+      <a href="https://github.com/akaneni/yata">GitHub</a>
+      <span class="mono" data-i18n="footer.made">MIT license · made by akaneni</span>
+    </nav>
+  </div>
+</footer>
+</body>
+</html>

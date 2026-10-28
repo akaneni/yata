@@ -105,5 +105,8 @@
   "dl.l5": "Desinstalar mantém seus dados, caso você volte.",
   "footer.privacy": "Política de privacidade",
   "footer.signing": "Política de assinatura",
-  "footer.made": "licença MIT · feito por akaneni"
+  "footer.changelog": "Novidades",
+  "footer.made": "licença MIT · feito por akaneni",
+  "changelog.title": "Novidades · Yata",
+  "changelog.description": "O que mudou em cada versão do Yata, o notch de código aberto para o Windows."
 }

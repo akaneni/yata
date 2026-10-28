@@ -5,7 +5,9 @@
 #   pt/index.html, and {{JSONLD}} and {{FAQ_JSONLD}} become the schema.org data in each
 #   language (the FAQ one is read from the page's <details class="faq-item">). robots.txt,
 #   sitemap.xml and llms.txt are copied as they are. {{LOCKUP}} becomes the inline lockup from docs/brand (run make-brand.ps1
-#   after redrawing the raven). Fails on a missing translation or a leftover {{token}}.
+#   after redrawing the raven). CHANGELOG.md and CHANGELOG.pt-BR.md become /changelog and
+#   /pt/changelog through the site/changelog.html template. Fails on a missing translation, a
+#   leftover {{token}} or a version (src/Yata/Yata.csproj) with no changelog entry.
 # Runs on Windows PowerShell 5.1 and on pwsh (the Pages workflow uses Linux).
 param([string]$Out = (Join-Path $PSScriptRoot "../_site"))
 $ErrorActionPreference = "Stop"
@@ -53,7 +55,54 @@ function Convert-ToPortuguese([string]$html) {
       [regex]::Replace($m.Value, "\s$($pair[1])=`"[^`"]*`"", " $($pair[1])=`"$value`"")
     })
   }
-  $html.Replace('href="/privacy"', 'href="/pt/privacy"').Replace('href="/code-signing"', 'href="/pt/code-signing"')
+  $html = $html.Replace('href="/privacy"', 'href="/pt/privacy"').Replace('href="/code-signing"', 'href="/pt/code-signing"')
+  # Every link to the changelog but the language switch's own EN link.
+  [regex]::Replace($html, '<a href="/changelog"(?![^>]*hreflang)', '<a href="/pt/changelog"')
+}
+
+# The changelog's small Markdown: # and ## headings, - lists (one level of nesting, two spaces),
+# **bold**, `code` and [links](url). Everything is escaped first, so raw HTML stays text.
+function ConvertFrom-Changelog([string]$markdown) {
+  $inline = {
+    param($s)
+    $s = ConvertTo-Html $s
+    $s = [regex]::Replace($s, '`([^`]+)`', '<code>$1</code>')
+    $s = [regex]::Replace($s, '\*\*(.+?)\*\*', '<strong>$1</strong>')
+    [regex]::Replace($s, '\[([^\]]+)\]\(([^)\s]+)\)', '<a href="$2">$1</a>')
+  }
+  $out = New-Object System.Collections.Generic.List[string]
+  $depth = 0
+  foreach ($raw in ($markdown -split "\r?\n") + "") {
+    $line = $raw.TrimEnd()
+    $item = [regex]::Match($line, '^( *)- (.+)$')
+    if ($item.Success) {
+      $level = [Math]::Min(2, [int][Math]::Floor($item.Groups[1].Value.Length / 2) + 1)
+      if ($level -gt $depth) {
+        while ($depth -lt $level) { $out.Add("<ul>"); $depth++ }
+      } else {
+        $out.Add("</li>")
+        while ($depth -gt $level) { $out.Add("</ul></li>"); $depth-- }
+      }
+      $out.Add("<li>" + (& $inline $item.Groups[2].Value))
+      continue
+    }
+    if ($depth -gt 0) {
+      $out.Add("</li>")
+      while ($depth -gt 1) { $out.Add("</ul></li>"); $depth-- }
+      $out.Add("</ul>")
+      $depth = 0
+    }
+    if ($line -eq "") { continue }
+    if ($line -match '^## (.+)$') {
+      $id = "v" + ($Matches[1] -replace '\s.*$', '')
+      $out.Add("<h2 id=`"$id`">$(& $inline $Matches[1])</h2>")
+    } elseif ($line -match '^# (.+)$') {
+      $out.Add("<h1>$(& $inline $Matches[1])</h1>")
+    } else {
+      $out.Add("<p>$(& $inline $line)</p>")
+    }
+  }
+  $out -join "`n"
 }
 
 # schema.org data for search engines and AI assistants, in the page's language.
@@ -125,5 +174,25 @@ Save-Page (Add-FaqJsonLd (Convert-ToPortuguese $ptPage)) (Join-Path $Out "pt/ind
 
 foreach ($page in "privacy.html", "pt/privacy.html", "code-signing.html", "pt/code-signing.html", "404.html") {
   Save-Page ([IO.File]::ReadAllText((Join-Path $site $page), $utf8)) (Join-Path $Out $page)
+}
+
+# /changelog and /pt/changelog, from CHANGELOG.md and CHANGELOG.pt-BR.md (written by hand in each
+# version's PR). The version being built must have an entry in both.
+$appVersion = [regex]::Match([IO.File]::ReadAllText((Join-Path $root "src/Yata/Yata.csproj"), $utf8), '<Version>([^<]+)</Version>').Groups[1].Value
+if (-not $appVersion) { throw "src/Yata/Yata.csproj has no <Version>" }
+$changelog = [IO.File]::ReadAllText((Join-Path $site "changelog.html"), $utf8)
+foreach ($lang in "en", "pt") {
+  $isEn = $lang -eq "en"
+  $file = if ($isEn) { "CHANGELOG.md" } else { "CHANGELOG.pt-BR.md" }
+  $markdown = [IO.File]::ReadAllText((Join-Path $root $file), $utf8)
+  if (-not [regex]::IsMatch($markdown, "(?m)^## $([regex]::Escape($appVersion))(\s|$)")) { throw "$file has no entry for version $appVersion" }
+  $page = $changelog.Replace("{{LANG}}", $(if ($isEn) { "en" } else { "pt-BR" })).Replace("{{HOME}}", $(if ($isEn) { "/" } else { "/pt/" }))
+  $page = $page.Replace("{{CANONICAL}}", "https://getyata.app/$(if ($isEn) { '' } else { 'pt/' })changelog")
+  $page = $page.Replace("{{OG_LOCALE}}", $(if ($isEn) { "en_US" } else { "pt_BR" })).Replace("{{OG_LOCALE_ALT}}", $(if ($isEn) { "pt_BR" } else { "en_US" }))
+  $page = $page.Replace("{{CUR_EN}}", $(if ($isEn) { ' aria-current="page"' } else { "" })).Replace("{{CUR_PT}}", $(if ($isEn) { "" } else { ' aria-current="page"' }))
+  if (-not $isEn) { $page = Convert-ToPortuguese $page }
+  # After the translation: the entries are already in the page's language.
+  $page = $page.Replace("{{CHANGELOG}}", (ConvertFrom-Changelog $markdown))
+  Save-Page $page (Join-Path $Out $(if ($isEn) { "changelog.html" } else { "pt/changelog.html" }))
 }
 "ok: $Out"

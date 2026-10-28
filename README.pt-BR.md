@@ -170,6 +170,8 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
+O que muda em cada versão vai em [CHANGELOG.pt-BR.md](CHANGELOG.pt-BR.md) e [CHANGELOG.md](CHANGELOG.md), escritos no PR da versão (junto com o número novo no `Yata.csproj`). O site mostra os dois em [getyata.app/changelog](https://getyata.app/changelog), e o build do site falha se a versão do `Yata.csproj` não tiver entrada nos dois.
+
 Os textos da interface ficam em `src/Yata/Strings.resx` (inglês, o padrão) e `src/Yata/Strings.pt-BR.resx` (português): `Strings.Chave` no C# e `{x:Static y:Strings.Chave}` no XAML. Um teste falha se um idioma tiver chave faltando ou sobrando, ou `{0}` diferentes. As mensagens do registro continuam em português, porque são para quem está depurando.
 
 O site ([getyata.app](https://getyata.app)) fica em `site/`: a página em inglês é `site/index.html`, e a versão em português sai das traduções em `site/pt.json`. A política de privacidade do site espelha o `PRIVACY.md` (inglês) e o `PRIVACY.pt-BR.md`. Montar e ver localmente (publicado no GitHub Pages a cada push na `main` que mexa no site):

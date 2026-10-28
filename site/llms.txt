@@ -37,4 +37,5 @@ Yata, also listed as Yata Notch (from Yatagarasu, the messenger crow of Japanese
 - [Yata Notch on AlternativeTo](https://alternativeto.net/software/yata-notch/about/): alternatives and reviews
 - [Privacy policy](https://getyata.app/privacy)
 - [How to check a download](https://getyata.app/code-signing)
+- [Changelog](https://getyata.app/changelog): what changed in each version
 - [Site in Portuguese](https://getyata.app/pt/)
