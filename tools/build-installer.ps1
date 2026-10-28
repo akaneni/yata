@@ -1,8 +1,8 @@
 # Publishes Yata and yata-cli (framework-dependent, single file) and builds the Inno Setup installer into dist/.
-# Usage: ./tools/build-installer.ps1 [-Version 0.5.0]
+# Usage: ./tools/build-installer.ps1 [-Version 0.6.0]
 # The release workflow runs it in two steps so publish\Yata.exe can be code-signed in between:
 #   -PublishOnly, then -SkipPublish.
-param([string]$Version = "0.5.0", [switch]$PublishOnly, [switch]$SkipPublish)
+param([string]$Version = "0.6.0", [switch]$PublishOnly, [switch]$SkipPublish)
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path $PSScriptRoot -Parent

@@ -2,6 +2,23 @@
 
 What changed in each version of Yata. The full notes (installing, checking the file and known limitations) are on [GitHub releases](https://github.com/akaneni/yata/releases), in Portuguese.
 
+## 0.6.0 — 2026-10-28
+
+- **Smoother.** The notch opens, switches tabs and closes at your screen's refresh rate: on a 120 Hz monitor, opening went from about 36 to 115 frames per second, with the same memory. Closing is quicker than opening, and the notch no longer goes blank halfway through.
+- **Calm motion.** **Settings → General → Calm motion** opens and closes the notch without the spring's bounce.
+- **Same width on every tab.** Switching tabs only changes the height, and between tabs of the same height the notch holds still while the page slides. The lyrics moved under the player instead of widening the notch.
+- **A fuller Focus tab.** Pick the task the session is for, from the Tasks tab, and tick it off right there. Beside it, today's focus against a daily goal (2 h by default, in **Settings → Focus**) and the last 7 days. The status line tells when the break comes and, with Google Calendar connected, how many sessions fit before the next meeting.
+- **Polish.** Even spacing on every tab, buttons that fade in on hover and sink a little when clicked, and the Shelf in even columns.
+- **Day to day:**
+  - a time zone change on a trip moves the clock and the reminders right away;
+  - a focus session pauses while the PC sleeps, instead of counting the sleep as focus;
+  - the calendar and Google Tasks catch up when the PC wakes or the network comes back;
+  - a microphone in use counts as you being there, so a call doesn't make Yata think you left;
+  - a Shelf file on a drive or server that doesn't answer stays, dimmed, instead of disappearing;
+  - a hand-edited or partly damaged `data.json` is fixed on load instead of keeping Yata from starting.
+
+[Full notes](https://github.com/akaneni/yata/releases/tag/v0.6.0)
+
 ## 0.5.0 — 2026-10-28
 
 - **Out of your calls.** Teams, Meet, Zoom, OBS and screenshots don't capture the notch, while you still see it: your next meeting, your tasks and your agent's project don't show up for others. On by default; it can be turned off in **Settings → General**.
