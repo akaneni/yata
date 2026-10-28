@@ -46,11 +46,11 @@
 <main class="wrap">
   <article class="doc">
     <h1>Política de privacidade do Yata</h1>
-    <p class="updated">Última atualização: 27 de outubro de 2026</p>
+    <p class="updated">Última atualização: 28 de outubro de 2026</p>
     <p>O Yata é um app de código aberto para Windows que mostra um "notch" no topo da tela. Ele não tem conta, servidor nem telemetria. Esta política explica quais dados o Yata usa e para onde eles vão.</p>
 
     <h2>Dados que ficam no seu computador</h2>
-    <p>Tarefas, registro de água, caminhos da prateleira e configurações ficam em <code>%LOCALAPPDATA%\Yata\data.json</code>. Esses dados nunca são enviados para fora do PC, com uma exceção que você escolhe: se ligar a sincronização com o Google Tasks, as tarefas vão para a sua lista no Google (veja abaixo).</p>
+    <p>Tarefas, registro de água, tempo de foco por dia, caminhos da prateleira e configurações ficam em <code>%LOCALAPPDATA%\Yata\data.json</code>. Esses dados nunca são enviados para fora do PC, com uma exceção que você escolhe: se ligar a sincronização com o Google Tasks, as tarefas vão para a sua lista no Google (veja abaixo).</p>
     <p>O Yata também mantém um registro de diagnóstico em <code>%LOCALAPPDATA%\Yata\logs</code>: horário, qual parte do app agiu e os erros que aconteceram. Ele não guarda títulos de músicas, textos de tarefas, títulos de eventos, nomes de arquivos, localização nem conta; caminhos, endereços web e e-mails que apareçam numa mensagem de erro são apagados antes de gravar. Cada arquivo é guardado por 7 dias e tem no máximo 1 MB por dia. Se o Yata fechar por um erro, ele grava um <code>crash-*.log</code> ali e encerra sem acionar o Relatório de Erros do Windows. Nada disso é enviado: você decide se quer anexar a uma issue (Configurações → Abrir registro ou Copiar diagnóstico).</p>
     <p>Outros programas deste PC (um script de build, um agente de IA trabalhando) podem mostrar o andamento ao lado do notch com o <code>yata-cli</code>. Eles chegam ao Yata por um canal local (um named pipe) que só o seu usuário do Windows abre e que recusa conexões pela rede. O que eles mandam (um título, um texto curto, o andamento e em qual janela estão rodando, para um clique na atividade levar você até lá) fica só na memória: nunca é gravado em disco nem no registro, e some quando a atividade termina ou expira, ou quando o Yata fecha. Nada é enviado para fora. Dá para desligar em Configurações → Atividades.</p>
 

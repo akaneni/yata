@@ -2,13 +2,13 @@
 
 **English** · [Português](PRIVACY.pt-BR.md)
 
-*Last updated: October 27, 2026*
+*Last updated: October 28, 2026*
 
 Yata is an open-source Windows app that shows a "notch" at the top of the screen. It has no account, no server and no telemetry. This policy explains what data Yata uses and where it goes.
 
 ## Data that stays on your computer
 
-Tasks, water log, shelf paths and settings are kept in `%LOCALAPPDATA%\Yata\data.json`. This data never leaves your PC, with one exception you choose: if you turn on Google Tasks sync, your tasks go to your list on Google (see below).
+Tasks, water log, focus time per day, shelf paths and settings are kept in `%LOCALAPPDATA%\Yata\data.json`. This data never leaves your PC, with one exception you choose: if you turn on Google Tasks sync, your tasks go to your list on Google (see below).
 
 Yata also keeps a diagnostic log in `%LOCALAPPDATA%\Yata\logs`: the time, which part of the app acted and any errors that happened. It does not record song titles, task text, event titles, file names, location or account. Paths, web addresses and email addresses that appear in an error message are removed before writing. Each file is kept for 7 days, with at most 1 MB per day. If Yata closes because of an error, it writes a `crash-*.log` there and exits without triggering Windows Error Reporting. None of this is sent anywhere: you decide whether to attach it to an issue (Settings → Open log or Copy diagnostics).
 

@@ -10,7 +10,7 @@ The name comes from **Yatagarasu** (八咫烏), the messenger and guide crow of 
 
 Open source, no account and no telemetry.
 
-**Local data:** tasks, the water log and shelf paths are kept in `%LOCALAPPDATA%\Yata\data.json`. A diagnostic log (errors and what each part of the app did, with no songs, tasks, events, paths or accounts) is kept in `%LOCALAPPDATA%\Yata\logs` for 7 days, for you to attach to an issue if you want.
+**Local data:** tasks, the water log, focus time per day and shelf paths are kept in `%LOCALAPPDATA%\Yata\data.json`. A diagnostic log (errors and what each part of the app did, with no songs, tasks, events, paths or accounts) is kept in `%LOCALAPPDATA%\Yata\logs` for 7 days, for you to attach to an issue if you want.
 
 **Network access:** only what you turn on, and nothing about the PC is sent:
 - lyrics lookup on [LRCLIB](https://lrclib.net) (an open, free service), sending only the artist, title and length of the song. Lyrics are cached in `%LOCALAPPDATA%\Yata\lyrics`. Can be turned off in Settings.

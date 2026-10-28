@@ -2,6 +2,23 @@
 
 O que mudou em cada versão do Yata. As notas completas (instalação, como conferir o arquivo e limitações conhecidas) ficam nas [versões do GitHub](https://github.com/akaneni/yata/releases).
 
+## 0.6.0 — 2026-10-28
+
+- **Mais fluido.** O notch abre, troca de aba e fecha na frequência da sua tela: num monitor de 120 Hz, abrir passou de uns 36 para 115 quadros por segundo, com a mesma memória. Fechar é mais rápido que abrir, e o notch não fica mais vazio no meio da transição.
+- **Movimento sóbrio.** **Configurações → Geral → Movimento sóbrio** abre e fecha o notch sem o balanço da mola.
+- **A mesma largura em todas as abas.** Trocar de aba só muda a altura, e entre abas da mesma altura o notch fica parado enquanto a página desliza. A letra foi para baixo do player, em vez de alargar o notch.
+- **Uma aba Foco mais completa.** Escolha a tarefa da sessão entre as da aba Tarefas e marque como feita ali mesmo. Ao lado, o foco de hoje contra uma meta diária (2 h por padrão, em **Configurações → Foco**) e os últimos 7 dias. A linha de status diz quando vem a pausa e, com o Google Agenda conectado, quantas sessões cabem até a próxima reunião.
+- **Acabamento.** Espaçamentos iguais em todas as abas, botões que acendem suave ao passar o mouse e afundam um pouco no clique, e a Prateleira em colunas iguais.
+- **No dia a dia:**
+  - trocar de fuso numa viagem ajusta o relógio e os lembretes na hora;
+  - uma sessão de foco pausa enquanto o PC dorme, em vez de contar o sono como foco;
+  - a agenda e o Google Tasks se atualizam quando o PC acorda ou a rede volta;
+  - o microfone em uso conta como você presente, então uma chamada não faz o Yata achar que você saiu;
+  - um arquivo da Prateleira numa unidade ou servidor que não responde fica, apagado, em vez de sumir;
+  - um `data.json` editado à mão ou em parte danificado é corrigido ao abrir, em vez de impedir o Yata de iniciar.
+
+[Notas completas](https://github.com/akaneni/yata/releases/tag/v0.6.0)
+
 ## 0.5.0 — 2026-10-28
 
 - **Fora das suas chamadas.** O Teams, o Meet, o Zoom, o OBS e os prints não capturam o notch, e você continua vendo: a próxima reunião, as tarefas e o projeto do agente não aparecem para os outros. Vem ligado e pode ser desligado em **Configurações → Geral**.
