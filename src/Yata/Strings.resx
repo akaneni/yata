@@ -25,6 +25,8 @@
   <data name="Settings_DisplayTip" xml:space="preserve"><value>Choose the display</value></data>
   <data name="Settings_Hotkey" xml:space="preserve"><value>Open and close with Ctrl+Alt+Y</value></data>
   <data name="Settings_HotkeyHint" xml:space="preserve"><value>Windows reports only this combination; nothing else you type is read.</value></data>
+  <data name="Settings_JumpHotkey" xml:space="preserve"><value>Go to the agent that needs you with Ctrl+Alt+J</value></data>
+  <data name="Settings_JumpHotkeyHint" xml:space="preserve"><value>Goes to the window of the most pressing activity; pressed again, to the next.</value></data>
   <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Hide in full-screen apps</value></data>
   <data name="Settings_HoverDelay" xml:space="preserve"><value>Open on hover after</value></data>
   <data name="Settings_Accent" xml:space="preserve"><value>Album art color as accent</value></data>

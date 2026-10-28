@@ -59,6 +59,25 @@ public class HostWindowTests
     }
 
     [Fact]
+    public void The_jump_key_goes_to_the_most_pressing_window_then_cycles()
+    {
+        var board = new ActivityBoard();
+        board.Apply(new ActivityRequest(ActivityOp.Set, "build", "Build", Window: new HostWindow(1, 1)), Now);
+        board.Apply(new ActivityRequest(ActivityOp.Set, "script", "Script"), Now);
+        board.Apply(new ActivityRequest(ActivityOp.Set, "agent", "Agent", State: ActivityState.Attention,
+            Window: Terminal), Now.AddSeconds(-30));
+
+        Assert.Equal("agent", board.NextWithWindow(null)!.Id);
+        Assert.Equal("build", board.NextWithWindow("agent")!.Id);
+        Assert.Equal("agent", board.NextWithWindow("build")!.Id);
+        Assert.Equal("agent", board.NextWithWindow("gone")!.Id);
+
+        board.ForgetWindow("agent");
+        board.ForgetWindow("build");
+        Assert.Null(board.NextWithWindow(null));
+    }
+
+    [Fact]
     public void A_window_that_no_longer_matches_isnt_brought_forward()
     {
         // A handle that doesn't exist, and this test's own process: neither may be focused.

@@ -11,7 +11,7 @@ Registro das melhorias levantadas na análise de outubro de 2026 (código do Yat
 ## Próximos passos
 
 ### Ir para a aba certa
-Clicar numa atividade já leva à janela de onde ela veio (o terminal do agente que pede permissão), e você responde lá: o Yata nunca decide pelo agente. Decidimos não aprovar nem negar pelo notch, porque um clique no notch autorizaria a execução de código, vendo só um pedaço do comando. Falta a precisão de aba: o Windows Terminal (`WT_SESSION`) e o Orca (`ORCA_TAB_ID`) não têm uma forma pública de focar uma aba. No VS Code e no Cursor, com várias janelas do mesmo processo, vale a que foi usada por último; falta testar.
+Clicar numa atividade, ou apertar Ctrl+Alt+J, já leva à janela de onde ela veio (o terminal do agente que pede permissão), e você responde lá: o Yata nunca decide pelo agente. Decidimos não aprovar nem negar pelo notch, porque um clique no notch autorizaria a execução de código, vendo só um pedaço do comando. Falta a precisão de aba: o Windows Terminal (`WT_SESSION`) e o Orca (`ORCA_TAB_ID`) não têm uma forma pública de focar uma aba. No VS Code e no Cursor, com várias janelas do mesmo processo, vale a que foi usada por último; falta testar.
 
 ### Prova pública de desempenho
 Publicar no site, a cada versão, a CPU e a memória medidas pelo `tools/measure.ps1` (parado, música, aberto, foco). Ataca a queixa nº 1 do mercado e dá prova ao "o notch em que você pode confiar".
@@ -23,7 +23,7 @@ Aviso ao conectar fones e mouse, com o nível da bateria, e a lista no notch abe
 Silenciar e encerrar Teams/Zoom/Meet/Discord ao lado do ponto laranja do microfone. Verificar o que o Windows 11 expõe (o mute de chamada da barra de tarefas, Win+Alt+K) antes de depender de cada app.
 
 ### Teclado dentro do notch aberto
-Tab e setas entre as abas e os controles (hoje só o Ctrl+Alt+Y e o campo de tarefas usam o teclado).
+Tab e setas entre as abas e os controles (hoje só o Ctrl+Alt+Y, o Ctrl+Alt+J e o campo de tarefas usam o teclado).
 
 ### Encaminhar comandos para o Yata aberto
 Uma segunda execução (`Yata.exe --show tasks`, `--settings`, ou abrir o atalho de novo) hoje só encerra. Com o pipe, pode pedir ao Yata aberto para mostrar a aba ou as configurações.

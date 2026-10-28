@@ -385,10 +385,10 @@ public partial class MainWindow : Window
             handled = true;
             return new IntPtr(NativeMethods.MA_NOACTIVATE);
         }
-        if (msg == NativeMethods.WM_HOTKEY && wParam.ToInt32() == HotkeyId)
+        if (msg == NativeMethods.WM_HOTKEY && wParam.ToInt32() is HotkeyId or JumpHotkeyId)
         {
             handled = true;
-            OnHotkey();
+            OnHotkey(wParam.ToInt32());
         }
         return IntPtr.Zero;
     }
