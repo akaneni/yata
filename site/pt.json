@@ -100,7 +100,7 @@
   "dl.meta": "Grátis · Windows 10 (2004+) e 11, x64 · cerca de 3 MB",
   "dl.l1": "Instala só para o seu usuário, sem permissão de administrador.",
   "dl.l2": "Se faltar o .NET 10 Desktop Runtime, o instalador baixa direto da Microsoft. Só essa etapa pede administrador.",
-  "dl.l3": "Cada versão traz um <code>SHA256SUMS.txt</code> para você conferir o arquivo baixado.",
+  "dl.l3": "Cada versão traz um <code>SHA256SUMS.txt</code> para você conferir o arquivo baixado e uma comprovação de origem do GitHub: <code>gh attestation verify Yata-Setup-x.y.z.exe --repo akaneni/yata</code> confirma que ele foi gerado a partir do código público.",
   "dl.l4": "O instalador ainda não é assinado, então o SmartScreen pode avisar na primeira vez. Clique em <strong>Mais informações</strong> e depois em <strong>Executar assim mesmo</strong>. Para conferir o arquivo antes, veja <a href=\"/pt/code-signing\">como conferir o download</a>.",
   "dl.l5": "Desinstalar mantém seus dados, caso você volte.",
   "footer.privacy": "Política de privacidade",
