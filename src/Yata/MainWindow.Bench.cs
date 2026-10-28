@@ -1,7 +1,10 @@
 using System;
 using System.Text;
 using System.Threading;
+using System.Windows;
 using System.Windows.Threading;
+using Yata.Helpers;
+using Yata.Services;
 
 namespace Yata;
 
@@ -22,8 +25,12 @@ public partial class MainWindow
     /// </summary>
     internal string? Bench { get; init; }
 
+    /// <summary>"sem-sombra" or "gpu" (the latter applied by App, before any window): what a measurement compares.</summary>
+    internal string? BenchVariant { get; init; }
+
     private void StartBench(string state)
     {
+        ApplyBenchVariant(BenchVariant);
         switch (state)
         {
             case "musica":
@@ -35,6 +42,10 @@ public partial class MainWindow
                 break;
             case "foco":
                 _focus.Start();
+                break;
+            case "transicoes":
+                SimulateTrack();
+                After(TimeSpan.FromSeconds(3), () => RunTransitions(1));
                 break;
             case "dormindo":
                 // Nothing playing and the user long gone: Yata dozes in the closed notch.
@@ -51,6 +62,52 @@ public partial class MainWindow
                     throw new InvalidOperationException("Erro de teste fora da interface (--bench queda)")).Start());
                 break;
         }
+    }
+
+    private const int TransitionCycles = 12;
+    private static readonly TimeSpan TransitionStep = TimeSpan.FromMilliseconds(1200);
+
+    /// <summary>
+    /// "transicoes" (tools/measure-frames.ps1): the notch opens, goes through three tabs, closes and
+    /// shows a notice, over and over, each step given time to settle. The frames go to --frames.
+    /// </summary>
+    private void RunTransitions(int cycle)
+    {
+        if (cycle > TransitionCycles)
+        {
+            FrameTimings.Note("fim");
+            return;
+        }
+        (string Label, Action Run)[] steps =
+        [
+            ("abrir", () => ShowPage("media", 300)),
+            ("aba-agenda", () => TabAgenda.IsChecked = true),
+            ("aba-tarefas", () => TabTasks.IsChecked = true),
+            ("aba-midia", () => TabMedia.IsChecked = true),
+            ("fechar", () => SetExpanded(false)),
+            ("hud", () => ShowHud(new HudMessage(Glyphs.Volume2, "Volume", "50", Level: 0.5, DurationMs: 60000))),
+            ("hud-sair", HideHud),
+        ];
+        for (int i = 0; i < steps.Length; i++)
+        {
+            var step = steps[i];
+            After(TransitionStep * i, () =>
+            {
+                FrameTimings.Begin(step.Label, cycle);
+                step.Run();
+            });
+        }
+        After(TransitionStep * steps.Length, () => RunTransitions(cycle + 1));
+    }
+
+    /// <summary>"sem-sombra" (--bench-variant): the notch without its drop shadows, to see what they cost.</summary>
+    private void ApplyBenchVariant(string? variant)
+    {
+        if (variant != "sem-sombra")
+            return;
+        NotchShadow.Visibility = Visibility.Collapsed;
+        BubbleShadow.Visibility = Visibility.Collapsed;
+        ActivityPanelShadow.Visibility = Visibility.Collapsed;
     }
 
     private void After(TimeSpan delay, Action action)

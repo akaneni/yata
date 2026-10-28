@@ -25,12 +25,17 @@ public partial class App : Application
         CatchUnhandledErrors();
         if (ArgValue(e.Args, "--timings") is { } timings)
             StartupTimings.Enable(timings);
+        if (ArgValue(e.Args, "--frames") is { } frames)
+            FrameTimings.Enable(frames);
         StartupTimings.Mark("OnStartup");
 
         // Measured: for a small transparent overlay, GPU rendering costs more than it saves —
         // each frame is read back from the GPU — and the Direct3D device alone took ~75 MB.
         // Software rendering cut Task Manager memory from ~119 MB to ~43 MB and halved CPU.
-        RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
+        // "--bench-variant gpu" leaves it on, for tools/measure-frames.ps1 to compare.
+        string? variant = ArgValue(e.Args, "--bench-variant");
+        if (variant != "gpu")
+            RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
         // Run by the uninstaller: no notch, just take Yata's hooks out of the AI agents.
         if (e.Args.Contains("--remove-agent-hooks"))
@@ -47,7 +52,7 @@ public partial class App : Application
             return;
         }
 
-        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench"), StartedWithWindows = e.Args.Contains(Autostart.Argument) };
+        _window = new MainWindow { Bench = ArgValue(e.Args, "--bench"), BenchVariant = variant, StartedWithWindows = e.Args.Contains(Autostart.Argument) };
         StartupTimings.Mark("MainWindow");
         _window.Show();
         StartupTimings.Mark("Show");

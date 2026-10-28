@@ -21,11 +21,9 @@
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="BubbleShift"/>
             </Grid.RenderTransform>
-            <Path x:Name="BubbleShape" Fill="{DynamicResource NotchBrush}">
-                <Path.Effect>
-                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
-                </Path.Effect>
-            </Path>
+            <views:SoftShadow x:Name="BubbleShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
+                              BlurRadius="20" Depth="4" ShadowOpacity="0.4" Width="32" Height="32"/>
+            <Path x:Name="BubbleShape" Fill="{DynamicResource NotchBrush}"/>
             <Grid x:Name="BubbleContent" Width="22" Height="22" Margin="0,5,0,0" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Ellipse x:Name="BubbleTrack" Stroke="{DynamicResource TrackBrush}" StrokeThickness="2"/>
                 <Path x:Name="BubbleArc" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
@@ -45,11 +43,9 @@
             <Grid.RenderTransform>
                 <TranslateTransform x:Name="ActivityPanelShift"/>
             </Grid.RenderTransform>
-            <Path x:Name="ActivityPanelShape" Fill="{DynamicResource NotchBrush}">
-                <Path.Effect>
-                    <DropShadowEffect BlurRadius="20" ShadowDepth="4" Direction="270" Opacity="0.4" Color="Black"/>
-                </Path.Effect>
-            </Path>
+            <views:SoftShadow x:Name="ActivityPanelShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
+                              BlurRadius="20" Depth="4" ShadowOpacity="0.4"/>
+            <Path x:Name="ActivityPanelShape" Fill="{DynamicResource NotchBrush}"/>
             <StackPanel x:Name="ActivityStrip" Margin="14,8,10,8" VerticalAlignment="Top"/>
         </Grid>
 
@@ -59,11 +55,9 @@
               AllowDrop="True" DragEnter="OnNotchDragOver" DragOver="OnNotchDragOver"
               DragLeave="OnNotchDragLeave" Drop="OnNotchDrop">
 
-            <Path x:Name="NotchShape" Fill="{DynamicResource NotchBrush}">
-                <Path.Effect>
-                    <DropShadowEffect BlurRadius="28" ShadowDepth="6" Direction="270" Opacity="0.45" Color="Black"/>
-                </Path.Effect>
-            </Path>
+            <views:SoftShadow x:Name="NotchShadow" HorizontalAlignment="Center" VerticalAlignment="Top"
+                              BlurRadius="28" Depth="6" ShadowOpacity="0.45"/>
+            <Path x:Name="NotchShape" Fill="{DynamicResource NotchBrush}"/>
 
             <Grid x:Name="ContentHost" HorizontalAlignment="Center" VerticalAlignment="Top" ClipToBounds="True">
 

@@ -927,6 +927,7 @@ public partial class MainWindow : Window
         if (_lastFrame == TimeSpan.Zero)
         {
             _lastFrame = now;
+            FrameTimings.Frame(0);
             return;
         }
 
@@ -934,6 +935,7 @@ public partial class MainWindow : Window
         if (dt <= 0)
             return; // Rendering can fire more than once per frame.
         _lastFrame = now;
+        long workStart = FrameTimings.Enabled ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
 
         if (Motion.Reduced)
         {
@@ -948,12 +950,19 @@ public partial class MainWindow : Window
         bool moving = _width.Step(dt) | _height.Step(dt) | _radius.Step(dt) | _expand.Step(dt) | _hud.Step(dt) |
                       _ambient.Step(dt) | _bubble.Step(dt);
         ApplyFrame();
+        if (FrameTimings.Enabled)
+        {
+            // The layout would run right after this handler anyway; done here, it's counted in the work.
+            UpdateLayout();
+            FrameTimings.Frame(System.Diagnostics.Stopwatch.GetElapsedTime(workStart).TotalMilliseconds);
+        }
 
         if (!moving)
         {
             CompositionTarget.Rendering -= OnRendering;
             _animating = false;
             FitWindow(allowShrink: true);
+            FrameTimings.End();
         }
     }
 
@@ -964,6 +973,8 @@ public partial class MainWindow : Window
         double radius = Math.Clamp(_radius.Value, 0, Math.Min(width, height) / 2);
 
         NotchShape.Data = BuildNotchGeometry(width, height, radius);
+        NotchShadow.Width = width;
+        NotchShadow.Height = height;
         ContentHost.Width = width;
         ContentHost.Height = height;
 
