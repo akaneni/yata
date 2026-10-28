@@ -34,14 +34,16 @@ internal static class ActivityCommand
     /// Sends the activity in <paramref name="args"/> (after "activity") to the running Yata. Returns
     /// the exit code from <see cref="Usage"/>; what went wrong goes to <paramref name="error"/>.
     /// </summary>
-    public static async Task<int> RunAsync(IReadOnlyList<string> args, Action<string> error, string? pipe = null)
+    /// <param name="window">Where the command runs, so a click on the activity goes back there.</param>
+    public static async Task<int> RunAsync(IReadOnlyList<string> args, Action<string> error, string? pipe = null,
+        HostWindow? window = null)
     {
         if (args.Count == 0 || args[0] is "-h" or "--help" or "help")
         {
             error(Usage);
             return args.Count == 0 ? 1 : 0;
         }
-        if (Build(args, out string? problem) is not string json)
+        if (Build(args, out string? problem, window) is not string json)
         {
             error($"{problem}{Environment.NewLine}{Environment.NewLine}{Usage}");
             return 1;
@@ -60,7 +62,7 @@ internal static class ActivityCommand
     }
 
     /// <summary>The JSON line for these arguments (without the leading "activity"), or an error.</summary>
-    public static string? Build(IReadOnlyList<string> args, out string? error)
+    public static string? Build(IReadOnlyList<string> args, out string? error, HostWindow? window = null)
     {
         error = null;
         if (args.Count < 2)
@@ -84,7 +86,10 @@ internal static class ActivityCommand
             ["id"] = args[1],
         };
         if (state != null)
+        {
             request["state"] = state;
+            window?.WriteTo(request);
+        }
 
         for (int i = 2; i < args.Count; i++)
         {

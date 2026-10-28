@@ -22,7 +22,8 @@ public sealed record Activity(
     ActivityState State,
     string Icon,
     DateTime Updated,
-    DateTime Expires)
+    DateTime Expires,
+    HostWindow? Window = null)
 {
     public string Glyph => State switch
     {
@@ -76,7 +77,8 @@ internal sealed record ActivityRequest(
     ActivityState State = ActivityState.Running,
     string? Icon = null,
     TimeSpan? Ttl = null,
-    string? Phrase = null)
+    string? Phrase = null,
+    HostWindow? Window = null)
 {
     /// <summary>
     /// Stock texts Yata words in its own language, for callers that don't know it (the agent
@@ -158,8 +160,13 @@ internal sealed record ActivityRequest(
             if (phrase != null && Array.IndexOf(Phrases, phrase) < 0)
                 return Fail("phrase must be one of: " + string.Join(", ", Phrases), out error);
 
+            HostWindow? window = null;
+            if (root.TryGetProperty("window", out var w) && w.ValueKind != JsonValueKind.Null &&
+                (window = HostWindow.Read(w)) == null)
+                return Fail("window must be {\"handle\": number, \"pid\": number}", out error);
+
             return new ActivityRequest(ActivityOp.Set, id, Clean(String(root, "title"), MaxTitle),
-                Clean(String(root, "text"), MaxText), progress, state.Value, icon, ttl, phrase);
+                Clean(String(root, "text"), MaxText), progress, state.Value, icon, ttl, phrase, window);
         }
         catch (JsonException)
         {
@@ -275,7 +282,8 @@ internal sealed class ActivityBoard
             request.State,
             request.Icon ?? previous?.Icon ?? "activity",
             now,
-            now + ttl);
+            now + ttl,
+            request.Window ?? previous?.Window);
         if (previous == null)
         {
             _items.Add(activity);
@@ -283,6 +291,14 @@ internal sealed class ActivityBoard
         }
         _items[index] = activity;
         return (previous.State != activity.State ? ActivityChange.StateChanged : ActivityChange.Updated, activity);
+    }
+
+    /// <summary>Its window closed: clicking it no longer offers to go there.</summary>
+    public void ForgetWindow(string id)
+    {
+        int index = _items.FindIndex(a => a.Id == id);
+        if (index >= 0)
+            _items[index] = _items[index] with { Window = null };
     }
 
     /// <summary>Drops what nobody updated in time (a script that died midway). True if any went.</summary>
