@@ -2,7 +2,7 @@
 
 **English** · [Português](PRIVACY.pt-BR.md)
 
-*Last updated: October 27, 2026*
+*Last updated: October 28, 2026*
 
 Yata is an open-source Windows app that shows a "notch" at the top of the screen. It has no account, no server and no telemetry. This policy explains what data Yata uses and where it goes.
 
