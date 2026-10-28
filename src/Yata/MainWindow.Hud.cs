@@ -63,8 +63,9 @@ public partial class MainWindow
         if (message.Chime && _chimed.TryAdd(message, true) && ChimeAllowed)
             Chime.Play();
 
-        HudIcon.Text = message.Glyph;
-        HudIcon.SetResourceReference(TextBlock.ForegroundProperty,
+        HudIcon.Glyph = message.Glyph;
+        HudIcon.Badge = message.Badge;
+        HudIcon.SetResourceReference(IconView.ForegroundProperty,
             message.Warning ? "WarningBrush"
             : message.Kind == HudKind.Privacy ? (message.Glyph == Glyphs.Camera ? "CameraBrush" : "MicrophoneBrush")
             : "TextPrimary");

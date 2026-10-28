@@ -98,11 +98,46 @@ public class ActivityTests
         board.Apply(new ActivityRequest(ActivityOp.Set, "x", "Build", Progress: 0.9, Ttl: TimeSpan.FromHours(1)), Now);
         var (_, done) = board.Apply(new ActivityRequest(ActivityOp.Set, "x", State: ActivityState.Done), Now);
         Assert.Null(done!.Progress);
-        Assert.Equal(ActivityIcons.Done, done.Glyph);
+        Assert.Equal(ActivityIcons.Done, done.Badge);
+        Assert.Equal(ActivityIcons.Glyph("activity"), done.Glyph); // Still says where it comes from.
 
         Assert.False(board.Prune(Now + ActivityBoard.DoneTtl - TimeSpan.FromSeconds(1)));
         Assert.True(board.Prune(Now + ActivityBoard.DoneTtl));
         Assert.Equal(0, board.Count);
+    }
+
+    [Theory]
+    [InlineData(ActivityState.Running, null)]
+    [InlineData(ActivityState.Attention, ActivityIcons.Attention)]
+    [InlineData(ActivityState.Done, ActivityIcons.Done)]
+    [InlineData(ActivityState.Failed, ActivityIcons.Failed)]
+    public void The_badge_says_what_happened_and_the_icon_keeps_the_source(ActivityState state, string? badge)
+    {
+        var board = new ActivityBoard();
+        var (_, activity) = board.Apply(new ActivityRequest(ActivityOp.Set, "x", "Claude Code", State: state, Icon: "claude"), Now);
+        Assert.Equal(ActivityIcons.ClaudeMark, activity!.Glyph);
+        Assert.Equal(badge, activity.Badge);
+    }
+
+    [Theory]
+    [InlineData("claude")]
+    [InlineData("cursor")]
+    [InlineData("codex")]
+    public void The_agents_marks_are_known_icons_drawn_on_a_24_grid(string name)
+    {
+        Assert.Equal(name, Parse($$"""{"op":"set","id":"x","title":"Agent","icon":"{{name}}"}""").Icon);
+        var glyph = ActivityIcons.Glyph(name);
+        Assert.True(BrandMarks.IsMark(glyph));
+        var image = (System.Windows.Media.DrawingImage)BrandMarks.Image(glyph)!;
+        Assert.InRange(image.Width, 23.9, 24.1);
+        Assert.InRange(image.Height, 23.9, 24.1);
+        // The mark itself (the first shape) fills most of the grid: its paths parsed whole.
+        var bounds = ((System.Windows.Media.DrawingGroup)image.Drawing).Children[0].Bounds;
+        Assert.InRange(bounds.Left, -0.5, 2);
+        Assert.InRange(bounds.Top, -0.5, 2);
+        Assert.InRange(bounds.Right, 22, 24.5);
+        Assert.InRange(bounds.Bottom, 22, 24.5);
+        Assert.Null(BrandMarks.Image(ActivityIcons.Glyph("build"))); // An ordinary glyph stays a glyph.
     }
 
     [Fact]

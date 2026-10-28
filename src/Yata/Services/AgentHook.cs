@@ -10,9 +10,10 @@ namespace Yata.Services;
 /// <summary>
 /// <c>yata-cli hook claude|cursor|codex</c>: turns an AI agent's lifecycle event (the JSON its hooks
 /// send) into an activity in the notch — working, waiting for you, done. One activity per agent
-/// session, titled with the agent and the project folder. Nothing from the conversation itself (the
-/// prompt, the commands, the answers) is ever sent: only the state, and which window the agent runs
-/// in (<see cref="HostWindow"/>), so a click on the activity goes there.
+/// session, titled with the program it runs in and the project folder ("Orca · yata"), with the
+/// agent's mark as its icon. Nothing from the conversation itself (the prompt, the commands, the
+/// answers) is ever sent: only the state, and which window the agent runs in (<see cref="HostWindow"/>),
+/// so a click on the activity goes there.
 ///
 /// A hook must never get in the agent's way: whatever happens, the caller exits 0, and prints only
 /// the neutral answer some events require (<see cref="Result.Output"/>).
@@ -144,8 +145,9 @@ internal static class AgentHook
         {
             ["op"] = "set",
             ["id"] = id,
-            ["title"] = project.Length > 0 ? $"{product} · {project}" : product,
-            ["icon"] = "agent",
+            ["title"] = Title(product, project, window?.AppName()),
+            // Its own mark says which agent, so the title doesn't have to.
+            ["icon"] = agent,
             ["state"] = status switch
             {
                 Status.Permission or Status.Waiting => "attention",
@@ -171,6 +173,19 @@ internal static class AgentHook
         window?.WriteTo(request);
         return JsonSerializer.Serialize(request);
     }
+
+    /// <summary>
+    /// "Orca · yata": where the agent runs and on what. The mark already names the agent, so it's
+    /// only the fallback when there's nothing else to say.
+    /// </summary>
+    internal static string Title(string product, string project, string? host) =>
+        (host, project.Length > 0) switch
+        {
+            (string h, true) => $"{h} · {project}",
+            (string h, false) => h,
+            (null, true) => project,
+            _ => product,
+        };
 
     /// <summary>The project folder's name: "C:\src\yata\" → "yata".</summary>
     internal static string ProjectName(string? folder)

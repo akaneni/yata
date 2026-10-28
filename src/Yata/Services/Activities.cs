@@ -25,11 +25,16 @@ public sealed record Activity(
     DateTime Expires,
     HostWindow? Window = null)
 {
-    public string Glyph => State switch
+    /// <summary>Where it comes from: the program's icon (an agent's mark), whatever the state.</summary>
+    public string Glyph => ActivityIcons.Glyph(Icon);
+
+    /// <summary>What happened to it, in the icon's corner: done, failed, needs you; none while running.</summary>
+    public string? Badge => State switch
     {
         ActivityState.Done => ActivityIcons.Done,
         ActivityState.Failed => ActivityIcons.Failed,
-        _ => ActivityIcons.Glyph(Icon),
+        ActivityState.Attention => ActivityIcons.Attention,
+        _ => null,
     };
 
     /// <summary>Needs the user: drawn in the warning color and announced as a reminder.</summary>
@@ -39,11 +44,21 @@ public sealed record Activity(
     public string Line => string.IsNullOrEmpty(Text) ? Title : $"{Title} · {Text}";
 }
 
-/// <summary>The icons a program may pick. A fixed set: no arbitrary glyphs or images from outside.</summary>
+/// <summary>
+/// The icons a program may pick. A fixed set: no arbitrary glyphs or images from outside. The agents'
+/// marks are among them (the hooks pick those), drawn from paths built into Yata.
+/// </summary>
 internal static class ActivityIcons
 {
+    // The agents' marks travel as these tokens where a glyph would; BrandMarks (in the app) draws them.
+    public const string ClaudeMark = "mark:claude";
+    public const string CursorMark = "mark:cursor";
+    public const string CodexMark = "mark:codex";
+
+    // Badges: what happened, in the icon's corner.
     public const string Done = "";
     public const string Failed = "";
+    public const string Attention = "";
 
     private static readonly Dictionary<string, string> ByName = new(StringComparer.OrdinalIgnoreCase)
     {
@@ -56,6 +71,9 @@ internal static class ActivityIcons
         ["agent"] = "",
         ["bell"] = "",
         ["timer"] = "",
+        ["claude"] = ClaudeMark,
+        ["cursor"] = CursorMark,
+        ["codex"] = CodexMark,
     };
 
     public static IEnumerable<string> Names => ByName.Keys;

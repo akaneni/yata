@@ -6,7 +6,7 @@ namespace Yata.Services;
 public enum HudKind { Reminder, Volume, Brightness, Power, AudioDevice, CapsLock, KeyboardLayout, Network, Privacy, Weather, Activity }
 
 /// <summary>A short-lived status shown in the compact notch (volume, battery, Caps Lock, ...).</summary>
-/// <param name="Glyph">Segoe Fluent Icons glyph.</param>
+/// <param name="Glyph">Segoe Fluent Icons glyph, or an agent's mark (BrandMarks).</param>
 /// <param name="Text">Main label.</param>
 /// <param name="Value">Optional value on the right, e.g. "62%".</param>
 /// <param name="Level">Optional 0..1 level drawn as a bar.</param>
@@ -20,6 +20,7 @@ public enum HudKind { Reminder, Volume, Brightness, Power, AudioDevice, CapsLock
 /// not in the middle of it).</param>
 /// <param name="Expires">Past this, a notice still waiting is dropped: "Daily in 5 min" is wrong
 /// once the meeting started.</param>
+/// <param name="Badge">A glyph in the icon's corner: what happened (done, failed) to what the icon names.</param>
 public sealed record HudMessage(
     string Glyph,
     string Text,
@@ -32,7 +33,8 @@ public sealed record HudMessage(
     bool Celebrate = false,
     string? Tag = null,
     bool Chime = false,
-    DateTime? Expires = null);
+    DateTime? Expires = null,
+    string? Badge = null);
 
 internal static class Glyphs
 {

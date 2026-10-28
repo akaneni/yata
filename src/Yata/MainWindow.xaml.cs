@@ -903,7 +903,7 @@ public partial class MainWindow : Window
         const double bottomRoom = 48; // shadow below
         const double overshoot = 1.06;
         // The bubble beside the notch; the window stays centered on the notch, so room on both sides.
-        double bubbleRoom = BubbleShown || _bubble.Value > 0.001 ? 2 * (BubbleGap + BubbleSize + Ear) : 0;
+        double bubbleRoom = BubbleShown || _bubble.Value > 0.001 ? 2 * (BubbleGap + BubbleWidth + Ear) : 0;
 
         // The activities panel beside the open notch (or below it, see LayoutActivityPanel).
         var panel = ActivityPanelRoom;
