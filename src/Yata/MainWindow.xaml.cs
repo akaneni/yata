@@ -54,7 +54,7 @@ public partial class MainWindow : Window
     private static readonly Size ExpandedFocus = new(ExpandedWidth, 196);
     private static readonly Size ExpandedWater = new(ExpandedWidth, 196);
     private static readonly Size ExpandedTasks = new(ExpandedWidth, 270);
-    private static readonly Size ExpandedShelf = new(ExpandedWidth, 250);
+    private static readonly Size ExpandedShelf = new(ExpandedWidth, 260);
     private static readonly Size ExpandedAgenda = new(ExpandedWidth, 250);
     // How early the closed notch starts showing the next event.
     private static readonly TimeSpan UpcomingWindow = TimeSpan.FromMinutes(15);
