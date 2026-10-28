@@ -31,6 +31,7 @@ Open source, no account and no telemetry.
 
 ## Features (v0.1)
 
+- **Welcome**: the first time, Settings open with what the notch can do and the choices that are yours (water reminders, new version notice). The tray menu has **Open Yata**.
 - **English and Portuguese**: follows the Windows language (Portuguese on any Portuguese Windows, English everywhere else), or pick one in Settings → Language.
 - **Compact notch**: a clock when nothing is playing; album art, title and an animated equalizer when media is.
 - **Expands on hover** with a spring animation; collapses when the mouse leaves.
