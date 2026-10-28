@@ -118,7 +118,7 @@ It's a console program, so PowerShell, cmd, bash and AI agents wait for it and g
 - **Send `--title` every time.** A running activity nobody updates goes away after 10 minutes (`--ttl` changes it, up to 24 h), and an id that's gone needs its title to come back. `attention` and `fail` stay until ended (up to 1 h); `done` stays 12 s. `end` on an id that's already gone is fine.
 - Icons: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. A fixed set: programs can't send images or arbitrary glyphs.
 - Text is one plain line (titles up to 60 characters, text up to 120); control, invisible and direction-changing characters are removed.
-- At most 8 activities at a time, and 30 requests per 10 s. Nothing is printed on success.
+- At most 8 activities at a time, and 60 requests per 10 s. Nothing is printed on success.
 - Exit codes: 0 shown, 1 bad arguments (unknown option, icon or value), 2 Yata isn't running, 3 refused by Yata (the reason is printed).
 - How it works: a named pipe that only your Windows user can open and that refuses network access. Activities live in memory only; their text isn't logged.
 

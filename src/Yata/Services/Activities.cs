@@ -165,7 +165,13 @@ internal sealed record ActivityRequest(
                 (window = HostWindow.Read(w)) == null)
                 return Fail("window must be {\"handle\": number, \"pid\": number}", out error);
 
-            return new ActivityRequest(ActivityOp.Set, id, Clean(String(root, "title"), MaxTitle),
+            string? rawTitle = String(root, "title");
+            string? title = Clean(rawTitle, MaxTitle);
+            // Sent, but nothing visible survives the cleaning: say so, not "send --title".
+            if (rawTitle is { Length: > 0 } && string.IsNullOrEmpty(title))
+                return Fail("title has no visible characters", out error);
+
+            return new ActivityRequest(ActivityOp.Set, id, title,
                 Clean(String(root, "text"), MaxText), progress, state.Value, icon, ttl, phrase, window);
         }
         catch (JsonException)

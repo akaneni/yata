@@ -118,7 +118,7 @@ yata-cli activity end agent
 - **Mande o `--title` sempre.** Uma atividade em andamento que ninguém atualiza some depois de 10 minutos (`--ttl` muda isso, até 24 h), e um id que sumiu precisa do título para voltar. `attention` e `fail` ficam até um `end` (no máximo 1 h); `done` fica 12 s. `end` num id que já sumiu não dá erro.
 - Ícones: `activity`, `code`, `build`, `download`, `upload`, `sync`, `agent`, `bell`, `timer`. Um conjunto fixo: programas não mandam imagens nem glifos quaisquer.
 - O texto é uma linha simples (títulos até 60 caracteres, texto até 120); caracteres de controle, invisíveis e de mudança de direção são removidos.
-- No máximo 8 atividades ao mesmo tempo, e 30 pedidos a cada 10 s. Nada é impresso quando dá certo.
+- No máximo 8 atividades ao mesmo tempo, e 60 pedidos a cada 10 s. Nada é impresso quando dá certo.
 - Códigos de saída: 0 mostrou, 1 argumentos errados (opção, ícone ou valor desconhecido), 2 o Yata não está aberto, 3 recusado pelo Yata (o motivo é impresso).
 - Como funciona: um named pipe que só o seu usuário do Windows abre e que recusa acesso pela rede. As atividades ficam só na memória; o texto delas não vai para o log.
 

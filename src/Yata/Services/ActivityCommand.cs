@@ -100,6 +100,9 @@ internal static class ActivityCommand
             switch (option)
             {
                 case "--title":
+                    // Only invisible or control characters: nothing would be left to show.
+                    if (string.IsNullOrEmpty(ActivityRequest.Clean(value, ActivityRequest.MaxTitle)))
+                        return Fail("--title has no visible characters", out error);
                     request["title"] = value;
                     break;
                 case "--text":
@@ -118,6 +121,9 @@ internal static class ActivityCommand
                 case "--ttl":
                     if (!int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out int seconds))
                         return Fail("--ttl takes whole seconds", out error);
+                    // Checked here too, so a wrong value is exit code 1 (fix the call), even with Yata closed.
+                    if (seconds < ActivityRequest.MinTtl.TotalSeconds || seconds > ActivityRequest.MaxTtl.TotalSeconds)
+                        return Fail($"--ttl takes {ActivityRequest.MinTtl.TotalSeconds:0} to {ActivityRequest.MaxTtl.TotalSeconds:0} seconds", out error);
                     request["ttl"] = seconds;
                     break;
                 default:
