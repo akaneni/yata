@@ -98,10 +98,13 @@ section { padding-block: 4.5rem; border-top: 1px solid var(--line) }
 .section-head p { color: var(--dim); font-size: var(--step-1); line-height: 1.5 }
 
 .shot { margin: 0 0 3.5rem; display: grid; gap: .75rem; justify-items: center }
-.shot-screen { position: relative; width: 100%; display: flex; justify-content: center; padding-bottom: 2.5rem; border: 1px solid var(--line); border-top: 0;
+.shot-screen, .feature-shot { position: relative; width: 100%; display: flex; justify-content: center; padding-bottom: 2.5rem; border: 1px solid var(--line); border-top: 0;
   background-color: var(--panel); background-image: radial-gradient(var(--dot) 1px, transparent 1.2px); background-size: 6px 6px }
-.shot-screen::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--fg); opacity: .35 }
-.shot img { display: block; max-width: calc(100% - 24px); height: auto }
+.shot-screen::before, .feature-shot::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--fg); opacity: .35 }
+.shot img, .feature-shot img { display: block; max-width: calc(100% - 24px); height: auto }
+/* A smaller screen on each feature card, all as tall so the cards line up; the notch hangs from its top */
+.feature-shot { height: 13.25rem; padding-bottom: 0; margin-bottom: .5rem; overflow: hidden; align-items: flex-start }
+.feature-shot img { max-width: calc(100% - 16px) }
 .shot figcaption { color: var(--dim) }
 .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 2.5rem 3rem }
 .feature { display: grid; gap: .5rem; align-content: start; min-width: 0 }

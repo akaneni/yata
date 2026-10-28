@@ -120,7 +120,7 @@ function Get-JsonLd([string]$lang, [string]$url, [string]$description) {
     downloadUrl = "https://github.com/akaneni/yata/releases/latest"
     fileSize = "3MB"
     image = "https://getyata.app/og.png"
-    screenshot = "https://getyata.app/img/notch-open-$(if ($lang -eq "en") { "en" } else { "pt" }).png"
+    screenshot = "https://getyata.app/img/shots/$(if ($lang -eq "en") { "en" } else { "pt" })/aberto-musica.png"
     license = "https://opensource.org/licenses/MIT"
     isAccessibleForFree = $true
     offers = [ordered]@{ "@type" = "Offer"; price = "0"; priceCurrency = "USD" }

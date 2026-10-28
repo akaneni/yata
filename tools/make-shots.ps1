@@ -5,11 +5,13 @@
 # (YATA_DATA_DIR), like tools/measure.ps1; a running Yata is closed and reopened. The song cover is
 # cut from docs/yata-hero.png, so no image needs a license.
 #
-# Usage: ./tools/make-shots.ps1 [-Languages pt-BR,en] [-OutDir docs\screenshots] [-Exe path\Yata.exe]
-#   Writes <OutDir>\<language>\<state>.png, e.g. docs\screenshots\pt-BR\aberto-foco.png.
+# Usage: ./tools/make-shots.ps1 [-Languages pt-BR,en] [-OutDir docs\screenshots] [-SiteDir site\img\shots] [-Exe path\Yata.exe]
+#   Writes <OutDir>\<language>\<state>.png, e.g. docs\screenshots\pt-BR\aberto-foco.png, and the
+#   ones the site shows, made lighter, in <SiteDir>\<en|pt>\.
 param(
     [string[]]$Languages = @("pt-BR", "en"),
     [string]$OutDir,
+    [string]$SiteDir,
     [string]$Exe
 )
 $ErrorActionPreference = "Stop"
@@ -17,6 +19,26 @@ Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path $PSScriptRoot -Parent
 if (-not $OutDir) { $OutDir = Join-Path $root "docs\screenshots" }
+if (-not $SiteDir) { $SiteDir = Join-Path $root "site\img\shots" }
+
+# What the site shows (site/index.html), and how wide: the big shot at twice its 554 px, the ones in
+# the feature cards at twice ~320 px.
+$siteShots = [ordered]@{
+    "aberto-musica" = 1108; "fechado-musica" = 640; "aberto-agenda" = 640; "aberto-foco" = 640
+    "aberto-tarefas" = 640; "aberto-prateleira" = 640; "fechado-volume" = 640; "fechado-atividade" = 640
+}
+
+function Save-Smaller([string]$from, [string]$to, [int]$width) {
+    $image = [Drawing.Bitmap]::FromFile($from)
+    $height = [int][math]::Round($image.Height * $width / $image.Width)
+    $small = New-Object Drawing.Bitmap $width, $height, ([Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    $g = [Drawing.Graphics]::FromImage($small)
+    $g.InterpolationMode = [Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+    $g.PixelOffsetMode = [Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+    $g.DrawImage($image, 0, 0, $width, $height)
+    $small.Save($to, [Drawing.Imaging.ImageFormat]::Png)
+    $g.Dispose(); $small.Dispose(); $image.Dispose()
+}
 $work = Join-Path ([IO.Path]::GetTempPath()) "yata-shots"
 New-Item -ItemType Directory -Force $work | Out-Null
 
@@ -177,6 +199,15 @@ try {
         New-Item -ItemType Directory -Force $target | Out-Null
         Get-ChildItem $shots -Filter *.png | Where-Object Name -ne "cover.png" | Copy-Item -Destination $target
         Write-Host ("  {0} imagens em {1}" -f (Get-ChildItem $target -Filter *.png).Count, $target)
+
+        $site = Join-Path $SiteDir $(if ($language -eq "en") { "en" } else { "pt" })
+        New-Item -ItemType Directory -Force $site | Out-Null
+        foreach ($name in $siteShots.Keys) {
+            $from = Join-Path $target "$name.png"
+            $image = [Drawing.Image]::FromFile($from); $full = $image.Width; $image.Dispose()
+            Save-Smaller $from (Join-Path $site "$name.png") ([math]::Min($siteShots[$name], $full))
+        }
+        Write-Host ("  {0} imagens do site em {1}" -f $siteShots.Count, $site)
     }
 }
 finally {

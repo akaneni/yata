@@ -29,6 +29,15 @@ Open source, no account and no telemetry.
 
 ![Yata's repertoire in the notch](docs/yata.gif)
 
+## Screenshots
+
+<p align="center"><img src="docs/screenshots/en/fechado-musica.png" width="448" alt="Yata closed while a song plays: cover, the line being sung, the equalizer and a meeting countdown in a bubble"></p>
+<p align="center"><img src="docs/screenshots/en/aberto-musica.png" width="554" alt="Yata open on a song: cover, title, progress, controls and the synced lyrics underneath"></p>
+<p align="center"><img src="docs/screenshots/en/aberto-foco.png" width="554" alt="The Focus tab: countdown, the task for the session, today against a 2-hour goal and the week"></p>
+<p align="center"><img src="docs/screenshots/en/aberto-tarefas.png" width="554" alt="The Tasks tab: tasks, one with a 3:30 PM reminder and one done"></p>
+
+Drawn by Yata itself, with sample content, by `tools/make-shots.ps1`; every state is in [docs/screenshots](docs/screenshots).
+
 ## Features (v0.1)
 
 - **Welcome**: the first time, Settings open with what the notch can do and the choices that are yours (water reminders, new version notice). The tray menu has **Open Yata**.
@@ -36,7 +45,7 @@ Open source, no account and no telemetry.
 - **Compact notch**: a clock when nothing is playing; album art, title and an animated equalizer when media is.
 - **Expands on hover** with a spring animation; collapses when the mouse leaves.
 - **Media player** for any app that uses the Windows media controls (Spotify, YouTube in the browser, etc.): album art, title, artist, a seekable progress bar, previous/play/next. With several players open, it follows the one that is **actually playing**.
-- **Synced lyrics**: the notch splits in two (player + scrolling lyrics), the current line is highlighted and clicking a line jumps to it. The compact notch shows the line being sung.
+- **Synced lyrics**: under the player in the open notch, three lines with the current one highlighted; clicking a line jumps to it. The compact notch shows the line being sung.
 - **System notices** in the compact notch: volume/mute, brightness, charger plugged/unplugged, low battery (20% and 10%), audio output change (headphones/speakers), Caps Lock, keyboard language change and network connection. The keyboard is read by polling its state, **with no hook** — the app never sees what you type.
 - **Camera and microphone in use**: an orange (microphone) or green (camera) dot in the closed notch and the apps' names in the open notch. The microphone comes from Windows audio sessions (Core Audio). The camera relies on the registry Windows kept up to version 25H2; on Windows 11 26H2 that data requires administrator rights, so there only the microphone is detected.
 - **Ctrl+Alt+Y shortcut** opens and closes the notch from anywhere. **Ctrl+Alt+J** (off by default) goes to the window of the activity that needs you, and pressed again, to the next one. Both use `RegisterHotKey`: Windows reports only those combinations.
@@ -44,7 +53,7 @@ Open source, no account and no telemetry.
 - **Tabs in the open notch**: Media, Calendar, Focus, Water, Tasks and Shelf.
 - **Calendar (Google)**: connect your Google account (OAuth, read-only) and choose which calendars appear. The tab shows today and tomorrow, highlights the ongoing event and has a **Join** button for Meet, Zoom and Teams calls. The closed notch shows "Standup in 8 min" in the 15 minutes before, and a notice (with sound) arrives a configurable few minutes before, plus another when the event starts. Declined invitations don't appear. To register the app with Google, see [docs/google-calendar.md](docs/google-calendar.md) (in Portuguese).
 - **Weather** (off by default): pick the city by name or, if you prefer, with a single reading of the Windows location (rounded to ~1 km right away, never stored precisely). No IP geolocation. 1-bit pixel-art icons in Yata's style. The closed notch shows the icon and temperature next to the clock; open with no music, it shows the condition, high/low and expected rain. A notice arrives when the chance of rain goes over 60% in the next 2 hours. Weather data: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
-- **Focus (Pomodoro)**: 25 min of focus / 5 min break, a 15 min long break every 4 sessions, a sound at the end of each phase and a countdown in the compact notch. Explicit controls for each state: **Start**, **Pause**, **Resume**, **Stop** and **Skip break**; when paused, the ring dims and the time pulses gently (and the compact notch shows ⏸).
+- **Focus (Pomodoro)**: 25 min of focus / 5 min break, a 15 min long break every 4 sessions, a sound at the end of each phase and a countdown in the compact notch. Explicit controls for each state: **Start**, **Pause**, **Resume**, **Stop** and **Skip break**; when paused, the ring dims and the time pulses gently (and the compact notch shows ⏸). Pick the task the session is for from the Tasks tab and tick it off right there; beside it, today's focus against a daily goal (2 h by default, in Settings) and the last 7 days.
 - **Water**: a daily goal, a +250 ml button, a chart of the last 7 days and an optional hourly reminder (8:00–22:00) until the goal is reached (off until you turn it on, on the welcome card or in Settings).
 - **Tasks**: a list with check/remove (a removal can be undone for a few seconds); a time at the end of the text ("Call Ana at 3pm", "Meeting 15:30", "ligar às 9h") becomes a reminder. Optionally syncs both ways with a **Google Tasks** list (Google keeps only the day; the reminder time stays in Yata). The notch takes keyboard focus only while you type and gives focus back to the previous window when you're done.
 - **File shelf**: drag files or folders onto the notch to keep them and drag them back out into any app; double-click opens. Only the path is kept (nothing is copied), and deleted/moved items disappear on their own. Images get a thumbnail. "Clear" can also be undone for a few seconds.

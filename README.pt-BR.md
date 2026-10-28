@@ -29,6 +29,15 @@ Projeto de código aberto, sem conta e sem telemetria.
 
 ![O repertório do Yata no notch](docs/yata.gif)
 
+## Capturas
+
+<p align="center"><img src="docs/screenshots/pt-BR/fechado-musica.png" width="448" alt="O Yata fechado com uma música tocando: capa, a linha sendo cantada, o equalizador e a contagem para a reunião numa bolha"></p>
+<p align="center"><img src="docs/screenshots/pt-BR/aberto-musica.png" width="554" alt="O Yata aberto numa música: capa, título, progresso, controles e a letra sincronizada embaixo"></p>
+<p align="center"><img src="docs/screenshots/pt-BR/aberto-foco.png" width="554" alt="A aba Foco: contagem, a tarefa da sessão, o dia contra a meta de 2 horas e a semana"></p>
+<p align="center"><img src="docs/screenshots/pt-BR/aberto-tarefas.png" width="554" alt="A aba Tarefas: tarefas, uma com lembrete às 15:30 e uma concluída"></p>
+
+Desenhadas pelo próprio Yata, com conteúdo de exemplo, pelo `tools/make-shots.ps1`; todos os estados estão em [docs/screenshots](docs/screenshots).
+
 ## Funcionalidades (v0.1)
 
 - **Boas-vindas**: na primeira vez, as Configurações abrem com o que dá para fazer no notch e as escolhas que são suas (lembrete de água, aviso de versão nova). O menu da bandeja tem **Abrir o Yata**.
@@ -36,7 +45,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Notch compacto**: relógio quando nada toca; capa, título e equalizador animado quando há mídia.
 - **Expande ao passar o mouse** com animação de mola; recolhe ao sair.
 - **Player de mídia** de qualquer app que use os controles de mídia do Windows (Spotify, YouTube no navegador, etc.): capa, título, artista, barra de progresso com busca, anterior/play/próxima. Com vários players abertos, segue o que está **tocando de fato**.
-- **Letras sincronizadas**: o notch se divide em dois (player + letra rolando), a linha atual fica em destaque e clicar numa linha pula para ela. No modo compacto aparece a linha sendo cantada.
+- **Letras sincronizadas**: embaixo do player no notch aberto, três linhas com a atual em destaque; clicar numa linha pula para ela. No modo compacto aparece a linha sendo cantada.
 - **Avisos do sistema** no notch compacto: volume/mudo, brilho, carregador conectado/desconectado, bateria baixa (20% e 10%), troca de saída de áudio (fone/caixa), Caps Lock, troca de idioma do teclado e conexão de rede. O teclado é lido por consulta de estado, **sem hook** — o app nunca vê o que é digitado.
 - **Câmera e microfone em uso**: ponto laranja (microfone) ou verde (câmera) no notch fechado e o nome dos apps no notch aberto. O microfone vem das sessões de áudio do Windows (Core Audio). A câmera depende do registro que o Windows mantinha até a versão 25H2; no Windows 11 26H2 esse dado passou a exigir administrador, então lá só o microfone é detectado.
 - **Atalho Ctrl+Alt+Y** abre e fecha o notch de qualquer lugar. O **Ctrl+Alt+J** (desligado por padrão) vai para a janela da atividade que precisa de você e, apertando de novo, para a próxima. Os dois usam `RegisterHotKey`: o Windows avisa só essas combinações.
@@ -44,7 +53,7 @@ Projeto de código aberto, sem conta e sem telemetria.
 - **Abas no notch aberto**: Mídia, Agenda, Foco, Água, Tarefas e Prateleira.
 - **Agenda (Google)**: conecte com sua conta Google (OAuth, só leitura) e escolha quais agendas aparecem. A aba mostra hoje e amanhã, destaca o evento em andamento e tem o botão **Entrar** para chamadas do Meet, Zoom e Teams. O notch fechado mostra "Daily em 8 min" nos 15 minutos antes, e chega um aviso (com som) alguns minutos antes, configurável, e outro quando o evento começa. Convites recusados não aparecem. Para cadastrar o app no Google, veja [docs/google-calendar.md](docs/google-calendar.md).
 - **Tempo** (desligado por padrão): você escolhe a cidade pelo nome ou, se preferir, com uma leitura única da localização do Windows (arredondada para ~1 km na hora, nunca guardada com precisão). Nada de geolocalização por IP. Ícones em pixel art 1-bit no estilo do Yata. O notch fechado mostra ícone e temperatura ao lado do relógio; aberto sem música, mostra condição, máxima/mínima e a chuva prevista. Chega um aviso quando a chance de chuva passa de 60% nas próximas 2 horas. Dados do tempo: [Open-Meteo.com](https://open-meteo.com) (CC BY 4.0).
-- **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸).
+- **Foco (Pomodoro)**: 25 min de foco / 5 min de pausa, pausa longa de 15 min a cada 4 sessões, aviso sonoro ao fim de cada fase e contagem no notch compacto. Controles explícitos por estado: **Iniciar**, **Pausar**, **Continuar**, **Parar** e **Pular pausa**; pausado, o anel apaga e o tempo pisca suave (e o notch compacto mostra ⏸). Escolha a tarefa da sessão entre as da aba Tarefas e marque como feita ali mesmo; ao lado, o foco de hoje contra uma meta diária (2 h por padrão, nas Configurações) e os últimos 7 dias.
 - **Água**: meta diária, botão +250 ml, gráfico dos últimos 7 dias e lembrete opcional de hora em hora (8h–22h) enquanto a meta não é batida (desligado até você ligar, nas boas-vindas ou nas Configurações).
 - **Tarefas**: lista com marcar/remover (remover pode ser desfeito por alguns segundos); um horário no fim do texto ("Reunião 15:30", "ligar às 9h", "Call Ana at 3pm") vira lembrete. Opcionalmente sincroniza, nos dois sentidos, com uma lista do **Google Tasks** (o Google guarda só o dia; o horário do lembrete fica no Yata). O notch só aceita foco de teclado enquanto você digita e devolve o foco à janela anterior ao terminar.
 - **Prateleira de arquivos**: arraste arquivos ou pastas até o notch para guardar e arraste de volta para qualquer app; clique duplo abre. Guarda só o caminho (nada é copiado) e itens apagados/movidos somem sozinhos. Imagens ganham miniatura. "Limpar" também pode ser desfeito por alguns segundos.
