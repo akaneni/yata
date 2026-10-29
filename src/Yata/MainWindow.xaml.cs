@@ -762,11 +762,12 @@ public partial class MainWindow : Window
                      : _focus.IsActive ? CompactIdleTimer
                      : compactWeather ? CompactIdleWeather
                      : CompactIdle;
-        // The privacy dots get their own space at the left edge of the closed notch.
+        // The privacy dots get their own space at the left edge of the closed notch, and the same
+        // room at the right one so the clock stays centered on the notch.
         int dots = !PrivacyShown ? 0 : (_privacy.Current.Camera.Count > 0 ? 1 : 0) + (_privacy.Current.Microphone.Count > 0 ? 1 : 0);
         double privacyRoom = dots == 0 ? 0 : dots * 6 + (dots - 1) * 3 + PrivacyGap;
-        compact = new Size(compact.Width + privacyRoom, compact.Height);
-        CompactView.Margin = new Thickness(12 + privacyRoom, 0, 12, 0);
+        compact = new Size(compact.Width + 2 * privacyRoom, compact.Height);
+        CompactView.Margin = new Thickness(12 + privacyRoom, 0, 12 + privacyRoom, 0);
         Size expanded = _page switch
         {
             NotchPage.Agenda or NotchPage.Tasks or NotchPage.Shelf => ExpandedTall,

@@ -11,7 +11,8 @@ namespace Yata.Services;
 
 /// <summary>
 /// Apps capturing from a microphone right now, from the Core Audio sessions on every active
-/// capture device. Event driven: Windows tells us when a session appears or changes state.
+/// capture device. Event driven: Windows tells us when a session appears or changes state; only while
+/// an app is shown is the list also checked again every few seconds, in case a stop went unannounced.
 /// Callbacks arrive on worker threads; the list is rebuilt on the UI dispatcher.
 /// </summary>
 [ComVisible(true)]
@@ -23,6 +24,9 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
     private readonly Dispatcher _dispatcher;
     // Sessions start and stop in bursts (and per device); rebuild once things settle.
     private readonly DispatcherTimer _settle = new() { Interval = TimeSpan.FromMilliseconds(250) };
+    // Windows sometimes never says a session stopped, which left the dot on for good. While an app
+    // is shown, look again now and then; with nothing shown, nothing runs.
+    private readonly DispatcherTimer _verify = new() { Interval = TimeSpan.FromSeconds(5) };
     private readonly List<IAudioSessionManager2> _managers = new();
     private readonly Dictionary<string, (IAudioSessionControl2 Control, SessionEvents Events)> _sessions = new();
     private IMMDeviceEnumerator? _enumerator;
@@ -36,6 +40,7 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
     {
         _dispatcher = dispatcher;
         _settle.Tick += (_, _) => { _settle.Stop(); Refresh(); };
+        _verify.Tick += (_, _) => Refresh();
     }
 
     public void Start()
@@ -57,6 +62,7 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
     public void Dispose()
     {
         _settle.Stop();
+        _verify.Stop();
         Unbind();
         if (_enumerator != null)
         {
@@ -184,6 +190,7 @@ internal sealed class MicrophoneMonitor : IAudioSessionNotification, IMMNotifica
             _sessions.Remove(id);
         }
 
+        _verify.IsEnabled = apps.Count > 0;
         if (apps.SequenceEqual(Apps))
             return;
         Apps = apps.ToList();
