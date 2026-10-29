@@ -57,7 +57,7 @@
 
     <h2>Checking a download</h2>
     <ul>
-      <li><strong>Checksum:</strong> in PowerShell, <code>Get-FileHash .\Yata-Setup-x.y.z.exe</code> must match the line in the release's <code>SHA256SUMS.txt</code>.</li>
+      <li><strong>Checksum:</strong> in PowerShell, <code>Get-FileHash .\Yata-Setup-x.y.z.exe</code> must match the line in the release's <code>SHA256SUMS.txt</code>. The Download button on this site gets <code>Yata-Setup.exe</code>: the same installer under a fixed name, also listed there.</li>
       <li><strong>Provenance</strong> (v0.2.1 and later): with the <a href="https://cli.github.com">GitHub CLI</a>, <code>gh attestation verify Yata-Setup-x.y.z.exe --repo akaneni/yata</code>.</li>
       <li><strong>Build it yourself:</strong> the <a href="https://github.com/akaneni/yata#build-and-run">README</a> shows how to build Yata and its installer from source.</li>
     </ul>

@@ -137,6 +137,12 @@ jobs:
             "$file signed by $($sig.SignerCertificate.Subject)"
           }
 
+      # A fixed-name copy that only the site's Download button links to, so its download count
+      # tells site downloads apart from in-app updates (which take Yata-Setup-x.y.z.exe).
+      - name: Site download copy
+        shell: pwsh
+        run: Copy-Item "dist\Yata-Setup-$env:VERSION.exe" dist\Yata-Setup.exe
+
       - name: Checksums
         shell: pwsh
         run: |
