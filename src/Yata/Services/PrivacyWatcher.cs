@@ -20,7 +20,7 @@ public sealed record PrivacyState(IReadOnlyList<string> Camera, IReadOnlyList<st
 }
 
 /// <summary>
-/// Camera / microphone in use. Nothing is polled, hooked or sent anywhere:
+/// Camera / microphone in use. Nothing is hooked or sent anywhere, and nothing is polled while idle:
 /// <list type="bullet">
 /// <item>Microphone: Core Audio capture sessions (<see cref="MicrophoneMonitor"/>), on every Windows version.</item>
 /// <item>Camera: where Windows records it for the taskbar privacy icon (CapabilityAccessManager\ConsentStore:
