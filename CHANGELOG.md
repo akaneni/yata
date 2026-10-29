@@ -2,6 +2,13 @@
 
 What changed in each version of Yata. The full notes (installing, checking the file and known limitations) are on [GitHub releases](https://github.com/akaneni/yata/releases), in Portuguese.
 
+## 0.7.1 — 2026-10-29
+
+- **The microphone dot no longer gets stuck.** Windows sometimes doesn't say an app stopped using the microphone, and the orange dot stayed on with nobody recording. While an app is shown, Yata now checks again every few seconds.
+- **The clock stays centered.** With the camera or microphone dot on, the clock moved a few pixels to the right; the notch now grows evenly on both sides.
+
+[Full notes](https://github.com/akaneni/yata/releases/tag/v0.7.1)
+
 ## 0.7.0 — 2026-10-28
 
 - **You can tell which agent it is.** Claude, Cursor and Codex show up with their own logo in the notch alert, the bubble and the activity list.
