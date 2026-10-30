@@ -66,13 +66,13 @@ No painel lateral, marque os itens abaixo. Se algum não aparecer na lista, cole
 |---|---|
 | `openid` | não sensível |
 | `https://www.googleapis.com/auth/userinfo.email` | não sensível |
-| `https://www.googleapis.com/auth/calendar.calendarlist.readonly` | sensível |
+| `https://www.googleapis.com/auth/calendar.calendarlist.readonly` | não sensível |
 | `https://www.googleapis.com/auth/calendar.events.readonly` | sensível |
 | `https://www.googleapis.com/auth/tasks` | sensível |
 
 → **Atualizar** → **Salvar** no fim da página.
 
-Os três aparecem em "Seus escopos sensíveis", e é por eles que o app precisa de verificação para sair da tela de aviso. Cada escopo só aparece na lista se a API correspondente estiver ativada (seção 2).
+Os dois últimos (eventos e tarefas) aparecem em "Seus escopos sensíveis", e é por eles que o app precisa de verificação para sair da tela de aviso. Cada escopo só aparece na lista se a API correspondente estiver ativada (seção 2).
 
 Guarde para a verificação a justificativa de cada um:
 
@@ -178,6 +178,8 @@ Os escopos de agenda e de tarefas são **sensíveis** (não restritos): a verifi
 4. A justificativa de cada escopo (texto da seção 5).
 
 Clique em **Publicar app** e depois em **Preparar para verificação**. A análise costuma levar de alguns dias a algumas semanas, e o Google responde por e-mail pedindo ajustes.
+
+O app oficial (projeto `yata-1001`) foi **verificado em 30/10/2026** para `calendar.events.readonly` e `tasks`; os outros escopos são não sensíveis e não passam por verificação. A aprovação não cobre mudanças: pedir um escopo novo ou alterar a tela de consentimento (nome, logo, domínios, links) exige uma nova verificação. Na análise, o Google também conferiu se o app usa IA (requisitos de *Limited Use*); por isso a política de privacidade tem uma seção que diz que não usa.
 
 ## Problemas comuns
 
