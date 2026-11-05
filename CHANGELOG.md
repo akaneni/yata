@@ -2,6 +2,19 @@
 
 What changed in each version of Yata. The full notes (installing, checking the file and known limitations) are on [GitHub releases](https://github.com/akaneni/yata/releases), in Portuguese.
 
+## 0.8.0 — 2026-11-05
+
+- **Mute the microphone with Ctrl+Alt+M.** Mutes the microphone in Windows itself, so every app hears silence (Teams, Meet, Discord, game chat), even with the notch hidden. Off by default; turn it on in **Settings**, right below Ctrl+Alt+Y. Wherever the mute comes from (the shortcut, the keyboard key or Windows), Yata shows "Microphone muted" and the microphone dot turns hollow.
+- **Switch players.** With Spotify and a YouTube tab open, for example, hover over the cover: **⇄** switches to the other player, which stays in the notch until another one starts playing, and **✕** takes the player out of the notch until it starts playing again. The app stays open.
+- **Hide Yata.** A tray menu item takes the whole notch off the screen for a presentation or a recording; notices wait until it's back. Clicking it again, **Open Yata** or Ctrl+Alt+Y brings it back.
+- **Fixes:**
+  - untitled sound from a game, a notification or a clip on a page no longer hides the player that's paused;
+  - dragging a file to the Shelf no longer closes the notch halfway there.
+
+Thanks to [ShamilJafarov20](https://github.com/ShamilJafarov20), whose fork the ideas in this release came from.
+
+[Full notes](https://github.com/akaneni/yata/releases/tag/v0.8.0)
+
 ## 0.7.1 — 2026-10-29
 
 - **The microphone dot no longer gets stuck.** Windows sometimes doesn't say an app stopped using the microphone, and the orange dot stayed on with nobody recording. While an app is shown, Yata now checks again every few seconds.
