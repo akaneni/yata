@@ -69,6 +69,14 @@ public partial class MainWindow
         ShowHud(message);
     }
 
+    /// <summary>The microphone was muted or unmuted in Windows (Ctrl+Alt+M, a keyboard's mic key, Settings).</summary>
+    private void OnMicrophoneMuteChanged(bool muted)
+    {
+        UpdatePrivacy();
+        ShowHud(new HudMessage(muted ? Glyphs.MicrophoneOff : Glyphs.Microphone,
+            muted ? Strings.Hud_MicrophoneMuted : Strings.Hud_MicrophoneOn, Kind: HudKind.Privacy, Tag: "microphone-mute"));
+    }
+
     private void UpdatePrivacy()
     {
         var state = _privacy.Current;
@@ -80,13 +88,26 @@ public partial class MainWindow
         CameraDot.Visibility = camera ? Visibility.Visible : Visibility.Collapsed;
         MicrophoneDot.Visibility = microphone ? Visibility.Visible : Visibility.Collapsed;
         MicrophoneDot.Margin = new Thickness(camera ? 3 : 0, 0, 0, 0);
+        // Muted in Windows: the app still holds the microphone, but hears silence. A hollow dot.
+        bool muted = _micMute.IsMuted;
+        if (muted)
+        {
+            MicrophoneDot.Fill = Brushes.Transparent;
+            MicrophoneDot.SetResourceReference(Shape.StrokeProperty, "MicrophoneBrush");
+            MicrophoneDot.StrokeThickness = 1.5;
+        }
+        else
+        {
+            MicrophoneDot.SetResourceReference(Shape.FillProperty, "MicrophoneBrush");
+            MicrophoneDot.Stroke = null;
+        }
 
         // Open notch: the header says who is using what, in place of the date.
         PrivacyText.Inlines.Clear();
         if (camera)
             AddPrivacyInline(Glyphs.Camera, "CameraBrush", state.Camera);
         if (microphone)
-            AddPrivacyInline(Glyphs.Microphone, "MicrophoneBrush", state.Microphone);
+            AddPrivacyInline(muted ? Glyphs.MicrophoneOff : Glyphs.Microphone, "MicrophoneBrush", state.Microphone);
         PrivacyText.Visibility = shown ? Visibility.Visible : Visibility.Collapsed;
         HeaderDate.Visibility = shown ? Visibility.Collapsed : Visibility.Visible;
 

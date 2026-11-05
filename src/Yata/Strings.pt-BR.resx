@@ -39,6 +39,8 @@
   <data name="Settings_HotkeyHint" xml:space="preserve"><value>O Windows avisa só essa combinação; nada mais do que você digita é lido.</value></data>
   <data name="Settings_JumpHotkey" xml:space="preserve"><value>Ir ao agente que precisa de você com Ctrl+Alt+J</value></data>
   <data name="Settings_JumpHotkeyHint" xml:space="preserve"><value>Vai para a janela da atividade mais urgente; apertando de novo, para a próxima.</value></data>
+  <data name="Settings_MicHotkey" xml:space="preserve"><value>Mutar o microfone com Ctrl+Alt+M</value></data>
+  <data name="Settings_MicHotkeyHint" xml:space="preserve"><value>Muta no Windows, então todo app recebe silêncio. Enquanto está mudo, o ponto do microfone fica vazado.</value></data>
   <data name="Settings_HideInFullscreen" xml:space="preserve"><value>Esconder em apps de tela cheia</value></data>
   <data name="Settings_HideFromCapture" xml:space="preserve"><value>Esconder de gravações e do compartilhamento de tela</value></data>
   <data name="Settings_HideFromCaptureHint" xml:space="preserve"><value>Quem vê a sua tela numa chamada ou gravação não vê o notch. Você continua vendo.</value></data>
@@ -318,6 +320,8 @@
   <data name="Hud_CameraAndMicrophone" xml:space="preserve"><value>Câmera e microfone em uso</value></data>
   <data name="Hud_Camera" xml:space="preserve"><value>Câmera em uso</value></data>
   <data name="Hud_Microphone" xml:space="preserve"><value>Microfone em uso</value></data>
+  <data name="Hud_MicrophoneMuted" xml:space="preserve"><value>Microfone mudo</value></data>
+  <data name="Hud_MicrophoneOn" xml:space="preserve"><value>Microfone ligado</value></data>
   <data name="Hud_AudioOutput" xml:space="preserve"><value>Saída de áudio</value></data>
   <data name="Hud_Muted" xml:space="preserve"><value>Mudo</value></data>
   <data name="Hud_Volume" xml:space="preserve"><value>Volume</value></data>
