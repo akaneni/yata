@@ -58,6 +58,7 @@ internal static class Glyphs
     public const string Water = "";
     public const string Camera = "";
     public const string Microphone = "";
+    public const string MicrophoneOff = "";
     public const string Bell = "";
     public const string Calendar = "";
     public const string Cloud = "";

@@ -1,17 +1,19 @@
 using System;
 using System.Windows.Input;
 using System.Windows.Interop;
+using Yata.Helpers;
 using Yata.Interop;
 using Yata.Services;
 
 namespace Yata;
 
 // Ctrl+Alt+Y opens and closes the notch from anywhere. Ctrl+Alt+J goes to the window of the
-// activity that needs you (the agent asking for a permission).
+// activity that needs you (the agent asking for a permission). Ctrl+Alt+M mutes the microphone in Windows.
 public partial class MainWindow
 {
     private const int HotkeyId = 0x5961; // "Ya"
     private const int JumpHotkeyId = 0x594A; // "YJ"
+    private const int MicHotkeyId = 0x594D; // "YM"
     // Opened from the keyboard, the mouse isn't over the notch; keep it open this long.
     private static readonly TimeSpan HotkeyPin = TimeSpan.FromSeconds(10);
     // Pressed again within this, Ctrl+Alt+J goes on to the next activity instead of the first.
@@ -19,6 +21,7 @@ public partial class MainWindow
 
     private bool _hotkeyRegistered;
     private bool _jumpHotkeyRegistered;
+    private bool _micHotkeyRegistered;
     private string? _lastJumpId;
     private DateTime _lastJumpAt;
 
@@ -34,6 +37,7 @@ public partial class MainWindow
 
         UpdateHotkey(hwnd, HotkeyId, Key.Y, Settings.HotkeyEnabled, ref _hotkeyRegistered);
         UpdateHotkey(hwnd, JumpHotkeyId, Key.J, Settings.JumpHotkeyEnabled, ref _jumpHotkeyRegistered);
+        UpdateHotkey(hwnd, MicHotkeyId, Key.M, Settings.MicHotkeyEnabled, ref _micHotkeyRegistered);
     }
 
     private static void UpdateHotkey(IntPtr hwnd, int id, Key key, bool wanted, ref bool registered)
@@ -69,6 +73,13 @@ public partial class MainWindow
         if (id == JumpHotkeyId)
         {
             OnJumpHotkey();
+            return;
+        }
+        if (id == MicHotkeyId)
+        {
+            // Works while the notch is hidden too (a game, a presentation): the notice waits, the mute doesn't.
+            if (!_micMute.Toggle())
+                Log.Info("microphone", "Ctrl+Alt+M sem microfone para mutar");
             return;
         }
         if (!IsVisible)

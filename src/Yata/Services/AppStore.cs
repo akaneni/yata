@@ -95,6 +95,8 @@ public sealed class SettingsData
     public bool HotkeyEnabled { get; set; } = true;
     /// <summary>Ctrl+Alt+J goes to the window of the activity that needs you. Off unless the user opts in.</summary>
     public bool JumpHotkeyEnabled { get; set; }
+    /// <summary>Ctrl+Alt+M mutes the microphone in Windows, for every app. Off unless the user opts in.</summary>
+    public bool MicHotkeyEnabled { get; set; }
 
     // Media
     public bool LyricsEnabled { get; set; } = true;

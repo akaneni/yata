@@ -69,6 +69,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _lyricsTimer = new();
     private readonly DispatcherTimer _hudTimer = new() { Interval = TimeSpan.FromMilliseconds(1800) };
     private readonly AudioWatcher _audio;
+    private readonly MicrophoneMute _micMute;
     private readonly BrightnessWatcher _brightness;
     private readonly PowerWatcher _power;
     private readonly NetworkWatcher _network;
@@ -180,6 +181,8 @@ public partial class MainWindow : Window
         _keyboard.Message += ShowHud;
         _privacy = new PrivacyWatcher(Dispatcher);
         _privacy.Changed += OnPrivacyChanged;
+        _micMute = new MicrophoneMute(Dispatcher);
+        _micMute.Changed += OnMicrophoneMuteChanged;
         _updates = new UpdateChecker(_store);
         _updates.Message += ShowHud;
 
@@ -269,6 +272,7 @@ public partial class MainWindow : Window
         // What the first moments show: the clock, the volume and Caps Lock notices, presence.
         StartService("clock", () => { ScheduleClock(); _clockTimer.Start(); });
         StartService("audio", _audio.Start);
+        StartService("microphone-mute", () => { _micMute.Start(); UpdatePrivacy(); });
         StartService("keyboard", _keyboard.Start);
         StartService("presence", _presence.Start);
         // The rest waits for the notch to be on screen.
@@ -368,6 +372,7 @@ public partial class MainWindow : Window
         _hudRavenLand.Stop();
         _titleReveal.Stop();
         _audio.Dispose();
+        _micMute.Dispose();
         _brightness.Dispose();
         _power.Dispose();
         _network.Dispose();
@@ -392,7 +397,7 @@ public partial class MainWindow : Window
             handled = true;
             return new IntPtr(NativeMethods.MA_NOACTIVATE);
         }
-        if (msg == NativeMethods.WM_HOTKEY && wParam.ToInt32() is HotkeyId or JumpHotkeyId)
+        if (msg == NativeMethods.WM_HOTKEY && wParam.ToInt32() is HotkeyId or JumpHotkeyId or MicHotkeyId)
         {
             handled = true;
             OnHotkey(wParam.ToInt32());
