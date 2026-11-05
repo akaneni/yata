@@ -5,8 +5,8 @@ namespace Yata.Tests;
 /// <summary>Which media session the notch follows when several players are open.</summary>
 public class MediaSessionPickTests
 {
-    private static SessionCandidate S(bool playing = false, bool shown = false, bool current = false) =>
-        new(playing, shown, current);
+    private static SessionCandidate S(bool playing = false, bool shown = false, bool current = false, bool untitled = false) =>
+        new(playing, shown, current, untitled);
 
     [Fact]
     public void No_sessions_means_nothing_to_show()
@@ -45,5 +45,24 @@ public class MediaSessionPickTests
     {
         Assert.Equal(1, MediaService.Pick(new[] { S(), S(current: true) }));
         Assert.Equal(0, MediaService.Pick(new[] { S(), S() }));
+    }
+
+    [Fact]
+    public void An_untitled_sound_does_not_hide_a_paused_player()
+    {
+        // Spotify paused on screen, then a game's sound (no title) plays and Windows makes it current.
+        Assert.Equal(0, MediaService.Pick(new[] { S(shown: true), S(playing: true, current: true, untitled: true) }));
+    }
+
+    [Fact]
+    public void Leaves_an_untitled_session_it_was_showing_for_a_titled_one()
+    {
+        Assert.Equal(1, MediaService.Pick(new[] { S(playing: true, shown: true, untitled: true), S() }));
+    }
+
+    [Fact]
+    public void Shows_an_untitled_session_when_there_is_nothing_else()
+    {
+        Assert.Equal(1, MediaService.Pick(new[] { S(untitled: true), S(playing: true, untitled: true) }));
     }
 }

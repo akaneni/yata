@@ -709,8 +709,21 @@ public partial class MainWindow : Window
                 return;
             }
         }
+        else if (DragKeepsOpen())
+        {
+            // A file is still being dragged over (or out of) the notch: look again in a moment.
+            _hoverTimer.Start();
+            return;
+        }
         SetExpanded(_pendingExpand);
     }
+
+    /// <summary>
+    /// A drag the notch is part of: a shelf item being dragged out, or files held over the open notch.
+    /// DragLeave also fires when the cursor crosses a see-through gap between the page's controls (no
+    /// DragOver comes from there to cancel it), so the cursor's real position decides, not the event.
+    /// </summary>
+    private bool DragKeepsOpen() => ShelfPage.IsDraggingOut || (_dropHinting && IsCursorOverNotch());
 
     private void SetExpanded(bool expanded)
     {
