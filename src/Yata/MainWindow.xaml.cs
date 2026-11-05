@@ -479,7 +479,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateShown()
     {
-        if (_sessionLocked || (_fullscreenApp && Settings.HideInFullscreen))
+        if (_sessionLocked || _hiddenByUser || (_fullscreenApp && Settings.HideInFullscreen))
         {
             _hoverTimer.Stop();
             SetExpanded(false);
