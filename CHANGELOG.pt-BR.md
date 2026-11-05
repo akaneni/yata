@@ -2,6 +2,19 @@
 
 O que mudou em cada versão do Yata. As notas completas (instalação, como conferir o arquivo e limitações conhecidas) ficam nas [versões do GitHub](https://github.com/akaneni/yata/releases).
 
+## 0.8.0 — 2026-11-05
+
+- **Mutar o microfone com Ctrl+Alt+M.** Muta o microfone no próprio Windows, então todo app recebe silêncio (Teams, Meet, Discord, chat de jogo), mesmo com o notch escondido. Vem desligado; liga em **Configurações**, logo abaixo do Ctrl+Alt+Y. Venha o mute de onde vier (o atalho, a tecla do teclado ou o Windows), o Yata avisa "Microfone mudo" e o ponto do microfone fica vazado.
+- **Trocar de player.** Com o Spotify e uma aba do YouTube abertos, por exemplo, passe o mouse na capa: **⇄** troca para o outro player, que fica no notch até outro começar a tocar, e **✕** tira o player do notch até ele mesmo voltar a tocar. O app continua aberto.
+- **Esconder o Yata.** Um item no menu da bandeja tira o notch inteiro da tela para uma apresentação ou gravação; os avisos esperam ele voltar. Clicar de novo, **Abrir o Yata** ou Ctrl+Alt+Y trazem de volta.
+- **Correções:**
+  - o som sem título de um jogo, de uma notificação ou de um clipe numa página não esconde mais o player que está pausado;
+  - arrastar um arquivo para a Prateleira não fecha mais o notch no meio do caminho.
+
+Obrigado a [ShamilJafarov20](https://github.com/ShamilJafarov20), de cujo fork vieram as ideias desta versão.
+
+[Notas completas](https://github.com/akaneni/yata/releases/tag/v0.8.0)
+
 ## 0.7.1 — 2026-10-29
 
 - **O ponto do microfone não fica mais preso.** Às vezes o Windows não avisa que um app parou de usar o microfone, e o ponto laranja ficava aceso sem ninguém gravando. Enquanto algum app aparece, o Yata confere de novo a cada poucos segundos.
