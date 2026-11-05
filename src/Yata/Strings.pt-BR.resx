@@ -16,6 +16,7 @@
   <data name="Welcome_Google" xml:space="preserve"><value>A agenda e as tarefas do Google ficam mais abaixo, em Google.</value></data>
   <data name="Welcome_Done" xml:space="preserve"><value>Pronto</value></data>
   <data name="Tray_Open" xml:space="preserve"><value>Abrir o Yata</value></data>
+  <data name="Tray_Hide" xml:space="preserve"><value>Esconder o Yata</value></data>
   <data name="Tray_Settings" xml:space="preserve"><value>Configurações…</value></data>
   <data name="Tray_Demo" xml:space="preserve"><value>Demonstração do Yata</value></data>
   <data name="Tray_Quit" xml:space="preserve"><value>Sair</value></data>

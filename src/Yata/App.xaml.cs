@@ -160,6 +160,10 @@ public partial class App : Application
     {
         var menu = new Forms.ContextMenuStrip();
         menu.Items.Add(Strings.Tray_Open, null, (_, _) => _window?.OpenNotch());
+        // Checked while the notch is off the screen; clicked again (or "Open Yata", or Ctrl+Alt+Y) brings it back.
+        var hide = new Forms.ToolStripMenuItem(Strings.Tray_Hide, null, (_, _) => _window?.ToggleHidden());
+        menu.Items.Add(hide);
+        menu.Opening += (_, _) => hide.Checked = _window?.IsHiddenByUser == true;
         menu.Items.Add(Strings.Tray_Settings, null, (_, _) => _window?.OpenSettings());
         menu.Items.Add(Strings.Tray_CheckUpdates, null, (_, _) => _window?.CheckForUpdatesNow());
         menu.Items.Add(Strings.Tray_Demo, null, (_, _) => _window?.RunCompanionDemo());
