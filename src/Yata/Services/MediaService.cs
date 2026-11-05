@@ -41,7 +41,8 @@ public sealed record MediaState(
 }
 
 /// <summary>One media session as seen by <see cref="MediaService.Pick"/>.</summary>
-internal readonly record struct SessionCandidate(bool IsPlaying, bool IsShown, bool IsSystemCurrent);
+/// <param name="IsUntitled">Seen with no title: a game's or a notification's sound, a clip on a page.</param>
+internal readonly record struct SessionCandidate(bool IsPlaying, bool IsShown, bool IsSystemCurrent, bool IsUntitled = false);
 
 /// <summary>
 /// Follows a Windows media session (SMTC), which covers Spotify, browsers and most players:
@@ -61,6 +62,8 @@ public sealed class MediaService
     private GlobalSystemMediaTransportControlsSession? _session;
     private IReadOnlyList<GlobalSystemMediaTransportControlsSession> _watched = Array.Empty<GlobalSystemMediaTransportControlsSession>();
     private int _propertiesVersion;
+    // Players (by app id) last seen with no title: picked only when there's nothing else.
+    private readonly HashSet<string> _untitled = new();
 
     private string _title = "";
     private string _artist = "";
@@ -81,7 +84,7 @@ public sealed class MediaService
         _onMediaProperties = (_, _) => _dispatcher.Post("media", () => _ = ReadMediaPropertiesAsync());
         _onPlaybackInfo = (_, _) => _dispatcher.Post("media", () => { ReadPlaybackInfo(); Publish(); });
         _onTimeline = (_, _) => _dispatcher.Post("media", () => { ReadTimeline(); Publish(); });
-        _onAnyPlayback = (_, _) => _dispatcher.Post("media", AttachBestSession);
+        _onAnyPlayback = (s, _) => _dispatcher.Post("media", () => OnAnyPlayback(s));
     }
 
     public async Task InitializeAsync()
@@ -97,13 +100,17 @@ public sealed class MediaService
     /// Which session to show: keep the shown one while it plays; otherwise prefer Windows'
     /// current session if it plays, then any session that plays; with nothing playing, stay
     /// on the paused one already shown, then fall back to Windows' current one. -1 for none.
+    /// Untitled sessions count only when there's nothing else: a sound with nothing to show mustn't
+    /// hide a real player that's merely paused.
     /// </summary>
     internal static int Pick(IReadOnlyList<SessionCandidate> sessions)
     {
+        bool anyTitled = sessions.Any(s => !s.IsUntitled);
+
         int Find(Func<SessionCandidate, bool> match)
         {
             for (int i = 0; i < sessions.Count; i++)
-                if (match(sessions[i]))
+                if ((!anyTitled || !sessions[i].IsUntitled) && match(sessions[i]))
                     return i;
             return -1;
         }
@@ -115,13 +122,14 @@ public sealed class MediaService
                      s => s.IsPlaying,
                      s => s.IsShown,
                      s => s.IsSystemCurrent,
+                     _ => true,
                  })
         {
             int index = Find(rule);
             if (index >= 0)
                 return index;
         }
-        return sessions.Count > 0 ? 0 : -1;
+        return -1;
     }
 
     private void WatchSessions()
@@ -143,13 +151,55 @@ public sealed class MediaService
 
     private void AttachBestSession()
     {
+        // Forget untitled players that closed.
+        var open = _watched.Select(AppIdOf).OfType<string>().ToHashSet();
+        _untitled.RemoveWhere(id => !open.Contains(id));
+
         var current = _manager?.GetCurrentSession();
         var candidates = _watched.Select(s => new SessionCandidate(
             IsPlaying(s),
             _session != null && SameSession(s, _session),
-            current != null && SameSession(s, current))).ToList();
+            current != null && SameSession(s, current),
+            AppIdOf(s) is { } id && _untitled.Contains(id))).ToList();
         int index = Pick(candidates);
         Attach(index >= 0 ? _watched[index] : current);
+    }
+
+    /// <summary>
+    /// Any session played or paused. An untitled one may have something to show now (a new video): its title
+    /// is read without attaching it, so a sound that still has none doesn't flash an empty player.
+    /// </summary>
+    private void OnAnyPlayback(GlobalSystemMediaTransportControlsSession session)
+    {
+        if (AppIdOf(session) is { } id && _untitled.Contains(id))
+            _ = RecheckTitleAsync(session, id);
+        AttachBestSession();
+    }
+
+    private async Task RecheckTitleAsync(GlobalSystemMediaTransportControlsSession session, string id)
+    {
+        try
+        {
+            var properties = await session.TryGetMediaPropertiesAsync();
+            if (!string.IsNullOrWhiteSpace(properties?.Title) && _untitled.Remove(id))
+                AttachBestSession();
+        }
+        catch (Exception)
+        {
+            // Closed meanwhile.
+        }
+    }
+
+    private static string? AppIdOf(GlobalSystemMediaTransportControlsSession session)
+    {
+        try
+        {
+            return session.SourceAppUserModelId;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
 
     private static bool IsPlaying(GlobalSystemMediaTransportControlsSession session)
@@ -260,6 +310,20 @@ public sealed class MediaService
             _artist = properties.Artist ?? "";
             _thumbnail = thumbnail;
             Publish();
+
+            // A session with nothing to show: note it, and pick again in case a titled player is waiting.
+            if (AppIdOf(session) is { } id)
+            {
+                if (string.IsNullOrWhiteSpace(_title))
+                {
+                    if (_untitled.Add(id))
+                        AttachBestSession();
+                }
+                else
+                {
+                    _untitled.Remove(id);
+                }
+            }
         }
         catch (Exception)
         {
@@ -281,6 +345,8 @@ public sealed class MediaService
         {
             return; // The player closed this session meanwhile; SessionsChanged brings the next one.
         }
+        if (info == null)
+            return; // Same, caught a moment later: Windows answers with nothing instead of an error.
         bool isPlaying = info.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
 
         // Freeze the extrapolated position on pause; many players don't send a timeline update.
