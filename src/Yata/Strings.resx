@@ -16,6 +16,7 @@
   <data name="Welcome_Google" xml:space="preserve"><value>Google Calendar and Tasks are further down, under Google.</value></data>
   <data name="Welcome_Done" xml:space="preserve"><value>Done</value></data>
   <data name="Tray_Open" xml:space="preserve"><value>Open Yata</value></data>
+  <data name="Tray_Hide" xml:space="preserve"><value>Hide Yata</value></data>
   <data name="Tray_Settings" xml:space="preserve"><value>Settings…</value></data>
   <data name="Tray_Demo" xml:space="preserve"><value>Yata demo</value></data>
   <data name="Tray_Quit" xml:space="preserve"><value>Quit</value></data>
@@ -217,6 +218,10 @@
   <data name="Tab_Settings" xml:space="preserve"><value>Settings</value></data>
   <data name="Media_Previous" xml:space="preserve"><value>Previous</value></data>
   <data name="Media_Next" xml:space="preserve"><value>Next</value></data>
+  <data name="Media_SwitchTo" xml:space="preserve"><value>Switch to {0}</value></data>
+  <data name="Media_SwitchPlayer" xml:space="preserve"><value>Switch to the next player</value></data>
+  <data name="Media_RemovePlayer" xml:space="preserve"><value>Take {0} off the notch until it plays again</value></data>
+  <data name="Media_RemoveThisPlayer" xml:space="preserve"><value>Take this player off the notch until it plays again</value></data>
   <data name="Media_Play" xml:space="preserve"><value>Play</value></data>
   <data name="Media_Pause" xml:space="preserve"><value>Pause</value></data>
   <data name="Media_NothingPlaying" xml:space="preserve"><value>Nothing playing</value></data>

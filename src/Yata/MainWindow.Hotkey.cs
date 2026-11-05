@@ -61,11 +61,38 @@ public partial class MainWindow
     /// <summary>Opens the notch for a while, as Ctrl+Alt+Y does (the tray menu's "Open Yata").</summary>
     public void OpenNotch()
     {
+        ShowAgain();
         if (!IsVisible || _expanded)
             return;
         _hoverTimer.Stop();
         _pinnedUntil = DateTime.Now + HotkeyPin;
         SetExpanded(true);
+    }
+
+    // Taken off the screen from the tray menu (a presentation, a screen recording). Not saved: after a
+    // restart the notch is back, so it can't seem to have vanished for good.
+    private bool _hiddenByUser;
+
+    /// <summary>Whether the notch is off the screen because the user hid it.</summary>
+    public bool IsHiddenByUser => _hiddenByUser;
+
+    /// <summary>
+    /// Takes the whole notch off the screen (the pill, the notices, the bubble), or brings it back.
+    /// Notices wait, as they do while a full-screen app hides it, and show once it's back.
+    /// </summary>
+    public void ToggleHidden()
+    {
+        _hiddenByUser = !_hiddenByUser;
+        _pinnedUntil = DateTime.MinValue;
+        Log.Info("notch", _hiddenByUser ? "Escondido pelo usuário" : "Mostrado de novo pelo usuário");
+        UpdateShown();
+    }
+
+    /// <summary>Opening the notch (shortcut, tray menu) also brings back a notch the user hid.</summary>
+    private void ShowAgain()
+    {
+        if (_hiddenByUser)
+            ToggleHidden();
     }
 
     private void OnHotkey(int id)
@@ -80,6 +107,11 @@ public partial class MainWindow
             // Works while the notch is hidden too (a game, a presentation): the notice waits, the mute doesn't.
             if (!_micMute.Toggle())
                 Log.Info("microphone", "Ctrl+Alt+M sem microfone para mutar");
+            return;
+        }
+        if (_hiddenByUser)
+        {
+            OpenNotch(); // Back, already open.
             return;
         }
         if (!IsVisible)

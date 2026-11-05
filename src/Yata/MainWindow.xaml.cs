@@ -156,6 +156,8 @@ public partial class MainWindow : Window
 
         _media = new MediaService(Dispatcher);
         _media.Changed += OnMediaChanged;
+        _media.Changed += UpdatePlayerButtons;
+        _media.SourcesChanged += UpdatePlayerButtons;
 
         _hoverTimer.Tick += OnHoverTimer;
         _clockTimer.Tick += (_, _) =>
@@ -484,7 +486,7 @@ public partial class MainWindow : Window
     /// </summary>
     private void UpdateShown()
     {
-        if (_sessionLocked || (_fullscreenApp && Settings.HideInFullscreen))
+        if (_sessionLocked || _hiddenByUser || (_fullscreenApp && Settings.HideInFullscreen))
         {
             _hoverTimer.Stop();
             SetExpanded(false);
