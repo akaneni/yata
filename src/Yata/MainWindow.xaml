@@ -278,6 +278,26 @@
                                     <ImageBrush x:Name="ExpandedArtBrush" Stretch="UniformToFill"/>
                                 </Border.Background>
                             </Border>
+                            <!-- Several players open: ⇄ switches to the next, ✕ takes this one off the notch until
+                                 it plays again. Over the cover, only while the mouse is on it. -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,6,0">
+                                <StackPanel.Style>
+                                    <Style TargetType="StackPanel">
+                                        <Setter Property="Opacity" Value="0"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Grid}}" Value="True">
+                                                <Setter Property="Opacity" Value="1"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </StackPanel.Style>
+                                <Button x:Name="SwitchPlayerButton" Style="{StaticResource IconButton}" Width="26" Height="26" FontSize="11"
+                                        Background="{DynamicResource OverlayButtonFill}" Content="&#xE8AB;" Visibility="Collapsed"
+                                        Click="OnSwitchPlayerClick"/>
+                                <Button x:Name="RemovePlayerButton" Style="{StaticResource IconButton}" Width="26" Height="26" FontSize="10"
+                                        Margin="4,0,0,0" Background="{DynamicResource OverlayButtonFill}" Content="&#xE711;"
+                                        Visibility="Collapsed" Click="OnRemovePlayerClick"/>
+                            </StackPanel>
                         </Grid>
 
                         <Grid Grid.Column="1" Margin="16,10,0,14">

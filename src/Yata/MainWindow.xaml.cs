@@ -155,6 +155,8 @@ public partial class MainWindow : Window
 
         _media = new MediaService(Dispatcher);
         _media.Changed += OnMediaChanged;
+        _media.Changed += UpdatePlayerButtons;
+        _media.SourcesChanged += UpdatePlayerButtons;
 
         _hoverTimer.Tick += OnHoverTimer;
         _clockTimer.Tick += (_, _) =>

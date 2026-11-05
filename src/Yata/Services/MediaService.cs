@@ -91,7 +91,12 @@ public sealed class MediaService
     {
         _manager = await GlobalSystemMediaTransportControlsSessionManager.RequestAsync();
         _manager.CurrentSessionChanged += (_, _) => _dispatcher.Post("media", AttachBestSession);
-        _manager.SessionsChanged += (_, _) => _dispatcher.Post("media", () => { WatchSessions(); AttachBestSession(); });
+        _manager.SessionsChanged += (_, _) => _dispatcher.Post("media", () =>
+        {
+            WatchSessions();
+            AttachBestSession();
+            SourcesChanged?.Invoke();
+        });
         WatchSessions();
         AttachBestSession();
     }
@@ -151,18 +156,88 @@ public sealed class MediaService
 
     private void AttachBestSession()
     {
-        // Forget untitled players that closed.
+        // Forget untitled players, and choices about players, that closed.
         var open = _watched.Select(AppIdOf).OfType<string>().ToHashSet();
         _untitled.RemoveWhere(id => !open.Contains(id));
+        _choice.Keep(open);
 
-        var current = _manager?.GetCurrentSession();
-        var candidates = _watched.Select(s => new SessionCandidate(
-            IsPlaying(s),
-            _session != null && SameSession(s, _session),
-            current != null && SameSession(s, current),
-            AppIdOf(s) is { } id && _untitled.Contains(id))).ToList();
-        int index = Pick(candidates);
-        Attach(index >= 0 ? _watched[index] : current);
+        var players = new List<(GlobalSystemMediaTransportControlsSession Session, string? Id, bool Playing)>();
+        bool choiceChanged = false;
+        foreach (var session in _watched)
+        {
+            string? id = AppIdOf(session);
+            bool playing = IsPlaying(session);
+            if (id != null)
+                choiceChanged |= _choice.Seen(id, playing);
+            // Taken off the notch with ✕: not a candidate until it starts playing again.
+            if (id == null || !_choice.IsRemoved(id))
+                players.Add((session, id, playing));
+        }
+
+        var chosen = players.FirstOrDefault(p => p.Id != null && p.Id == _choice.Chosen).Session;
+        if (chosen != null)
+        {
+            Attach(chosen);
+        }
+        else
+        {
+            var current = _manager?.GetCurrentSession();
+            if (current != null && AppIdOf(current) is { } currentId && _choice.IsRemoved(currentId))
+                current = null;
+            var candidates = players.Select(p => new SessionCandidate(
+                p.Playing,
+                _session != null && SameSession(p.Session, _session),
+                current != null && SameSession(p.Session, current),
+                p.Id != null && _untitled.Contains(p.Id))).ToList();
+            int index = Pick(candidates);
+            Attach(index >= 0 ? players[index].Session : current);
+        }
+        if (choiceChanged)
+            SourcesChanged?.Invoke();
+    }
+
+    // ---- Switching (⇄) and taking off (✕) players ------------------------------------
+
+    private readonly PlayerChoice _choice = new();
+
+    /// <summary>Players came or went, or a choice about them changed: the ⇄ and ✕ buttons follow.</summary>
+    public event Action? SourcesChanged;
+
+    // What ⇄ goes through: open players not taken off and with something to show.
+    private List<GlobalSystemMediaTransportControlsSession> Switchable() =>
+        _watched.Where(s => AppIdOf(s) is { } id && !_choice.IsRemoved(id) && !_untitled.Contains(id)).ToList();
+
+    /// <summary>The app id ⇄ would switch to; null with fewer than two players.</summary>
+    public string? NextSource => NextSession() is { } next ? AppIdOf(next) : null;
+
+    private GlobalSystemMediaTransportControlsSession? NextSession()
+    {
+        var players = Switchable();
+        if (players.Count < 2)
+            return null;
+        int index = _session == null ? -1 : players.FindIndex(s => SameSession(s, _session));
+        return players[(index + 1) % players.Count];
+    }
+
+    /// <summary>Shows and controls the next player (Spotify ⇄ a YouTube tab), until another one starts playing.</summary>
+    public void SwitchToNext()
+    {
+        if (NextSession() is not { } next || AppIdOf(next) is not { } id)
+            return;
+        _choice.Choose(id);
+        AttachBestSession();
+        SourcesChanged?.Invoke();
+    }
+
+    /// <summary>Takes the shown player off the notch (the app keeps running) until it starts playing again.</summary>
+    public void RemoveCurrent()
+    {
+        if (_session is not { } session || AppIdOf(session) is not { } id)
+            return;
+        _choice.Seen(id, IsPlaying(session)); // So "starts playing again" is measured from now.
+        _choice.Remove(id);
+        AttachBestSession();
+        SourcesChanged?.Invoke();
     }
 
     /// <summary>
