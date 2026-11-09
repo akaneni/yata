@@ -2,6 +2,8 @@
 
 **English** · [Português](README.pt-BR.md)
 
+[![Downloads](https://img.shields.io/github/downloads/akaneni/yata/total?label=downloads)](https://github.com/akaneni/yata/releases)
+
 ![Yata, a pixel-art raven, perched in front of a dithered sun](docs/yata-hero.png)
 
 A live notch at the top of the Windows screen, right below the camera: it shows what's playing, the time and your reminders, and gets out of the way when it isn't needed. Website: **[getyata.app](https://getyata.app)**.
