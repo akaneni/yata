@@ -2,6 +2,8 @@
 
 [English](README.md) · **Português**
 
+[![Downloads](https://img.shields.io/github/downloads/akaneni/yata/total?label=downloads)](https://github.com/akaneni/yata/releases)
+
 ![O Yata, corvo em pixel art, pousado diante de um sol pontilhado](docs/yata-hero.png)
 
 Um notch vivo no topo da tela do Windows, logo abaixo da câmera: mostra o que está tocando, a hora, seus lembretes, e sai do caminho quando não é necessário. Site: **[getyata.app](https://getyata.app)**.
