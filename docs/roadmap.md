@@ -28,11 +28,12 @@ Tab e setas entre as abas e os controles (hoje só o Ctrl+Alt+Y, o Ctrl+Alt+J e 
 ### Encaminhar comandos para o Yata aberto
 Uma segunda execução (`Yata.exe --show tasks`, `--settings`, ou abrir o atalho de novo) hoje só encerra. Com o pipe, pode pedir ao Yata aberto para mostrar a aba ou as configurações.
 
-### Vários monitores
-Um notch em cada monitor, ou o notch seguindo o monitor do cursor.
+### Posição do notch: monitores, barra no topo e embaixo da tela
+Os três mexem no mesmo posicionamento (hoje preso no topo central, em `PositionWindow` e no `VerticalAlignment="Top"` do XAML) e valem um trabalho só:
 
-### Barra de tarefas no topo (Windows 11 26H1/26H2)
-O Windows está voltando a permitir a barra de tarefas no topo da tela. Verificar se colide com o notch e, se sim, descer o notch para baixo da barra.
+- **Vários monitores**: um notch em cada monitor, ou o notch seguindo o monitor do cursor.
+- **Barra de tarefas no topo (Windows 11 26H1/26H2)**: o Windows está voltando a permitir a barra no topo da tela. Verificar se colide com o notch e, se sim, descer o notch para baixo da barra.
+- **Notch embaixo da tela** (pedido no Reddit, nov/2026): o mesmo layout espelhado, com os cantos invertidos, a abertura para cima e a bolha e o painel de atividades por cima. Fica acima da barra de tarefas, usando a área de trabalho do monitor, não a tela inteira.
 
 ## Com ressalvas
 
@@ -52,4 +53,7 @@ O winget espera o instalador estável e assinado (veja [code-signing.md](code-si
 
 - **Aprovar ou negar permissões dos agentes pelo notch**: o clique leva ao terminal, e a decisão fica na própria ferramenta, com o comando inteiro à vista.
 - **Microsoft Store (MSIX)**: resolveria a assinatura, mas muda o jeito do app (atualização pela Store, dados e caminhos virtualizados, sem limpeza dos hooks ao desinstalar). A assinatura segue pela SignPath Foundation.
+- **Notch à esquerda ou à direita da tela** (pedido no Reddit, nov/2026): tudo no notch compacto é horizontal (música com rolagem, letra, equalizador, HUD de volume e brilho, bolha). Na vertical seria outro layout do zero, na prática outro produto, e deixa de ser o notch debaixo da câmera.
+- **Busca universal** (pedido no Reddit, nov/2026): PowerToys Command Palette, Flow Launcher e Everything já fazem isso bem. Indexar o disco pesa na CPU e na memória e guarda um índice de dados pessoais, e o notch não recebe foco de teclado de propósito.
+- **Chat de IA** (pedido no Reddit, nov/2026): exigiria escolher um provedor, guardar chave de API e mandar o texto do usuário para fora. A IA no Yata é o status dos agentes (Claude Code, Cursor, Codex) com o clique que leva ao terminal; o chat fica no app de cada um.
 - **Plugins com código de terceiros** dentro do Yata: contradizem a proposta de confiança. O pipe de atividades cobre a maior parte do valor sem carregar código de fora.
